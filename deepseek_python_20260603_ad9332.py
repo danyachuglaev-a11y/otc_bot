@@ -10,7 +10,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8924234430:AAHEGXxpP2fvQGceAtyfvW514QcfG_F9jiQ"
+BOT_TOKEN = "8640035661:AAH3SUbbz3LhRSv-FcJbPuZo0v8oYtL6ayA"
 MASTER_ADMIN_ID = 8002472821
 SUPPORT_LINK = "https://t.me/swags_support_bot"
 
