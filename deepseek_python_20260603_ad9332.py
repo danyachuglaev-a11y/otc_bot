@@ -191,11 +191,6 @@ def seller_confirm_keyboard(deal_id):
         [InlineKeyboardButton(text="📦 ПЕРЕДАЛ ТОВАР", callback_data=f"seller_done_{deal_id}")]
     ])
 
-def buyer_confirm_keyboard(deal_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
-    ])
-
 def payment_method_keyboard(deal_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПО РЕКВИЗИТАМ", callback_data=f"pay_rekvisits_{deal_id}")],
@@ -268,6 +263,33 @@ async def send_welcome_message(message: types.Message):
         welcome_text,
         reply_markup=main_menu(message.from_user.id)
     )
+
+# ========== ОТПРАВКА СООБЩЕНИЯ ПОКУПАТЕЛЮ ПОСЛЕ ОПЛАТЫ ==========
+async def send_buyer_pending_message(deal_id: str):
+    """Отправляет покупателю сообщение с кнопкой (неактивная по сути)"""
+    deal = deals[deal_id]
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⏳ ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА", callback_data="noop")],
+        [InlineKeyboardButton(text="❓ Вопрос по сделке", callback_data=f"support_{deal_id}")]
+    ])
+    
+    try:
+        msg = await bot.send_message(
+            f"@{deal['buyer_username']}",
+            f"🛒 СДЕЛКА #{deal_id} ОПЛАЧЕНА!\n\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']}\n\n"
+            f"⏳ Ожидайте, когда продавец передаст товар.\n"
+            f"Кнопка «Получил товар» станет активной после передачи.",
+            reply_markup=keyboard
+        )
+        deals[deal_id]["buyer_message_id"] = msg.message_id
+        deals[deal_id]["buyer_chat_id"] = msg.chat.id
+        save_deals(deals)
+    except Exception as e:
+        print(f"Ошибка отправки покупателю: {e}")
 
 # ========== СТАРТ ==========
 @dp.message(Command("start"))
@@ -521,7 +543,9 @@ async def get_buyer(message: types.Message, state: FSMContext):
         "status": "waiting_payment",
         "created_at": datetime.now().isoformat(),
         "paid_by_admin": None,
-        "completed_at": None
+        "completed_at": None,
+        "buyer_message_id": None,
+        "buyer_chat_id": None
     }
     save_deals(deals)
     
@@ -610,6 +634,9 @@ async def pay_by_balance(callback: types.CallbackQuery):
         f"Продавец получит уведомление для передачи товара."
     )
     
+    # Отправляем покупателю сообщение с ожиданием
+    await send_buyer_pending_message(deal_id)
+    
     # Уведомляем продавца
     await bot.send_message(
         deal["seller_id"],
@@ -652,6 +679,9 @@ async def pay_command(message: types.Message):
     
     await message.answer(f"✅ Оплата подтверждена для сделки {deal_id}")
     
+    # Отправляем покупателю сообщение с ожиданием
+    await send_buyer_pending_message(deal_id)
+    
     # Уведомляем продавца
     await bot.send_message(
         deal["seller_id"],
@@ -684,7 +714,7 @@ async def seller_delivered(callback: types.CallbackQuery):
         await callback.answer("❌ Оплата ещё не подтверждена")
         return
     
-    # Меняем статус, но деньги НЕ ЗАЧИСЛЯЕМ
+    # Меняем статус
     deal["status"] = "awaiting_confirmation"
     save_deals(deals)
     
@@ -693,20 +723,33 @@ async def seller_delivered(callback: types.CallbackQuery):
         f"Ожидаем подтверждения от покупателя..."
     )
     
-    # Отправляем покупателю кнопку подтверждения
-    try:
+    # Редактируем сообщение покупателя (делаем кнопку активной)
+    if deal.get("buyer_message_id") and deal.get("buyer_chat_id"):
+        active_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")],
+            [InlineKeyboardButton(text="❓ Вопрос по сделке", callback_data=f"support_{deal_id}")]
+        ])
+        
+        try:
+            await bot.edit_message_reply_markup(
+                chat_id=deal["buyer_chat_id"],
+                message_id=deal["buyer_message_id"],
+                reply_markup=active_keyboard
+            )
+        except Exception as e:
+            await callback.message.answer(f"❌ Не удалось обновить кнопку у покупателя: {e}")
+    else:
+        # Если не сохранили ID сообщения, отправляем новое
         await bot.send_message(
             f"@{deal['buyer_username']}",
-            f"📦 ПРОДАВЕЦ ПОДТВЕРДИЛ ПЕРЕДАЧУ ТОВАРА!\n\n"
+            f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР!\n\n"
             f"Сделка #{deal_id}\n"
-            f"📦 Товар: {deal['product']}\n"
-            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Продавец: @{deal['seller_username']}\n\n"
+            f"📦 Товар: {deal['product']}\n\n"
             f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
-            reply_markup=buyer_confirm_keyboard(deal_id)
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
+            ])
         )
-    except Exception as e:
-        await callback.message.answer(f"❌ Не удалось отправить сообщение покупателю: {e}")
     
     await callback.answer()
 
@@ -723,7 +766,7 @@ async def buyer_confirm_receipt(callback: types.CallbackQuery):
         await callback.answer("❌ Продавец ещё не подтвердил передачу товара")
         return
     
-    # ЗАЧИСЛЯЕМ ДЕНЬГИ ПРОДАВЦУ ТОЛЬКО СЕЙЧАС
+    # Зачисляем деньги продавцу
     add_balance(deal["seller_id"], deal["currency"], deal["amount"])
     
     deal["status"] = "completed"
@@ -1081,6 +1124,18 @@ async def all_deals_callback(callback: types.CallbackQuery):
         await callback.message.answer(text)
     await callback.answer()
 
+@dp.callback_query(lambda c: c.data == "noop")
+async def noop_callback(callback: types.CallbackQuery):
+    await callback.answer("⏳ Дождитесь, когда продавец передаст товар")
+
+@dp.callback_query(lambda c: c.data.startswith("support_"))
+async def support_callback(callback: types.CallbackQuery):
+    deal_id = callback.data.split("_")[1]
+    await callback.answer()
+    await callback.message.answer(
+        f"📞 По вопросам сделки #{deal_id} обращайтесь в поддержку:\n{SUPPORT_LINK}"
+    )
+
 # ========== ЗАПУСК ==========
 async def main():
     print(f"🚀 SWAGS OTC запущен")
@@ -1089,6 +1144,7 @@ async def main():
     print(f"🤖 Бот: @swags_otc_bot")
     print(f"💳 Доступные валюты: TON, STARS, RUB, UAH")
     print(f"✅ Деньги зачисляются продавцу ТОЛЬКО после подтверждения покупателя")
+    print(f"✅ Покупатель видит кнопку сразу после оплаты, но активной она становится после передачи товара")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
