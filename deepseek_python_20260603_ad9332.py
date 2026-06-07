@@ -694,15 +694,19 @@ async def seller_delivered(callback: types.CallbackQuery):
     )
     
     # Отправляем покупателю кнопку подтверждения
-    await bot.send_message(
-        f"@{deal['buyer_username']}",
-        f"📦 Продавец подтвердил, что передал товар по сделке #{deal_id}\n\n"
-        f"📦 Товар: {deal['product']}\n"
-        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-        f"👤 Продавец: @{deal['seller_username']}\n\n"
-        f"✅ Подтвердите получение товара:",
-        reply_markup=buyer_confirm_keyboard(deal_id)
-    )
+    try:
+        await bot.send_message(
+            f"@{deal['buyer_username']}",
+            f"📦 ПРОДАВЕЦ ПОДТВЕРДИЛ ПЕРЕДАЧУ ТОВАРА!\n\n"
+            f"Сделка #{deal_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']}\n\n"
+            f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
+            reply_markup=buyer_confirm_keyboard(deal_id)
+        )
+    except Exception as e:
+        await callback.message.answer(f"❌ Не удалось отправить сообщение покупателю: {e}")
     
     await callback.answer()
 
