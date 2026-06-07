@@ -191,6 +191,11 @@ def seller_confirm_keyboard(deal_id):
         [InlineKeyboardButton(text="📦 ПЕРЕДАЛ ТОВАР", callback_data=f"seller_done_{deal_id}")]
     ])
 
+def buyer_confirm_keyboard(deal_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
+    ])
+
 def payment_method_keyboard(deal_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПО РЕКВИЗИТАМ", callback_data=f"pay_rekvisits_{deal_id}")],
@@ -243,8 +248,8 @@ async def send_welcome_message(message: types.Message):
 3️⃣ Покупатель выбирает способ оплаты (реквизиты / с баланса)
 4️⃣ Администратор проверяет оплату (если по реквизитам) или оплата с баланса
 5️⃣ Продавец нажимает «Передал товар»
-6️⃣ Деньги зачисляются на баланс продавца
-7️⃣ Продавец может вывести деньги
+6️⃣ Покупатель нажимает «Получил товар»
+7️⃣ ТОЛЬКО ПОСЛЕ ЭТОГО деньги зачисляются на баланс продавца
 
 👇 Начните прямо сейчас 👇"""
     
@@ -679,7 +684,42 @@ async def seller_delivered(callback: types.CallbackQuery):
         await callback.answer("❌ Оплата ещё не подтверждена")
         return
     
-    # ЗАЧИСЛЯЕМ ДЕНЬГИ ПРОДАВЦУ
+    # Меняем статус, но деньги НЕ ЗАЧИСЛЯЕМ
+    deal["status"] = "awaiting_confirmation"
+    save_deals(deals)
+    
+    await callback.message.edit_text(
+        f"✅ Продавец подтвердил передачу товара!\n\n"
+        f"Ожидаем подтверждения от покупателя..."
+    )
+    
+    # Отправляем покупателю кнопку подтверждения
+    await bot.send_message(
+        f"@{deal['buyer_username']}",
+        f"📦 Продавец подтвердил, что передал товар по сделке #{deal_id}\n\n"
+        f"📦 Товар: {deal['product']}\n"
+        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+        f"👤 Продавец: @{deal['seller_username']}\n\n"
+        f"✅ Подтвердите получение товара:",
+        reply_markup=buyer_confirm_keyboard(deal_id)
+    )
+    
+    await callback.answer()
+
+# ========== ПОКУПАТЕЛЬ ПОДТВЕРЖДАЕТ ПОЛУЧЕНИЕ ==========
+@dp.callback_query(lambda c: c.data.startswith("buyer_confirm_"))
+async def buyer_confirm_receipt(callback: types.CallbackQuery):
+    deal_id = callback.data.split("_")[2]
+    if deal_id not in deals:
+        await callback.answer("❌ Сделка не найдена")
+        return
+    
+    deal = deals[deal_id]
+    if deal["status"] != "awaiting_confirmation":
+        await callback.answer("❌ Продавец ещё не подтвердил передачу товара")
+        return
+    
+    # ЗАЧИСЛЯЕМ ДЕНЬГИ ПРОДАВЦУ ТОЛЬКО СЕЙЧАС
     add_balance(deal["seller_id"], deal["currency"], deal["amount"])
     
     deal["status"] = "completed"
@@ -687,22 +727,19 @@ async def seller_delivered(callback: types.CallbackQuery):
     save_deals(deals)
     
     await callback.message.edit_text(
-        f"✅ ДЕНЬГИ ЗАЧИСЛЕНЫ НА БАЛАНС!\n\n"
+        f"✅ ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА!\n\n"
         f"Сделка #{deal_id} завершена.\n"
-        f"💰 {deal['amount']} {deal['currency']} на вашем балансе.\n\n"
-        f"📹 ВАЖНО: снимите видео передачи товара на случай спора.\n"
-        f"Оно понадобится ТОЛЬКО если покупатель обратится в поддержку."
+        f"Спасибо за доверие! 🤝"
     )
     
-    # Уведомляем покупателя
+    # Уведомляем продавца
     await bot.send_message(
-        f"@{deal['buyer_username']}",
-        f"✅ СДЕЛКА #{deal_id} ЗАВЕРШЕНА!\n\n"
+        deal["seller_id"],
+        f"🎉 СДЕЛКА #{deal_id} УСПЕШНО ЗАВЕРШЕНА! 🎉\n\n"
+        f"💰 {deal['amount']} {deal['currency']} зачислены на ваш баланс.\n"
         f"📦 Товар: {deal['product']}\n"
-        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-        f"👤 Продавец: @{deal['seller_username']}\n\n"
-        f"Спасибо за доверие! 🤝\n\n"
-        f"Если возникли проблемы — обратитесь в поддержку: {SUPPORT_LINK}"
+        f"👤 Покупатель: @{deal['buyer_username']}\n\n"
+        f"Баланс можно проверить в главном меню."
     )
     
     await log_to_master(
@@ -728,7 +765,7 @@ async def my_deals(message: types.Message):
     
     text = "📋 ВАШИ СДЕЛКИ\n\n"
     for d_id, d in user_deals[-10:]:
-        status_emoji = {"waiting_payment": "⏳ ожидает оплаты", "paid": "✅ оплачено", "completed": "🎉 завершена"}.get(d['status'], d['status'])
+        status_emoji = {"waiting_payment": "⏳ ожидает оплаты", "paid": "✅ оплачено", "awaiting_confirmation": "📦 ожидает подтверждения", "completed": "🎉 завершена"}.get(d['status'], d['status'])
         text += f"{d_id} | {d['amount']} {d['currency']} | {status_emoji}\n   → {d['product'][:30]}\n\n"
     
     await message.answer(text, reply_markup=main_menu(message.from_user.id))
@@ -760,7 +797,7 @@ async def faq(message: types.Message):
 💎 TON | ⭐️ STARS | ₽ RUB | ₴ UAH
 
 🔹 Как я получу оплату?
-После того как вы нажмете «Передал товар», деньги зачисляются на ваш баланс.
+После того как покупатель подтвердит получение товара, деньги зачисляются на ваш баланс.
 
 🔹 Как вывести деньги?
 Нажмите «💰 Баланс и вывод», выберите валюту и укажите реквизиты.
@@ -1035,7 +1072,7 @@ async def all_deals_callback(callback: types.CallbackQuery):
     else:
         text = "📋 ВСЕ СДЕЛКИ\n\n"
         for deal_id, deal in list(deals.items())[-20:]:
-            status_emoji = {"waiting_payment": "⏳", "paid": "✅", "completed": "🎉"}.get(deal['status'], deal['status'])
+            status_emoji = {"waiting_payment": "⏳", "paid": "✅", "awaiting_confirmation": "📦", "completed": "🎉"}.get(deal['status'], deal['status'])
             text += f"{deal_id} | {status_emoji} | {deal['amount']} {deal['currency']}\n"
         await callback.message.answer(text)
     await callback.answer()
@@ -1047,6 +1084,7 @@ async def main():
     print(f"👥 Всего админов: {len(admins)}")
     print(f"🤖 Бот: @swags_otc_bot")
     print(f"💳 Доступные валюты: TON, STARS, RUB, UAH")
+    print(f"✅ Деньги зачисляются продавцу ТОЛЬКО после подтверждения покупателя")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
