@@ -191,6 +191,11 @@ def seller_confirm_keyboard(deal_id):
         [InlineKeyboardButton(text="📦 ПЕРЕДАЛ ТОВАР", callback_data=f"seller_done_{deal_id}")]
     ])
 
+def buyer_confirm_keyboard(deal_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
+    ])
+
 def payment_method_keyboard(deal_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПО РЕКВИЗИТАМ", callback_data=f"pay_rekvisits_{deal_id}")],
@@ -266,23 +271,22 @@ async def send_welcome_message(message: types.Message):
 
 # ========== ОТПРАВКА СООБЩЕНИЯ ПОКУПАТЕЛЮ ПОСЛЕ ОПЛАТЫ ==========
 async def send_buyer_pending_message(deal_id: str):
-    """Отправляет покупателю сообщение с кнопкой (неактивная по сути)"""
+    """Отправляет покупателю сообщение с неактивной кнопкой"""
     deal = deals[deal_id]
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⏳ ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА", callback_data="noop")],
-        [InlineKeyboardButton(text="❓ Вопрос по сделке", callback_data=f"support_{deal_id}")]
+        [InlineKeyboardButton(text="⏳ ОЖИДАНИЕ ПЕРЕДАЧИ", callback_data="noop")],
+        [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
     ])
     
     try:
         msg = await bot.send_message(
-            f"@{deal['buyer_username']}",
+            deal["buyer_username"],
             f"🛒 СДЕЛКА #{deal_id} ОПЛАЧЕНА!\n\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
             f"👤 Продавец: @{deal['seller_username']}\n\n"
-            f"⏳ Ожидайте, когда продавец передаст товар.\n"
-            f"Кнопка «Получил товар» станет активной после передачи.",
+            f"⏳ Кнопка «ПОЛУЧИЛ ТОВАР» появится ПОСЛЕ того, как продавец передаст товар.",
             reply_markup=keyboard
         )
         deals[deal_id]["buyer_message_id"] = msg.message_id
@@ -302,6 +306,7 @@ async def cmd_start(message: types.Message):
         
         deal = deals[deal_id]
         
+        # ПРОВЕРКА: заходит только тот, кого указал продавец
         if message.from_user.username != deal["buyer_username"]:
             await message.answer(
                 f"❌ Доступ запрещён!\n\nЭта сделка предназначена для @{deal['buyer_username']}\n\nОбратитесь в поддержку: {SUPPORT_LINK}"
@@ -549,7 +554,8 @@ async def get_buyer(message: types.Message, state: FSMContext):
     }
     save_deals(deals)
     
-    deal_link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+    # НОВАЯ ССЫЛКА - открывает Telegram и сразу показывает бота
+    deal_link = f"tg://resolve?domain={BOT_USERNAME}&start=deal_{deal_id}"
     
     await message.answer(
         f"✅ Сделка #{deal_id} создана!\n\n"
@@ -558,7 +564,7 @@ async def get_buyer(message: types.Message, state: FSMContext):
         f"👤 Покупатель: @{buyer_username}\n\n"
         f"🔗 Отправьте ЭТУ ССЫЛКУ покупателю:",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🔗 ОТПРАВИТЬ ССЫЛКУ ПОКУПАТЕЛЮ", url=deal_link)]
+            [InlineKeyboardButton(text="🔗 ОТПРАВИТЬ ССЫЛКУ", url=deal_link)]
         ])
     )
     
@@ -723,11 +729,11 @@ async def seller_delivered(callback: types.CallbackQuery):
         f"Ожидаем подтверждения от покупателя..."
     )
     
-    # Редактируем сообщение покупателя (делаем кнопку активной)
+    # Активируем кнопку у покупателя
     if deal.get("buyer_message_id") and deal.get("buyer_chat_id"):
         active_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")],
-            [InlineKeyboardButton(text="❓ Вопрос по сделке", callback_data=f"support_{deal_id}")]
+            [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
         ])
         
         try:
@@ -741,14 +747,12 @@ async def seller_delivered(callback: types.CallbackQuery):
     else:
         # Если не сохранили ID сообщения, отправляем новое
         await bot.send_message(
-            f"@{deal['buyer_username']}",
+            deal["buyer_username"],
             f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР!\n\n"
             f"Сделка #{deal_id}\n"
             f"📦 Товар: {deal['product']}\n\n"
             f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
-            ])
+            reply_markup=buyer_confirm_keyboard(deal_id)
         )
     
     await callback.answer()
@@ -1145,6 +1149,7 @@ async def main():
     print(f"💳 Доступные валюты: TON, STARS, RUB, UAH")
     print(f"✅ Деньги зачисляются продавцу ТОЛЬКО после подтверждения покупателя")
     print(f"✅ Покупатель видит кнопку сразу после оплаты, но активной она становится после передачи товара")
+    print(f"✅ Ссылка на сделку: tg://resolve?domain={BOT_USERNAME}&start=deal_xxxxx")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
