@@ -11,10 +11,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8876288906:AAEpjipMQyf585nnmx5u0qaPM8T6Hw8Xmns"
+BOT_TOKEN = "8911310692:AAFD11Kmqx02MHI_4WrveVDTvhMN5f0BCq0"
 MASTER_ADMIN_ID = 8002472821
-SUPPORT_LINK = "https://t.me/tonkeeperdealssupbot"
-BOT_USERNAME = "tonkeeperdealsbot"
+SUPPORT_LINK = "@dealtonkeeper_bot"
+BOT_USERNAME = "tonkeeperealsbot"
 BOT_NAME = "Tonkeeper | P2P"
 CHANNEL_LINK = "https://t.me/tonkeeper_ru"
 
