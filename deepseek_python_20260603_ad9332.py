@@ -428,7 +428,7 @@ async def send_welcome_message(message: types.Message):
 {pm('7️⃣')} Деньги зачисляются на баланс продавца
 
 {pm('📢')} НАШ КАНАЛ: {CHANNEL_LINK}
-{pm('🆘')} ПОДДЕРЖКА: @tonkeeperdealssupbot
+{pm('🆘')} ПОДДЕРЖКА: @dealtonkeeper_bot
 
 {pm('🔥')} НАЧНИ ПРЯМО СЕЙЧАС {pm('🚀')}"""
 
@@ -608,7 +608,7 @@ async def cmd_start(message: types.Message):
 
         if message.from_user.username != deal["buyer_username"]:
             await message.answer(
-                f"{pm('❌')} ДОСТУП ЗАПРЕЩЁН!\n\nЭта сделка для @{deal['buyer_username']}\n\nОбратитесь в поддержку: @tonkeeperdealssupbot"
+                f"{pm('❌')} ДОСТУП ЗАПРЕЩЁН!\n\nЭта сделка для @{deal['buyer_username']}\n\nОбратитесь в поддержку: @dealtonkeeper_bot"
             )
             await log_to_master(
                 f"⚠️ НЕСАНКЦИОНИРОВАННЫЙ ЗАХОД\nСделка: #{deal_id}\nПопытался: @{message.from_user.username}\nОжидался: @{deal['buyer_username']}")
