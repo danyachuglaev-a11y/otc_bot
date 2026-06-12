@@ -11,7 +11,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8627625287:AAEpO9KqqtGNm6Umnbtp5W4j-2BH2_Qkhqc"
+BOT_TOKEN = "8854837097:AAGWRVj4xW3WVh8xIk1iB50QuClmhA_dxCg"
 MASTER_ADMIN_ID = 8002472821
 SUPPORT_LINK = "@p2psuptokeeperbot"
 BOT_USERNAME = "dealitonkeeperbot"
