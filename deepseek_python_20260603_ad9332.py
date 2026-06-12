@@ -428,7 +428,7 @@ async def send_welcome_message(message: types.Message):
 {pm('7️⃣')} Деньги зачисляются на баланс продавца
 
 {pm('📢')} НАШ КАНАЛ: {CHANNEL_LINK}
-{pm('🆘')} ПОДДЕРЖКА: @dealtonkeeper_bot
+{pm('🆘')} ПОДДЕРЖКА: @p2psuptokeeperbot
 
 {pm('🔥')} НАЧНИ ПРЯМО СЕЙЧАС {pm('🚀')}"""
 
