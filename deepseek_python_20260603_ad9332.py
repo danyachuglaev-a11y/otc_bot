@@ -14,7 +14,7 @@ from aiogram.client.default import DefaultBotProperties
 BOT_TOKEN = "8854837097:AAGWRVj4xW3WVh8xIk1iB50QuClmhA_dxCg"
 MASTER_ADMIN_ID = 8002472821
 SUPPORT_LINK = "@p2psuptokeeperbot"
-BOT_USERNAME = "dealitonkeeperbot"
+BOT_USERNAME = "tonkeeperdialbot"
 BOT_NAME = "Tonkeeper | P2P"
 CHANNEL_LINK = "https://t.me/tonkeeper_ru"
 
