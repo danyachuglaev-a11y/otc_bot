@@ -11,10 +11,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8734046996:AAFg1-HE0aG1pe9rz-Jjz3hx5ZQpmppqS2U"
+BOT_TOKEN = "8832955909:AAEjgJF_JXu5oPvufUt1oL7klfpMqa-yq1o"
 MASTER_ADMIN_ID = 8002472821
-SUPPORT_LINK = "@p2psuptokeeperbot"
-BOT_USERNAME = "dealstonkeeperbot"
+SUPPORT_LINK = "@p2psupporttonbot"
+BOT_USERNAME = "tonkeeperdealcbot"
 BOT_NAME = " Tonkeeper | P2P"
 CHANNEL_LINK = "https://t.me/tonkeeper_ru"
 
@@ -271,7 +271,7 @@ LOCALE = {
         "step7": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
-        "support_contact": "@p2psuptokeeperbot",
+        "support_contact": "@p2psupporttonbot",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -315,7 +315,7 @@ LOCALE = {
         "faq_q6": "СКОЛЬКО ВРЕМЕНИ ЗАНИМАЕТ ВЫВОД?",
         "faq_a6": "1-5 МИНУТ ПОСЛЕ ПОДТВЕРЖДЕНИЯ.",
         "faq_q7": "КАК СВЯЗАТЬСЯ С ПОДДЕРЖКОЙ?",
-        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ @p2psuptokeeperbot",
+        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ @p2psupporttonbot",
         "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА ИЛИ УЖЕ ЗАВЕРШЕНА",
         "access_denied": "ДОСТУП ЗАПРЕЩЁН",
         "invalid_amount": "ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО",
@@ -408,7 +408,7 @@ LOCALE = {
         "step7": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
-        "support_contact": "@p2psuptokeeperbot",
+        "support_contact": "@p2psupporttonbot",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
@@ -452,7 +452,7 @@ LOCALE = {
         "faq_q6": "HOW LONG DOES WITHDRAWAL TAKE?",
         "faq_a6": "1-5 MINUTES AFTER CONFIRMATION.",
         "faq_q7": "HOW TO CONTACT SUPPORT?",
-        "faq_a7": "CLICK 'CHANNEL' BUTTON OR MESSAGE SUPPORT @p2psuptokeeperbot",
+        "faq_a7": "CLICK 'CHANNEL' BUTTON OR MESSAGE SUPPORT @p2psupporttonbot",
         "deal_not_found": "DEAL NOT FOUND OR ALREADY COMPLETED",
         "access_denied": "ACCESS DENIED",
         "invalid_amount": "ENTER A POSITIVE NUMBER",
@@ -545,7 +545,7 @@ LOCALE = {
         "step7": "款项计入卖家余额",
         "our_channel": "我们的频道",
         "support": "支持",
-        "support_contact": "@p2psuptokeeperbot",
+        "support_contact": "@p2psupporttonbot",
         "start_now": "立即开始",
         "create_deal": "创建交易",
         "my_balance": "我的余额",
@@ -589,7 +589,7 @@ LOCALE = {
         "faq_q6": "提现需要多长时间？",
         "faq_a6": "确认后1-5分钟。",
         "faq_q7": "如何联系支持？",
-        "faq_a7": "点击「频道」按钮或联系客服 @p2psuptokeeperbot",
+        "faq_a7": "点击「频道」按钮或联系客服 @p2psupporttonbot",
         "deal_not_found": "交易未找到或已完成",
         "access_denied": "访问被拒绝",
         "invalid_amount": "输入正数",
@@ -682,7 +682,7 @@ LOCALE = {
         "step7": "تضاف الأموال إلى رصيد البائع",
         "our_channel": "قناتنا",
         "support": "الدعم",
-        "support_contact": "@p2psuptokeeperbot",
+        "support_contact": "@p2psupporttonbot",
         "start_now": "ابدأ الآن",
         "create_deal": "إنشاء صفقة",
         "my_balance": "رصيدي",
@@ -726,7 +726,7 @@ LOCALE = {
         "faq_q6": "كم يستغرق السحب؟",
         "faq_a6": "1-5 دقائق بعد التأكيد.",
         "faq_q7": "كيف اتصل بالدعم؟",
-        "faq_a7": "اضغط زر «القناة» أو أرسل رسالة للدعم @p2psuptokeeperbot",
+        "faq_a7": "اضغط زر «القناة» أو أرسل رسالة للدعم @p2psupporttonbot",
         "deal_not_found": "الصفقة غير موجودة أو مكتملة بالفعل",
         "access_denied": "الوصول مرفوض",
         "invalid_amount": "أدخل رقماً موجباً",
