@@ -12,7 +12,7 @@ from aiogram.client.default import DefaultBotProperties
 
 # ========== КОНФИГ ==========
 BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
-MASTER_ADMIN_ID = 8002472821
+MASTER_ADMIN_ID = 8328066206
 SUPPORT_LINK = "@p2psupbot"
 BOT_USERNAME = "tonkeeperp2p_bot"
 BOT_NAME = " Tonkeeper | P2P"
