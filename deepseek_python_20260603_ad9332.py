@@ -67,7 +67,7 @@ user_language = load_json(FILES["user_language"])
 stats = load_json(FILES["stats"])
 
 # ============================================================
-# 4. СТАТИСТИКА (ПЛАВНОЕ ПРИБАВЛЕНИЕ)
+# 4. СТАТИСТИКА
 # ============================================================
 def init_stats():
     if not stats:
@@ -76,19 +76,16 @@ def init_stats():
         stats["reviews"] = 5234
         stats["volume"] = 45.6
         stats["online"] = 6500
-        stats["last_update"] = datetime.now().isoformat()
         save_json(FILES["stats"], stats)
     return stats
 
 init_stats()
 
 def update_stats():
-    """Плавное прибавление статистики каждый вызов"""
     now = datetime.now()
     last = datetime.fromisoformat(stats.get("last_update", now.isoformat()))
     minutes_passed = (now - last).total_seconds() / 60
     
-    # Прибавляем каждую минуту по чуть-чуть
     if minutes_passed >= 1:
         stats["deals_today"] += random.choice([0, 0, 1, 0, 0, 1, 0, 0, 0, 1])
         stats["users"] += random.choice([0, 0, 0, 1, 0, 0, 0, 1, 0, 0])
@@ -132,6 +129,7 @@ def generate_reviews():
             "user_id": None
         }
     save_json(FILES["reviews"], reviews)
+    print(f"✅ Сгенерировано {len(reviews)} отзывов")
 
 generate_reviews()
 
@@ -174,13 +172,11 @@ def complete_verification(user_id: int, phone: str, full_name: str = "", usernam
         "username": username
     }
     save_json(FILES["verification"], verification_data)
-    # Лог в бота админу
-    add_log("verification", {
-        "user_id": user_id,
-        "username": username,
-        "phone": phone,
-        "full_name": full_name
-    })
+
+def has_2_deals_with_same_buyer(user_id: int) -> bool:
+    bal = get_balance(user_id)
+    partners = bal.get("deal_partners", {})
+    return any(count >= 2 for count in partners.values())
 
 def add_log(action: str, data: dict):
     log_id = str(uuid.uuid4())[:8]
@@ -191,20 +187,6 @@ def add_log(action: str, data: dict):
         "time": datetime.now().isoformat()
     }
     save_json(FILES["logs"], logs)
-    # Отправка админу
-    asyncio.create_task(send_log_to_admin(log_id, action, data))
-
-async def send_log_to_admin(log_id: str, action: str, data: dict):
-    try:
-        text = f"📋 <b>ЛОГ #{log_id}</b>\n\n"
-        text += f"🕐 Время: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}\n"
-        text += f"📌 Действие: {action}\n"
-        text += f"📊 Данные:\n"
-        for key, value in data.items():
-            text += f"   • {key}: {value}\n"
-        await bot.send_message(MASTER_ADMIN_ID, text[:4000])
-    except:
-        pass
 
 def get_user_language(user_id: int) -> str:
     uid = str(user_id)
@@ -214,13 +196,8 @@ def set_user_language(user_id: int, lang: str):
     user_language[str(user_id)] = lang
     save_json(FILES["user_language"], user_language)
 
-def has_2_deals_with_same_buyer(user_id: int) -> bool:
-    bal = get_balance(user_id)
-    partners = bal.get("deal_partners", {})
-    return any(count >= 2 for count in partners.values())
-
 # ============================================================
-# 7. КЛАВИАТУРЫ (БЕЗ ВЫВОДА И ВЕРИФИКАЦИИ)
+# 7. КЛАВИАТУРЫ
 # ============================================================
 def main_menu_keyboard(user_id: int):
     buttons = [
@@ -517,7 +494,6 @@ async def admin_get_amount(message: types.Message, state: FSMContext):
             target_user_id = data.get("target_user_id")
             currency = data.get("currency")
             add_balance(target_user_id, currency, amount)
-            add_log("admin_add_balance", {"admin": message.from_user.username, "target": target_user_id, "amount": amount, "currency": currency})
             await message.answer(
                 f"✅ Начислено {amount} {currency} пользователю {target_user_id}",
                 reply_markup=admin_panel_keyboard(message.from_user.id)
@@ -551,7 +527,6 @@ async def add_admin(message: types.Message):
         new_admin_id = int(args[1])
         admins[str(new_admin_id)] = True
         save_json(FILES["admins"], admins)
-        add_log("add_admin", {"admin": message.from_user.username, "new_admin": new_admin_id})
         await message.answer(f"✅ Админ {new_admin_id} добавлен")
     except:
         await message.answer("❌ Введите корректный ID")
@@ -573,7 +548,6 @@ async def remove_admin(message: types.Message):
         if str(admin_id) in admins:
             del admins[str(admin_id)]
             save_json(FILES["admins"], admins)
-            add_log("remove_admin", {"admin": message.from_user.username, "removed": admin_id})
             await message.answer(f"✅ Админ {admin_id} удалён")
         else:
             await message.answer("❌ Админ не найден")
@@ -650,7 +624,7 @@ async def admin_logs(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 11. API ДЛЯ MINI APP
+# 11. API ДЛЯ MINI APP (ВСЕ ЭНДПОИНТЫ)
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -683,7 +657,7 @@ async def handle_api(request):
             'deals_today': stats_data.get('deals_today', 0),
             'users': stats_data.get('users', 0),
             'reviews': stats_data.get('reviews', 0),
-            'volume': stats_data.get('volume', 0)
+            'volume': round(stats_data.get('volume', 0), 1)
         }, headers=headers)
     
     # ===== ОНЛАЙН =====
@@ -704,6 +678,60 @@ async def handle_api(request):
             'total': len(reviews_list)
         }, headers=headers)
     
+    # ===== ДОБАВИТЬ ОТЗЫВ (РАБОТАЕТ) =====
+    elif endpoint == '/api/add_review':
+        rating = data.get('rating')
+        text = data.get('text')
+        anonymous = data.get('anonymous', True)
+        
+        if not all([user_id, rating, text]):
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        # Проверяем верификацию
+        if not is_verified(user_id):
+            return web.json_response({'success': False, 'error': 'Verification required'}, headers=headers)
+        
+        review_id = str(uuid.uuid4())[:8]
+        reviews[review_id] = {
+            "id": review_id,
+            "user": "Аноним" if anonymous else str(user_id),
+            "rating": rating,
+            "text": text,
+            "anonymous": anonymous,
+            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+            "user_id": user_id
+        }
+        save_json(FILES["reviews"], reviews)
+        add_log("add_review", {"user_id": user_id, "rating": rating})
+        
+        return web.json_response({'success': True, 'review_id': review_id}, headers=headers)
+    
+    # ===== УДАЛИТЬ ОТЗЫВ =====
+    elif endpoint == '/api/delete_review':
+        review_id = data.get('review_id')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        if review_id in reviews:
+            del reviews[review_id]
+            save_json(FILES["reviews"], reviews)
+            add_log("delete_review", {"admin": user_id, "review_id": review_id})
+            return web.json_response({'success': True}, headers=headers)
+        
+        return web.json_response({'success': False, 'error': 'Review not found'}, headers=headers)
+    
+    # ===== ОЧИСТИТЬ ОТЗЫВЫ =====
+    elif endpoint == '/api/clear_reviews':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        reviews.clear()
+        save_json(FILES["reviews"], reviews)
+        add_log("clear_reviews", {"admin": user_id})
+        
+        return web.json_response({'success': True}, headers=headers)
+    
     # ===== ПРОВЕРКА 2 СДЕЛОК =====
     elif endpoint == '/api/has_2_deals':
         if not user_id:
@@ -717,17 +745,21 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
         return web.json_response({'success': True, 'verified': is_verified(user_id)}, headers=headers)
     
-    # ===== ВЕРИФИКАЦИЯ (ТОЛЬКО НА САЙТЕ) =====
+    # ===== ВЕРИФИКАЦИЯ =====
     elif endpoint == '/api/verify':
         phone = data.get('phone')
         full_name = data.get('full_name', '')
         username = data.get('username', '')
+        
         if not user_id or not phone:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
-        # Проверяем 2 сделки
+        
         if not has_2_deals_with_same_buyer(user_id):
             return web.json_response({'success': False, 'error': 'Need 2 deals with same buyer'}, headers=headers)
+        
         complete_verification(user_id, phone, full_name, username)
+        add_log("verification", {"user_id": user_id, "phone": phone, "full_name": full_name})
+        
         return web.json_response({'success': True, 'verified': True}, headers=headers)
     
     # ===== СОЗДАНИЕ СДЕЛКИ =====
@@ -924,17 +956,148 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== НАКРУТКА СТАТИСТИКИ =====
+    # ===== ВЫВОД СРЕДСТВ =====
+    elif endpoint == '/api/withdraw':
+        currency = data.get('currency')
+        details = data.get('details')
+        
+        if not all([user_id, currency, details]):
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        bal = get_balance(user_id)
+        curr_key = currency.lower()
+        if bal.get(curr_key, 0) <= 0:
+            return web.json_response({'success': False, 'error': 'Insufficient balance'}, headers=headers)
+        
+        request_id = str(uuid.uuid4())[:8]
+        withdraw_requests[request_id] = {
+            "id": request_id,
+            "user_id": user_id,
+            "username": str(user_id),
+            "currency": currency,
+            "amount": bal[curr_key],
+            "details": details,
+            "status": "pending",
+            "created_at": datetime.now().isoformat()
+        }
+        save_json(FILES["withdraw"], withdraw_requests)
+        add_log("withdraw", {"user_id": user_id, "amount": bal[curr_key], "currency": currency})
+        
+        return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
+    
+    # ===== ПОДТВЕРДИТЬ ВЫВОД (АДМИН) =====
+    elif endpoint == '/api/confirm_withdraw':
+        request_id = data.get('request_id')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        if request_id not in withdraw_requests:
+            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
+        
+        req = withdraw_requests[request_id]
+        if req.get('status') != 'pending':
+            return web.json_response({'success': False, 'error': 'Already processed'}, headers=headers)
+        
+        bal = get_balance(req['user_id'])
+        curr_key = req['currency'].lower()
+        if bal.get(curr_key, 0) >= req['amount']:
+            bal[curr_key] -= req['amount']
+            save_json(FILES["balance"], balance)
+        
+        req['status'] = 'completed'
+        req['completed_at'] = datetime.now().isoformat()
+        save_json(FILES["withdraw"], withdraw_requests)
+        add_log("confirm_withdraw", {"admin": user_id, "request_id": request_id})
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ОТКЛОНИТЬ ВЫВОД (АДМИН) =====
+    elif endpoint == '/api/reject_withdraw':
+        request_id = data.get('request_id')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        if request_id not in withdraw_requests:
+            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
+        
+        withdraw_requests[request_id]['status'] = 'rejected'
+        save_json(FILES["withdraw"], withdraw_requests)
+        add_log("reject_withdraw", {"admin": user_id, "request_id": request_id})
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== НАЧИСЛИТЬ БАЛАНС (АДМИН) =====
+    elif endpoint == '/api/add_balance':
+        target_user_id = data.get('target_user_id')
+        currency = data.get('currency')
+        amount = data.get('amount')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        if not all([target_user_id, currency, amount]):
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        add_balance(target_user_id, currency, float(amount))
+        add_log("api_add_balance", {"admin": user_id, "target": target_user_id, "amount": amount, "currency": currency})
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== УПРАВЛЕНИЕ АДМИНАМИ (МАСТЕР) =====
+    elif endpoint == '/api/manage_admin':
+        target_user_id = data.get('target_user_id')
+        action = data.get('action')
+        
+        if user_id != MASTER_ADMIN_ID:
+            return web.json_response({'success': False, 'error': 'Master admin only'}, headers=headers)
+        
+        if action == 'add':
+            admins[str(target_user_id)] = True
+        elif action == 'remove':
+            if str(target_user_id) in admins:
+                del admins[str(target_user_id)]
+        else:
+            return web.json_response({'success': False, 'error': 'Invalid action'}, headers=headers)
+        
+        save_json(FILES["admins"], admins)
+        add_log("manage_admin", {"admin": user_id, "target": target_user_id, "action": action})
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ВСЕ СДЕЛКИ (АДМИН) =====
+    elif endpoint == '/api/all_deals':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        deals_list = []
+        for d_id, d in deals.items():
+            d_copy = d.copy()
+            d_copy['deal_id'] = d_id
+            deals_list.append(d_copy)
+        
+        return web.json_response({'success': True, 'deals': deals_list}, headers=headers)
+    
+    # ===== ЗАЯВКИ НА ВЫВОД (АДМИН) =====
+    elif endpoint == '/api/withdraw_requests':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        pending = [r for r in withdraw_requests.values() if r.get('status') == 'pending']
+        return web.json_response({'success': True, 'requests': pending}, headers=headers)
+    
+    # ===== НАКРУТКА СТАТИСТИКИ (АДМИН) =====
     elif endpoint == '/api/admin_set_stats':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
         key = data.get('key')
         value = data.get('value')
         if not key or value is None:
             return web.json_response({'success': False, 'error': 'Missing key or value'}, headers=headers)
+        
         stats[key] = value
         save_json(FILES["stats"], stats)
         add_log("admin_set_stats", {"key": key, "value": value})
+        
         return web.json_response({'success': True}, headers=headers)
     
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
