@@ -19,7 +19,7 @@ BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
 MASTER_ADMIN_ID = 8855434638
 BOT_USERNAME = "tonkeeperp2p_bot"
 BOT_NAME = "Tonkeeper P2P"
-MINI_APP_URL = "https://fantastic-melomakarona-889472.netlify.app"
+MINI_APP_URL = "https://saitminiapp.onrender.com"
 
 # ============================================================
 # 2. ИНИЦИАЛИЗАЦИЯ
