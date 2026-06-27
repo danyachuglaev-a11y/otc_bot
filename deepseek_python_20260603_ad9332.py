@@ -472,13 +472,12 @@ def admin_panel_keyboard(user_id: int):
         [InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="admin_manage_reviews")],
         [InlineKeyboardButton(text=f"📋 Логи", callback_data="admin_logs")],
         [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
-      "ru": "🇷🇺 Русский",
+    "ru": "🇷🇺 Русский",
     "en": "🇬🇧 English",
     "zh": "🇨🇳 中文",
     "ar": "🇸🇦 العربية"
-}
-
-LOCALE = {
+    ]
+LOCALE = 
     "ru": {
         "bot_name": "P2P Exchange",
         "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
