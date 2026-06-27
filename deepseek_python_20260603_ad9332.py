@@ -173,6 +173,381 @@ LOCALE = {
         "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
         "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
         "deal_created": "СДЕЛКА СОЗДАНА",
+        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ Выберите способ оплаты:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n4️⃣ Отправьте ссылку покупателю\n\n5️⃣ После оплаты:\n   • Продавец нажимает «Передал товар»\n   • Покупатель нажимает «Получил товар»\n   • Деньги зачисляются на баланс\n\n🔥 ВСЕ СДЕЛКИ БЕЗОПАСНЫ!"
+    },
+    "en": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "SECURE DEALS",
+        "feature1": "Fair deals between sellers and buyers",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Security guarantee from both sides",
+        "feature4": "Premium 24/7 support",
+        "how_it_works": "HOW IT WORKS",
+        "step1": "Seller creates deal in Mini App",
+        "step2": "Seller sends link to buyer",
+        "step3": "Buyer chooses payment method",
+        "step4": "Admin verifies payment",
+        "step5": "Seller clicks 'Delivered'",
+        "step6": "Buyer clicks 'Received'",
+        "step7": "Money credited to seller's balance",
+        "our_channel": "OUR CHANNEL",
+        "support": "SUPPORT",
+        "support_contact": "@p2psupbot",
+        "start_now": "START NOW",
+        "create_deal": "CREATE DEAL",
+        "my_balance": "MY BALANCE",
+        "my_deals": "MY DEALS",
+        "how_to_deal": "HOW TO CREATE DEAL",
+        "faq": "REVIEWS",
+        "channel": "CHANNEL",
+        "admin_panel": "ADMIN PANEL",
+        "choose_action": "CHOOSE ACTION",
+        "your_balance": "YOUR BALANCE",
+        "main_menu": "MAIN MENU",
+        "no_deals": "YOU HAVE NO DEALS",
+        "your_deals": "YOUR DEALS",
+        "deal_not_found": "DEAL NOT FOUND",
+        "access_denied": "ACCESS DENIED",
+        "payment_confirmed": "PAYMENT CONFIRMED",
+        "seller_confirmed": "YOU CONFIRMED DELIVERY",
+        "buyer_confirmed": "YOU CONFIRMED RECEIPT",
+        "deal_completed": "DEAL COMPLETED",
+        "insufficient_balance": "INSUFFICIENT BALANCE",
+        "choose_payment_method": "CHOOSE PAYMENT METHOD",
+        "pay_by_rekvisits": "PAY BY DETAILS",
+        "pay_by_balance": "PAY FROM BALANCE",
+        "status_waiting": "WAITING FOR PAYMENT",
+        "status_paid": "PAID",
+        "status_awaiting": "AWAITING CONFIRMATION",
+        "status_completed": "COMPLETED",
+        "select_language": "SELECT LANGUAGE",
+        "welcome": "WELCOME",
+        "choose_language_prompt": "🌐 SELECT YOUR LANGUAGE:",
+        "product": "PRODUCT",
+        "amount": "AMOUNT",
+        "seller": "SELLER",
+        "buyer": "BUYER",
+        "deal": "DEAL",
+        "waiting_for_delivery": "WAITING FOR DELIVERY",
+        "seller_delivered": "SELLER DELIVERED",
+        "confirm_receipt": "CONFIRM RECEIPT",
+        "contact_support": "CONTACT SUPPORT",
+        "balance_added": "BALANCE ADDED",
+        "admin_rights": "INSUFFICIENT RIGHTS",
+        "admin_added": "ADMIN ADDED",
+        "admin_removed": "ADMIN REMOVED",
+        "admin_list": "ADMIN LIST",
+        "no_deals_total": "NO DEALS",
+        "all_deals_title": "ALL DEALS",
+        "no_active_requests": "NO ACTIVE REQUESTS",
+        "copy_link": "COPY LINK",
+        "deal_link_text": "LINK FOR BUYER",
+        "send_link_to_buyer": "SEND LINK TO BUYER",
+        "deal_created": "DEAL CREATED",
+        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Choose payment method:\n   • From balance — instantly\n   • By details — after admin check\n\n4️⃣ Send the link to the buyer\n\n5️⃣ After payment:\n   • Seller clicks 'Delivered'\n   • Buyer clicks 'Received'\n   • Money goes to balance\n\n🔥 ALL DEALS ARE SAFE!"
+    },
+    "zh": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "安全交易",
+        "feature1": "买卖双方公平交易",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "双方安全保障",
+        "feature4": "24/7高级支持",
+        "how_it_works": "运作方式",
+        "step1": "卖家在Mini App中创建交易",
+        "step2": "卖家发送链接给买家",
+        "step3": "买家选择支付方式",
+        "step4": "管理员验证付款",
+        "step5": "卖家点击「已交付」",
+        "step6": "买家点击「已收到」",
+        "step7": "款项计入卖家余额",
+        "our_channel": "我们的频道",
+        "support": "支持",
+        "support_contact": "@p2psupbot",
+        "start_now": "立即开始",
+        "create_deal": "创建交易",
+        "my_balance": "我的余额",
+        "my_deals": "我的交易",
+        "how_to_deal": "如何创建交易",
+        "faq": "评论",
+        "channel": "频道",
+        "admin_panel": "管理面板",
+        "choose_action": "选择操作",
+        "your_balance": "您的余额",
+        "main_menu": "主菜单",
+        "no_deals": "您没有任何交易",
+        "your_deals": "您的交易",
+        "deal_not_found": "交易未找到",
+        "access_denied": "访问被拒绝",
+        "payment_confirmed": "付款已确认",
+        "seller_confirmed": "您已确认交付",
+        "buyer_confirmed": "您已确认收到",
+        "deal_completed": "交易已完成",
+        "insufficient_balance": "余额不足",
+        "choose_payment_method": "选择支付方式",
+        "pay_by_rekvisits": "按信息付款",
+        "pay_by_balance": "从余额付款",
+        "status_waiting": "等待付款",
+        "status_paid": "已付款",
+        "status_awaiting": "等待确认",
+        "status_completed": "已完成",
+        "select_language": "选择语言",
+        "welcome": "欢迎",
+        "choose_language_prompt": "🌐 选择您的语言:",
+        "product": "商品",
+        "amount": "金额",
+        "seller": "卖家",
+        "buyer": "买家",
+        "deal": "交易",
+        "waiting_for_delivery": "等待交付",
+        "seller_delivered": "卖家已交付",
+        "confirm_receipt": "确认收到",
+        "contact_support": "联系客服",
+        "balance_added": "余额已添加",
+        "admin_rights": "权限不足",
+        "admin_added": "管理员已添加",
+        "admin_removed": "管理员已移除",
+        "admin_list": "管理员列表",
+        "no_deals_total": "无交易",
+        "all_deals_title": "所有交易",
+        "no_active_requests": "无活跃申请",
+        "copy_link": "复制链接",
+        "deal_link_text": "买家链接",
+        "send_link_to_buyer": "发送链接给买家",
+        "deal_created": "交易已创建",
+        "how_to_deal_text": "📖 <b>如何创建交易</b>\n\n1️⃣ 点击「创建交易」\n   → 打开 Mini App\n\n2️⃣ 填写表格：\n   • 商品名称\n   • 货币 (TON/STARS/RUB/UAH)\n   • 金额\n   • 买家用户名\n\n3️⃣ 选择支付方式：\n   • 从余额支付 — 即时\n   • 按详情支付 — 管理员检查后\n\n4️⃣ 发送链接给买家\n\n5️⃣ 付款后：\n   • 卖家点击「已交付」\n   • 买家点击「已收到」\n   • 钱款计入余额\n\n🔥 所有交易都安全！"
+    },
+    "ar": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "صفقات آمنة",
+        "feature1": "صفقات عادلة بين البائعين والمشترين",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "ضمان الأمن من كلا الجانبين",
+        "feature4": "دعم بريميوم 24/7",
+        "how_it_works": "كيف يعمل",
+        "step1": "البائع ينشئ صفقة في Mini App",
+        "step2": "البائع يرسل الرابط للمشتري",
+        "step3": "المشتري يختار طريقة الدفع",
+        "step4": "المدقق يتحقق من الدفع",
+        "step5": "البائع يضغط «تم التسليم»",
+        "step6": "المشتري يضغط «تم الاستلام»",
+        "step7": "تضاف الأموال إلى رصيد البائع",
+        "our_channel": "قناتنا",
+        "support": "الدعم",
+        "support_contact": "@p2psupbot",
+        "start_now": "ابدأ الآن",
+        "create_deal": "إنشاء صفقة",
+        "my_balance": "رصيدي",
+        "my_deals": "صفقاتي",
+        "how_to_deal": "كيفية إنشاء صفقة",
+        "faq": "مراجعات",
+        "channel": "القناة",
+        "admin_panel": "لوحة التحكم",
+        "choose_action": "اختر إجراء",
+        "your_balance": "رصيدك",
+        "main_menu": "القائمة الرئيسية",
+        "no_deals": "ليس لديك صفقات",
+        "your_deals": "صفقاتك",
+        "deal_not_found": "الصفقة غير موجودة",
+        "access_denied": "الوصول مرفوض",
+        "payment_confirmed": "تم تأكيد الدفع",
+        "seller_confirmed": "لقد أكدت التسليم",
+        "buyer_confirmed": "لقد أكدت الاستلام",
+        "deal_completed": "الصفقة مكتملة",
+        "insufficient_balance": "رصيد غير كافٍ",
+        "choose_payment_method": "اختر طريقة الدفع",
+        "pay_by_rekvisits": "الدفع حسب التفاصيل",
+        "pay_by_balance": "الدفع من الرصيد",
+        "status_waiting": "انتظار الدفع",
+        "status_paid": "تم الدفع",
+        "status_awaiting": "انتظار التأكيد",
+        "status_completed": "مكتملة",
+        "select_language": "اختر اللغة",
+        "welcome": "مرحباً",
+        "choose_language_prompt": "🌐 اختر لغتك:",
+        "product": "المنتج",
+        "amount": "المبلغ",
+        "seller": "البائع",
+        "buyer": "المشتري",
+        "deal": "الصفقة",
+        "waiting_for_delivery": "انتظار التسليم",
+        "seller_delivered": "البائع سلم المنتج",
+        "confirm_receipt": "تأكيد الاستلام",
+        "contact_support": "اتصل بالدعم",
+        "balance_added": "تم إضافة الرصيد",
+        "admin_rights": "صلاحيات غير كافية",
+        "admin_added": "تم إضافة المدقق",
+        "admin_removed": "تم إزالة المدقق",
+        "admin_list": "قائمة المدققين",
+        "no_deals_total": "لا توجد صفقات",
+        "all_deals_title": "جميع الصفقات",
+        "no_active_requests": "لا توجد طلبات نشطة",
+        "copy_link": "انسخ الرابط",
+        "deal_link_text": "رابط المشتري",
+        "send_link_to_buyer": "أرسل الرابط للمشتري",
+        "deal_created": "تم إنشاء الصفقة",
+        "how_to_deal_text": "📖 <b>كيفية إنشاء صفقة</b>\n\n1️⃣ اضغط «إنشاء صفقة»\n   → يفتح Mini App\n\n2️⃣ املأ النموذج:\n   • اسم المنتج\n   • العملة (TON/STARS/RUB/UAH)\n   • المبلغ\n   • اسم مستخدم المشتري\n\n3️⃣ اختر طريقة الدفع:\n   • من الرصيد — فوري\n   • حسب التفاصيل — بعد فحص المدقق\n\n4️⃣ أرسل الرابط للمشتري\n\n5️⃣ بعد الدفع:\n   • البائع يضغط «تم التسليم»\n   • المشتري يضغط «تم الاستلام»\n   • تضاف الأموال إلى الرصيد\n\n🔥 جميع الصفقات آمنة!"
+    }
+}
+
+def get_text(lang: str, key: str) -> str:
+    if lang in LOCALE and key in LOCALE[lang]:
+        return LOCALE[lang][key]
+    return LOCALE["ru"].get(key, key)
+
+# ============================================================
+# 6. ПОМОЩНИКИ
+# ============================================================
+def is_admin(user_id: int) -> bool:
+    return user_id == MASTER_ADMIN_ID or str(user_id) in admins
+
+def get_balance(user_id: int):
+    uid = str(user_id)
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+        save_json(FILES["balance"], balance)
+    return balance[uid]
+
+def add_balance(user_id: int, currency: str, amount: float):
+    uid = str(user_id)
+    curr = currency.lower()
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+    balance[uid][curr] = balance[uid].get(curr, 0) + amount
+    save_json(FILES["balance"], balance)
+
+def get_user_language(user_id: int) -> str:
+    uid = str(user_id)
+    return user_language.get(uid, "ru")
+
+def set_user_language(user_id: int, lang: str):
+    user_language[str(user_id)] = lang
+    save_json(FILES["user_language"], user_language)
+
+def add_log(action: str, data: dict):
+    log_id = str(uuid.uuid4())[:8]
+    logs[log_id] = {
+        "id": log_id,
+        "action": action,
+        "data": data,
+        "time": datetime.now().isoformat()
+    }
+    save_json(FILES["logs"], logs)
+
+# ============================================================
+# 7. КЛАВИАТУРЫ
+# ============================================================
+def main_menu_keyboard(user_id: int):
+    lang = get_user_language(user_id)
+    buttons = [
+        [
+            InlineKeyboardButton(text=f"📱 {get_text(lang, 'create_deal')}", web_app=WebAppInfo(url=MINI_APP_URL)),
+            InlineKeyboardButton(text=f"💰 {get_text(lang, 'my_balance')}", callback_data="menu_balance"),
+        ],
+        [
+            InlineKeyboardButton(text=f"📊 {get_text(lang, 'my_deals')}", callback_data="menu_deals"),
+            InlineKeyboardButton(text=f"📖 {get_text(lang, 'how_to_deal')}", callback_data="how_to_deal"),
+        ],
+        [
+            InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="menu_reviews"),
+            InlineKeyboardButton(text=f"📢 {get_text(lang, 'channel')}", callback_data="menu_channel"),
+        ],
+        [
+            InlineKeyboardButton(text=f"🌐 {get_text(lang, 'select_language')}", callback_data="select_language"),
+        ]
+    ]
+    if is_admin(user_id):
+        buttons.append([
+            InlineKeyboardButton(text=f"👑 {get_text(lang, 'admin_panel')}", callback_data="menu_admin"),
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+def admin_panel_keyboard(user_id: int):
+    lang = get_user_language(user_id)
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💰 {get_text(lang, 'balance_added')}", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text=f"👥 {get_text(lang, 'admin_list')}", callback_data="admin_manage_admins")],
+        [InlineKeyboardButton(text=f"📊 {get_text(lang, 'all_deals_title')}", callback_data="admin_all_deals")],
+        [InlineKeyboardButton(text=f"💲 Заявки на вывод", callback_data="admin_withdraw_requests")],
+        [InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="admin_manage_reviews")],
+        [InlineKeyboardButton(text=f"📋 Логи", callback_data="admin_logs")],
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+      "ru": "🇷🇺 Русский",
+    "en": "🇬🇧 English",
+    "zh": "🇨🇳 中文",
+    "ar": "🇸🇦 العربية"
+}
+
+LOCALE = {
+    "ru": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
+        "feature1": "Честные сделки между продавцами и покупателями",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Гарант безопасности с обеих сторон",
+        "feature4": "Премиум поддержка 24/7",
+        "how_it_works": "КАК ЭТО РАБОТАЕТ",
+        "step1": "Продавец создаёт сделку в Mini App",
+        "step2": "Продавец отправляет ссылку покупателю",
+        "step3": "Покупатель выбирает способ оплаты",
+        "step4": "Администратор проверяет оплату",
+        "step5": "Продавец нажимает «Передал товар»",
+        "step6": "Покупатель нажимает «Получил товар»",
+        "step7": "Деньги зачисляются на баланс продавца",
+        "our_channel": "НАШ КАНАЛ",
+        "support": "ПОДДЕРЖКА",
+        "support_contact": "@p2psupbot",
+        "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
+        "create_deal": "СОЗДАТЬ СДЕЛКУ",
+        "my_balance": "МОЙ БАЛАНС",
+        "my_deals": "МОИ СДЕЛКИ",
+        "how_to_deal": "КАК СОЗДАТЬ СДЕЛКУ",
+        "faq": "ОТЗЫВЫ",
+        "channel": "КАНАЛ",
+        "admin_panel": "АДМИН ПАНЕЛЬ",
+        "choose_action": "ВЫБЕРИТЕ ДЕЙСТВИЕ",
+        "your_balance": "ВАШ БАЛАНС",
+        "main_menu": "ГЛАВНОЕ МЕНЮ",
+        "no_deals": "У ВАС НЕТ СДЕЛОК",
+        "your_deals": "ВАШИ СДЕЛКИ",
+        "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА",
+        "access_denied": "ДОСТУП ЗАПРЕЩЁН",
+        "payment_confirmed": "ОПЛАТА ПОДТВЕРЖДЕНА",
+        "seller_confirmed": "ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА",
+        "buyer_confirmed": "ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА",
+        "deal_completed": "СДЕЛКА ЗАВЕРШЕНА",
+        "insufficient_balance": "НЕДОСТАТОЧНО СРЕДСТВ",
+        "choose_payment_method": "ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ",
+        "pay_by_rekvisits": "ОПЛАТИТЬ ПО РЕКВИЗИТАМ",
+        "pay_by_balance": "ОПЛАТИТЬ С БАЛАНСА",
+        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
+        "status_paid": "ОПЛАЧЕНО",
+        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
+        "status_completed": "ЗАВЕРШЕНО",
+        "select_language": "ВЫБРАТЬ ЯЗЫК",
+        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
+        "choose_language_prompt": "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
+        "product": "ТОВАР",
+        "amount": "СУММА",
+        "seller": "ПРОДАВЕЦ",
+        "buyer": "ПОКУПАТЕЛЬ",
+        "deal": "СДЕЛКА",
+        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА",
+        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР",
+        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
+        "contact_support": "В ПОДДЕРЖКУ",
+        "balance_added": "БАЛАНС НАЧИСЛЕН",
+        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
+        "admin_added": "АДМИН ДОБАВЛЕН",
+        "admin_removed": "АДМИН УДАЛЁН",
+        "admin_list": "СПИСОК АДМИНОВ",
+        "no_deals_total": "НЕТ СДЕЛОК",
+        "all_deals_title": "ВСЕ СДЕЛКИ",
+        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
+        "copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
+        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
+        "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
+        "deal_created": "СДЕЛКА СОЗДАНА",
         "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n"
                            "1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n"
                            "   → Откроется Mini App\n\n"
