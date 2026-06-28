@@ -577,22 +577,11 @@ class AdminStates(StatesGroup):
 # ============================================================
 # 9. ОБРАБОТЧИКИ БОТА
 # ============================================================
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    if message.text and message.text.startswith("/start deal_"):
-        deal_id = message.text.split("_")[1]
-        await handle_deal_link(message, deal_id)
-        return
+async def send_welcome_message(message: types.Message, user_id: int):
+    lang = get_user_language(user_id)
+    if lang is None:
+        lang = "ru"
     
-    uid = str(message.from_user.id)
-    if uid not in user_language:
-        await message.answer(
-            f"🌐 {get_text('ru', 'choose_language_prompt')}",
-            reply_markup=language_keyboard()
-        )
-        return
-    
-    lang = get_user_language(message.from_user.id)
     welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
 
 {get_text(lang, 'bot_desc')}
@@ -615,14 +604,36 @@ async def cmd_start(message: types.Message):
 
 🔥 {get_text(lang, 'start_now')} 🚀"""
     
-    await message.answer(welcome_text, reply_markup=main_menu_keyboard(message.from_user.id))
+    await message.answer(welcome_text, reply_markup=main_menu_keyboard(user_id))
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    if message.text and message.text.startswith("/start deal_"):
+        deal_id = message.text.split("_")[1]
+        await handle_deal_link(message, deal_id)
+        return
+    
+    uid = str(message.from_user.id)
+    
+    # ЕСЛИ ЯЗЫК УЖЕ ВЫБРАН — ПОКАЗЫВАЕМ ГЛАВНОЕ МЕНЮ
+    if uid in user_language:
+        await send_welcome_message(message, message.from_user.id)
+        return
+    
+    # ЕСЛИ ЯЗЫК НЕ ВЫБРАН — ПОКАЗЫВАЕМ ВЫБОР
+    await message.answer(
+        f"🌐 {get_text('ru', 'choose_language_prompt')}",
+        reply_markup=language_keyboard()
+    )
 
 @dp.callback_query(lambda c: c.data.startswith("set_lang_"))
 async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
     await callback.answer(f"{get_text(lang, 'welcome')}")
-    await cmd_start(callback.message)
+    
+    # ПОКАЗЫВАЕМ ПРИВЕТСТВИЕ С ГЛАВНЫМ МЕНЮ, А НЕ СНОВА ВЫБОР ЯЗЫКА
+    await send_welcome_message(callback.message, callback.from_user.id)
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
