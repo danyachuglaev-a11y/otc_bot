@@ -4,8 +4,6 @@ import os
 import uuid
 import random
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
@@ -68,6 +66,19 @@ logs = load_json(FILES["logs"])
 user_language = load_json(FILES["user_language"])
 stats = load_json(FILES["stats"])
 
+# Минимальные значения статистики
+MIN_STATS = {
+    "deals_today": 1264,
+    "users": 21374,
+    "reviews": 5427,
+    "volume": 47.6
+}
+
+# Инициализация статистики
+if not stats:
+    stats = MIN_STATS.copy()
+    save_json(FILES["stats"], stats)
+
 # ============================================================
 # 4. ГЕНЕРАЦИЯ ОТЗЫВОВ
 # ============================================================
@@ -122,8 +133,8 @@ LOCALE = {
         "how_it_works": "КАК ЭТО РАБОТАЕТ",
         "step1": "Создайте сделку в Mini App",
         "step2": "Отправьте ссылку покупателю",
-        "step3": "Покупатель выбирает способ оплаты",
-        "step4": "Администратор проверяет оплату",
+        "step3": "Покупатель переходит по ссылке",
+        "step4": "Покупатель оплачивает в Mini App",
         "step5": "Продавец нажимает «Передал товар»",
         "step6": "Покупатель нажимает «Получил товар»",
         "step7": "Деньги зачисляются на баланс продавца",
@@ -181,7 +192,11 @@ LOCALE = {
         "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
         "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
         "deal_created": "СДЕЛКА СОЗДАНА",
-        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ Выберите способ оплаты:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n4️⃣ Отправьте ссылку покупателю\n\n5️⃣ После оплаты:\n   • Продавец нажимает «Передал товар»\n   • Покупатель нажимает «Получил товар»\n   • Деньги зачисляются на баланс\n\n🔥 ВСЕ СДЕЛКИ БЕЗОПАСНЫ!"
+        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ Отправьте ссылку покупателю\n\n4️⃣ Покупатель переходит по ссылке\n   → Открывается Mini App со сделкой\n\n5️⃣ Покупатель оплачивает:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n6️⃣ Продавец нажимает «Передал товар»\n\n7️⃣ Покупатель нажимает «Получил товар»\n   → Деньги зачисляются на баланс\n\n🔥 ВСЕ СДЕЛКИ БЕЗОПАСНЫ!",
+        "open_deal": "🔓 ПЕРЕЙТИ В СДЕЛКУ",
+        "deal_ready": "🔥 СДЕЛКА ГОТОВА!",
+        "deal_info": "📋 Информация о сделке:",
+        "click_to_open": "👇 Нажмите кнопку ниже, чтобы перейти в сделку"
     },
     "en": {
         "bot_name": "P2P Exchange",
@@ -193,8 +208,8 @@ LOCALE = {
         "how_it_works": "HOW IT WORKS",
         "step1": "Create deal in Mini App",
         "step2": "Send link to buyer",
-        "step3": "Buyer chooses payment method",
-        "step4": "Admin verifies payment",
+        "step3": "Buyer follows the link",
+        "step4": "Buyer pays in Mini App",
         "step5": "Seller clicks 'Delivered'",
         "step6": "Buyer clicks 'Received'",
         "step7": "Money credited to seller's balance",
@@ -252,7 +267,11 @@ LOCALE = {
         "deal_link_text": "LINK FOR BUYER",
         "send_link_to_buyer": "SEND LINK TO BUYER",
         "deal_created": "DEAL CREATED",
-        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Choose payment method:\n   • From balance — instantly\n   • By details — after admin check\n\n4️⃣ Send the link to the buyer\n\n5️⃣ After payment:\n   • Seller clicks 'Delivered'\n   • Buyer clicks 'Received'\n   • Money goes to balance\n\n🔥 ALL DEALS ARE SAFE!"
+        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Send the link to the buyer\n\n4️⃣ Buyer follows the link\n   → Opens Mini App with the deal\n\n5️⃣ Buyer pays:\n   • From balance — instantly\n   • By details — after admin check\n\n6️⃣ Seller clicks 'Delivered'\n\n7️⃣ Buyer clicks 'Received'\n   → Money goes to balance\n\n🔥 ALL DEALS ARE SAFE!",
+        "open_deal": "🔓 OPEN DEAL",
+        "deal_ready": "🔥 DEAL IS READY!",
+        "deal_info": "📋 Deal information:",
+        "click_to_open": "👇 Click the button below to open the deal"
     },
     "zh": {
         "bot_name": "P2P Exchange",
@@ -264,8 +283,8 @@ LOCALE = {
         "how_it_works": "运作方式",
         "step1": "在Mini App中创建交易",
         "step2": "发送链接给买家",
-        "step3": "买家选择支付方式",
-        "step4": "管理员验证付款",
+        "step3": "买家点击链接",
+        "step4": "买家在Mini App中支付",
         "step5": "卖家点击「已交付」",
         "step6": "买家点击「已收到」",
         "step7": "款项计入卖家余额",
@@ -323,7 +342,11 @@ LOCALE = {
         "deal_link_text": "买家链接",
         "send_link_to_buyer": "发送链接给买家",
         "deal_created": "交易已创建",
-        "how_to_deal_text": "📖 <b>如何创建交易</b>\n\n1️⃣ 点击「创建交易」\n   → 打开 Mini App\n\n2️⃣ 填写表格：\n   • 商品名称\n   • 货币 (TON/STARS/RUB/UAH)\n   • 金额\n   • 买家用户名\n\n3️⃣ 选择支付方式：\n   • 从余额支付 — 即时\n   • 按详情支付 — 管理员检查后\n\n4️⃣ 发送链接给买家\n\n5️⃣ 付款后：\n   • 卖家点击「已交付」\n   • 买家点击「已收到」\n   • 钱款计入余额\n\n🔥 所有交易都安全！"
+        "how_to_deal_text": "📖 <b>如何创建交易</b>\n\n1️⃣ 点击「创建交易」\n   → 打开 Mini App\n\n2️⃣ 填写表格：\n   • 商品名称\n   • 货币 (TON/STARS/RUB/UAH)\n   • 金额\n   • 买家用户名\n\n3️⃣ 发送链接给买家\n\n4️⃣ 买家点击链接\n   → 打开带有交易的 Mini App\n\n5️⃣ 买家支付：\n   • 从余额支付 — 即时\n   • 按详情支付 — 管理员检查后\n\n6️⃣ 卖家点击「已交付」\n\n7️⃣ 买家点击「已收到」\n   → 钱款计入余额\n\n🔥 所有交易都安全！",
+        "open_deal": "🔓 打开交易",
+        "deal_ready": "🔥 交易已准备好！",
+        "deal_info": "📋 交易信息：",
+        "click_to_open": "👇 点击下方按钮打开交易"
     },
     "ar": {
         "bot_name": "P2P Exchange",
@@ -335,8 +358,8 @@ LOCALE = {
         "how_it_works": "كيف يعمل",
         "step1": "إنشاء صفقة في Mini App",
         "step2": "إرسال الرابط للمشتري",
-        "step3": "المشتري يختار طريقة الدفع",
-        "step4": "المدقق يتحقق من الدفع",
+        "step3": "المشتري يتبع الرابط",
+        "step4": "المشتري يدفع في Mini App",
         "step5": "البائع يضغط «تم التسليم»",
         "step6": "المشتري يضغط «تم الاستلام»",
         "step7": "تضاف الأموال إلى رصيد البائع",
@@ -394,7 +417,11 @@ LOCALE = {
         "deal_link_text": "رابط المشتري",
         "send_link_to_buyer": "أرسل الرابط للمشتري",
         "deal_created": "تم إنشاء الصفقة",
-        "how_to_deal_text": "📖 <b>كيفية إنشاء صفقة</b>\n\n1️⃣ اضغط «إنشاء صفقة»\n   → يفتح Mini App\n\n2️⃣ املأ النموذج:\n   • اسم المنتج\n   • العملة (TON/STARS/RUB/UAH)\n   • المبلغ\n   • اسم مستخدم المشتري\n\n3️⃣ اختر طريقة الدفع:\n   • من الرصيد — فوري\n   • حسب التفاصيل — بعد فحص المدقق\n\n4️⃣ أرسل الرابط للمشتري\n\n5️⃣ بعد الدفع:\n   • البائع يضغط «تم التسليم»\n   • المشتري يضغط «تم الاستلام»\n   • تضاف الأموال إلى الرصيد\n\n🔥 جميع الصفقات آمنة!"
+        "how_to_deal_text": "📖 <b>كيفية إنشاء صفقة</b>\n\n1️⃣ اضغط «إنشاء صفقة»\n   → يفتح Mini App\n\n2️⃣ املأ النموذج:\n   • اسم المنتج\n   • العملة (TON/STARS/RUB/UAH)\n   • المبلغ\n   • اسم مستخدم المشتري\n\n3️⃣ أرسل الرابط للمشتري\n\n4️⃣ المشتري يتبع الرابط\n   → يفتح Mini App مع الصفقة\n\n5️⃣ المشتري يدفع:\n   • من الرصيد — فوري\n   • حسب التفاصيل — بعد فحص المدقق\n\n6️⃣ البائع يضغط «تم التسليم»\n\n7️⃣ المشتري يضغط «تم الاستلام»\n   → تضاف الأموال إلى الرصيد\n\n🔥 جميع الصفقات آمنة!",
+        "open_deal": "🔓 افتح الصفقة",
+        "deal_ready": "🔥 الصفقة جاهزة!",
+        "deal_info": "📋 معلومات الصفقة:",
+        "click_to_open": "👇 اضغط الزر أدناه لفتح الصفقة"
     }
 }
 
@@ -484,6 +511,21 @@ async def send_log_to_admin(action: str, data: dict):
     except Exception as e:
         print(f"Ошибка отправки лога: {e}")
 
+def update_stats():
+    """Обновляет статистику, увеличивая значения, но не ниже минимума"""
+    global stats
+    
+    # Увеличиваем случайным образом
+    stats["deals_today"] = max(stats.get("deals_today", MIN_STATS["deals_today"]) + random.randint(0, 3), MIN_STATS["deals_today"])
+    stats["users"] = max(stats.get("users", MIN_STATS["users"]) + random.randint(0, 5), MIN_STATS["users"])
+    stats["reviews"] = max(stats.get("reviews", MIN_STATS["reviews"]) + random.randint(0, 2), MIN_STATS["reviews"])
+    stats["volume"] = max(stats.get("volume", MIN_STATS["volume"]) + random.uniform(0, 0.1), MIN_STATS["volume"])
+    
+    # Округляем volume до 1 знака
+    stats["volume"] = round(stats["volume"], 1)
+    
+    save_json(FILES["stats"], stats)
+
 # ============================================================
 # 7. КЛАВИАТУРЫ
 # ============================================================
@@ -566,6 +608,18 @@ def currency_keyboard():
         [InlineKeyboardButton(text="🌐 UAH", callback_data="curr_UAH")],
     ])
 
+def deal_link_keyboard(deal_id: str, user_id: int):
+    """Клавиатура для перехода в сделку через Mini App"""
+    lang = get_user_language(user_id)
+    deal_url = f"{MINI_APP_URL}?deal_id={deal_id}&user_id={user_id}"
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=f"🔓 {get_text(lang, 'open_deal')}",
+            web_app=WebAppInfo(url=deal_url)
+        )],
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+    ])
+
 # ============================================================
 # 8. FSM АДМИНА
 # ============================================================
@@ -608,6 +662,7 @@ async def send_welcome_message(message: types.Message, user_id: int):
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
+    # Проверяем, не пришла ли ссылка на сделку
     if message.text and message.text.startswith("/start deal_"):
         deal_id = message.text.split("_")[1]
         await handle_deal_link(message, deal_id)
@@ -615,12 +670,10 @@ async def cmd_start(message: types.Message):
     
     uid = str(message.from_user.id)
     
-    # ЕСЛИ ЯЗЫК УЖЕ ВЫБРАН — ПОКАЗЫВАЕМ ГЛАВНОЕ МЕНЮ
     if uid in user_language:
         await send_welcome_message(message, message.from_user.id)
         return
     
-    # ЕСЛИ ЯЗЫК НЕ ВЫБРАН — ПОКАЗЫВАЕМ ВЫБОР
     await message.answer(
         f"🌐 {get_text('ru', 'choose_language_prompt')}",
         reply_markup=language_keyboard()
@@ -631,8 +684,6 @@ async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
     await callback.answer(f"{get_text(lang, 'welcome')}")
-    
-    # ПОКАЗЫВАЕМ ПРИВЕТСТВИЕ С ГЛАВНЫМ МЕНЮ, А НЕ СНОВА ВЫБОР ЯЗЫКА
     await send_welcome_message(callback.message, callback.from_user.id)
 
 @dp.callback_query(lambda c: c.data == "select_language")
@@ -750,19 +801,20 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 11. СДЕЛКИ
+# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     lang = get_user_language(message.from_user.id)
+    if lang is None:
+        lang = "ru"
+    
     if deal_id not in deals:
         await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
-    if deal["status"] != "waiting_payment":
-        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-
+    
+    # Проверяем, что пользователь — покупатель
     if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         await message.answer(
             f"❌ {get_text(lang, 'access_denied')}!\n\n"
@@ -776,9 +828,10 @@ async def handle_deal_link(message: types.Message, deal_id: str):
         })
         return
 
+    # Обновляем buyer_id
     deal["buyer_id"] = message.from_user.id
     save_json(FILES["deals"], deals)
-    
+
     add_log("buyer_entered_deal", {
         "user_id": message.from_user.id,
         "username": message.from_user.username,
@@ -788,212 +841,21 @@ async def handle_deal_link(message: types.Message, deal_id: str):
         "currency": deal["currency"]
     })
 
+    # Отправляем сообщение с кнопкой для перехода в Mini App
+    text = f"""🔥 <b>{get_text(lang, 'deal_ready')}</b>
+
+📋 <b>{get_text(lang, 'deal_info')}</b>
+🆔 <b>ID:</b> #{deal_id}
+📦 <b>{get_text(lang, 'product')}:</b> {deal['product']}
+💰 <b>{get_text(lang, 'amount')}:</b> {deal['amount']} {deal['currency']}
+👤 <b>{get_text(lang, 'seller')}:</b> @{deal['seller_username']}
+📊 <b>{get_text(lang, 'status')}:</b> {get_text(lang, 'status_waiting')}
+
+{get_text(lang, 'click_to_open')}"""
+
     await message.answer(
-        f"✈️ <b>{get_text(lang, 'deal')} #{deal_id}</b>\n\n"
-        f"📦 {get_text(lang, 'product')}: {deal['product']}\n"
-        f"💰 {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}\n"
-        f"👤 {get_text(lang, 'seller')}: @{deal['seller_username']}\n\n"
-        f"⬇️ {get_text(lang, 'choose_payment_method')} ⬇️",
-        reply_markup=payment_method_keyboard(deal_id, message.from_user.id)
-    )
-
-@dp.callback_query(lambda c: c.data.startswith("pay_rekvisits_"))
-async def pay_by_rekvisits(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    deal_id = callback.data.split("_")[2]
-    if deal_id not in deals:
-        await callback.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-    deal = deals[deal_id]
-    
-    add_log("user_viewed_rekvisits", {
-        "user_id": callback.from_user.id,
-        "username": callback.from_user.username,
-        "deal_id": deal_id,
-        "amount": deal["amount"],
-        "currency": deal["currency"]
-    })
-    
-    await callback.message.edit_text(
-        f"💳 <b>{get_text(lang, 'payment_details')}</b>\n\n"
-        f"Оплатите {deal['amount']} {deal['currency']}\n"
-        f"После оплаты напишите админу: /pay {deal_id}",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
-    await callback.answer()
-
-@dp.callback_query(lambda c: c.data.startswith("pay_balance_"))
-async def pay_by_balance(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    deal_id = callback.data.split("_")[2]
-    if deal_id not in deals:
-        await callback.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-    deal = deals[deal_id]
-    if deal["status"] != "waiting_payment":
-        await callback.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-    
-    buyer_balance = get_balance(callback.from_user.id)
-    curr_key = deal["currency"].lower()
-    if buyer_balance.get(curr_key, 0) < deal["amount"]:
-        await callback.answer(f"❌ {get_text(lang, 'insufficient_balance')}!", show_alert=True)
-        add_log("insufficient_balance_payment_attempt", {
-            "user_id": callback.from_user.id,
-            "username": callback.from_user.username,
-            "deal_id": deal_id,
-            "amount": deal["amount"],
-            "currency": deal["currency"],
-            "balance": buyer_balance.get(curr_key, 0)
-        })
-        return
-    
-    buyer_balance[curr_key] -= deal["amount"]
-    save_json(FILES["balance"], balance)
-    deal["status"] = "paid"
-    deal["paid_by_admin"] = callback.from_user.id
-    save_json(FILES["deals"], deals)
-    
-    add_log("deal_paid_by_balance", {
-        "user_id": callback.from_user.id,
-        "username": callback.from_user.username,
-        "deal_id": deal_id,
-        "amount": deal["amount"],
-        "currency": deal["currency"]
-    })
-    
-    await callback.message.edit_text(
-        f"✅ {get_text(lang, 'payment_confirmed')}!\n\n"
-        f"{get_text(lang, 'deal')} #{deal_id}\n"
-        f"💰 {get_text(lang, 'funds_deducted')}: {deal['amount']} {deal['currency']}",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
-    
-    try:
-        seller_lang = get_user_language(deal["seller_id"])
-        await bot.send_message(
-            deal["seller_id"],
-            f"💎 <b>{get_text(seller_lang, 'deal')} #{deal_id} {get_text(seller_lang, 'status_paid')}!</b>\n\n"
-            f"💰 {get_text(seller_lang, 'amount')}: {deal['amount']} {deal['currency']}\n"
-            f"👤 {get_text(seller_lang, 'buyer')}: @{deal['buyer_username']}\n\n"
-            f"⬇️ {get_text(seller_lang, 'seller_delivered')} ⬇️",
-            reply_markup=seller_confirm_keyboard(deal_id, deal["seller_id"])
-        )
-    except Exception as e:
-        print(f"Error: {e}")
-    
-    await callback.answer()
-
-@dp.callback_query(lambda c: c.data.startswith("seller_done_"))
-async def seller_done(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    deal_id = callback.data.split("_")[2]
-    if deal_id not in deals:
-        await callback.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-    deal = deals[deal_id]
-    if deal["status"] != "paid":
-        await callback.answer(f"⏳ {get_text(lang, 'status_waiting')}")
-        return
-    deal["status"] = "awaiting_confirmation"
-    save_json(FILES["deals"], deals)
-    
-    add_log("seller_confirmed_delivery", {
-        "user_id": callback.from_user.id,
-        "username": callback.from_user.username,
-        "deal_id": deal_id,
-        "product": deal["product"],
-        "amount": deal["amount"],
-        "currency": deal["currency"],
-        "buyer": deal["buyer_username"]
-    })
-    
-    try:
-        await callback.message.edit_text(
-            f"✅ {get_text(lang, 'seller_confirmed')}!\n\n"
-            f"⏳ {get_text(lang, 'waiting_for_delivery')}"
-        )
-    except:
-        await callback.message.answer(
-            f"✅ {get_text(lang, 'seller_confirmed')}!"
-        )
-    
-    try:
-        buyer_lang = get_user_language(deal["buyer_id"])
-        await bot.send_message(
-            deal["buyer_id"],
-            f"📦 <b>{get_text(buyer_lang, 'seller_delivered')} {get_text(buyer_lang, 'deal')} #{deal_id}</b>\n\n"
-            f"💰 {get_text(buyer_lang, 'amount')}: {deal['amount']} {deal['currency']}\n"
-            f"👤 {get_text(buyer_lang, 'seller')}: @{deal['seller_username']}\n\n"
-            f"⬇️ {get_text(buyer_lang, 'confirm_receipt')} ⬇️",
-            reply_markup=buyer_confirm_keyboard(deal_id, deal["buyer_id"])
-        )
-    except:
-        pass
-    
-    await callback.answer()
-
-@dp.callback_query(lambda c: c.data.startswith("buyer_confirm_"))
-async def buyer_confirm(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    deal_id = callback.data.split("_")[2]
-    if deal_id not in deals:
-        await callback.answer(f"❌ {get_text(lang, 'deal_not_found')}")
-        return
-    deal = deals[deal_id]
-    if deal["status"] != "awaiting_confirmation":
-        await callback.answer(f"⏳ {get_text(lang, 'status_waiting')}")
-        return
-    
-    add_balance(deal["seller_id"], deal["currency"], deal["amount"])
-    seller_balance = get_balance(deal["seller_id"])
-    buyer = deal["buyer_username"]
-    if buyer not in seller_balance["deal_partners"]:
-        seller_balance["deal_partners"][buyer] = 0
-    seller_balance["deal_partners"][buyer] += 1
-    save_json(FILES["balance"], balance)
-    
-    deal["status"] = "completed"
-    deal["completed_at"] = datetime.now().isoformat()
-    save_json(FILES["deals"], deals)
-    
-    add_log("deal_completed", {
-        "user_id": callback.from_user.id,
-        "username": callback.from_user.username,
-        "deal_id": deal_id,
-        "product": deal["product"],
-        "amount": deal["amount"],
-        "currency": deal["currency"],
-        "seller": deal["seller_username"],
-        "buyer": deal["buyer_username"],
-        "completed_at": deal["completed_at"]
-    })
-    
-    await callback.message.edit_text(
-        f"🎉 <b>{get_text(lang, 'deal_completed')}</b> #{deal_id}!\n\n"
-        f"💳 {get_text(lang, 'funds_added_to_balance')} {deal['amount']} {deal['currency']}\n\n"
-        f"{get_text(lang, 'deal_completed_msg')}",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
-    
-    try:
-        seller_lang = get_user_language(deal["seller_id"])
-        await bot.send_message(
-            deal["seller_id"],
-            f"🎉 <b>{get_text(seller_lang, 'deal_completed')}</b> #{deal_id}!\n\n"
-            f"💰 {deal['amount']} {deal['currency']} {get_text(seller_lang, 'funds_added_to_balance')}"
-        )
-    except:
-        pass
-    
-    await callback.answer()
-
-@dp.callback_query(lambda c: c.data.startswith("support_"))
-async def support_callback(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    await callback.answer()
-    await callback.message.answer(
-        f"🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}"
+        text,
+        reply_markup=deal_link_keyboard(deal_id, message.from_user.id)
     )
 
 # ============================================================
@@ -1535,13 +1397,23 @@ async def handle_api(request):
         bal = get_balance(user_id)
         return web.json_response({'success': True, 'balance': bal}, headers=headers)
     
+    # ===== СТАТИСТИКА (С АВТО-УВЕЛИЧЕНИЕМ) =====
+    elif endpoint == '/api/stats':
+        update_stats()
+        return web.json_response({
+            'success': True,
+            'deals_today': stats.get('deals_today', MIN_STATS['deals_today']),
+            'users': stats.get('users', MIN_STATS['users']),
+            'reviews': stats.get('reviews', MIN_STATS['reviews']),
+            'volume': stats.get('volume', MIN_STATS['volume'])
+        }, headers=headers)
+    
     # ===== СОЗДАНИЕ СДЕЛКИ =====
     elif endpoint == '/api/create_deal':
         product = data.get('product')
         currency = data.get('currency')
         amount = data.get('amount')
         buyer_username = data.get('buyer_username')
-        payment_method = data.get('payment_method', 'balance')
         
         if not all([user_id, product, currency, amount, buyer_username]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
@@ -1557,7 +1429,6 @@ async def handle_api(request):
             "currency": currency,
             "amount": float(amount),
             "status": "waiting_payment",
-            "payment_method": payment_method,
             "created_at": datetime.now().isoformat(),
             "paid_by_admin": None,
             "completed_at": None
@@ -1574,40 +1445,6 @@ async def handle_api(request):
             "currency": currency,
             "buyer_username": buyer_username
         })
-        
-        if payment_method == 'balance':
-            buyer_balance = get_balance(user_id)
-            curr_key = currency.lower()
-            if buyer_balance.get(curr_key, 0) >= amount:
-                buyer_balance[curr_key] -= amount
-                save_json(FILES["balance"], balance)
-                deals[deal_id]["status"] = "paid"
-                deals[deal_id]["paid_by_admin"] = user_id
-                save_json(FILES["deals"], deals)
-                
-                add_log("api_deal_paid_from_balance", {
-                    "user_id": user_id,
-                    "username": username,
-                    "deal_id": deal_id,
-                    "amount": amount,
-                    "currency": currency
-                })
-                
-                try:
-                    seller_lang = get_user_language(user_id)
-                    await bot.send_message(
-                        user_id,
-                        f"💎 <b>{get_text(seller_lang, 'deal')} #{deal_id} {get_text(seller_lang, 'status_paid')}!</b>\n\n"
-                        f"💰 {get_text(seller_lang, 'amount')}: {amount} {currency}\n"
-                        f"👤 {get_text(seller_lang, 'buyer')}: @{buyer_username}\n\n"
-                        f"⬇️ {get_text(seller_lang, 'seller_delivered')} ⬇️",
-                        reply_markup=seller_confirm_keyboard(deal_id, user_id)
-                    )
-                except:
-                    pass
-            else:
-                deals[deal_id]["status"] = "waiting_payment"
-                save_json(FILES["deals"], deals)
         
         return web.json_response({
             'success': True,
@@ -1628,6 +1465,13 @@ async def handle_api(request):
                 user_deals.append(d_copy)
         return web.json_response({'success': True, 'deals': user_deals}, headers=headers)
     
+    # ===== ПОЛУЧИТЬ СДЕЛКУ ПО ID =====
+    elif endpoint == '/api/get_deal':
+        deal_id = data.get('deal_id')
+        if not deal_id or deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        return web.json_response({'success': True, 'deal': deals[deal_id]}, headers=headers)
+    
     # ===== ПРОВЕРКА АДМИНА =====
     elif endpoint == '/api/is_admin':
         return web.json_response({'success': True, 'is_admin': is_admin(user_id)}, headers=headers)
@@ -1646,7 +1490,7 @@ async def handle_api(request):
             'total': len(reviews_list)
         }, headers=headers)
     
-    # ===== ДОБАВИТЬ ОТЗЫВ (БЕЗ ВЕРИФИКАЦИИ) =====
+    # ===== ДОБАВИТЬ ОТЗЫВ =====
     elif endpoint == '/api/add_review':
         rating = data.get('rating')
         text = data.get('text')
@@ -1689,16 +1533,6 @@ async def handle_api(request):
             save_json(FILES["reviews"], reviews)
             return web.json_response({'success': True}, headers=headers)
         return web.json_response({'success': False, 'error': 'Review not found'}, headers=headers)
-    
-    # ===== СТАТИСТИКА =====
-    elif endpoint == '/api/stats':
-        return web.json_response({
-            'success': True,
-            'deals_today': stats.get('deals_today', 0),
-            'users': stats.get('users', 0),
-            'reviews': len(reviews),
-            'volume': stats.get('volume', 0)
-        }, headers=headers)
     
     # ===== ПРОВЕРКА 2 СДЕЛОК =====
     elif endpoint == '/api/has_2_deals':
