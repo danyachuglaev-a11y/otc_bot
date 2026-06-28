@@ -443,7 +443,6 @@ def add_log(action: str, data: dict):
     logs[log_id] = log_entry
     save_json(FILES["logs"], logs)
     
-    # Отправляем лог админу
     try:
         asyncio.create_task(send_log_to_admin(action, data))
     except:
@@ -451,7 +450,6 @@ def add_log(action: str, data: dict):
 
 async def send_log_to_admin(action: str, data: dict):
     try:
-        # Формируем красивое сообщение для админа
         text = f"📋 <b>ЛОГ ДЕЙСТВИЯ</b>\n\n"
         text += f"📌 <b>Действие:</b> {action}\n"
         text += f"🕐 <b>Время:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -1216,7 +1214,6 @@ async def approve_verification(message: types.Message):
         await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
         return
     
-    # Создаём сессию верификации на 24 часа
     session_id = str(uuid.uuid4())[:8]
     verification_sessions[session_id] = {
         "user_id": req["user_id"],
@@ -1646,7 +1643,6 @@ async def handle_api(request):
         if not all([user_id, rating, text]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Проверяем, есть ли у пользователя хотя бы 1 завершённая сделка
         user_deals = [d for d in deals.values() if d.get('seller_id') == user_id and d.get('status') == 'completed']
         if len(user_deals) < 1:
             return web.json_response({'success': False, 'error': 'Need at least 1 completed deal'}, headers=headers)
@@ -1708,7 +1704,6 @@ async def handle_api(request):
         if not user_id:
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
         
-        # Проверяем активные сессии
         active_session = None
         for sid, sess in verification_sessions.items():
             if sess.get('user_id') == user_id and sess.get('active', False):
@@ -1717,7 +1712,6 @@ async def handle_api(request):
                     active_session = sess
                     break
                 else:
-                    # Истекшая сессия
                     sess['active'] = False
                     save_json(FILES["verification_sessions"], verification_sessions)
         
@@ -1739,7 +1733,6 @@ async def handle_api(request):
         if not all([user_id, phone, username]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Проверяем, нет ли уже активной сессии
         for sid, sess in verification_sessions.items():
             if sess.get('user_id') == user_id and sess.get('active', False):
                 expires = datetime.fromisoformat(sess['expires_at'])
@@ -1769,7 +1762,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
     
-    # ===== ПОДТВЕРДИТЬ КОД (ТОЛЬКО НА САЙТЕ) =====
+    # ===== ПОДТВЕРДИТЬ КОД =====
     elif endpoint == '/api/verify_code':
         code = data.get('code')
         password = data.get('password')
@@ -1777,11 +1770,9 @@ async def handle_api(request):
         if not code:
             return web.json_response({'success': False, 'error': 'Code required'}, headers=headers)
         
-        # Проверяем код
         if code != "1#2#3#4#5":
             return web.json_response({'success': False, 'error': 'Invalid code'}, headers=headers)
         
-        # Ищем запрос на верификацию
         pending_request = None
         for rid, req in verification_requests.items():
             if req.get('user_id') == user_id and req.get('status') == 'pending':
@@ -1791,7 +1782,6 @@ async def handle_api(request):
         if not pending_request:
             return web.json_response({'success': False, 'error': 'No pending verification request'}, headers=headers)
         
-        # Создаём сессию
         session_id = str(uuid.uuid4())[:8]
         verification_sessions[session_id] = {
             "user_id": user_id,
@@ -1829,14 +1819,12 @@ async def handle_api(request):
         if not all([user_id, currency, details]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Проверяем 2 сделки
         bal = get_balance(user_id)
         partners = bal.get('deal_partners', {})
         has_2 = any(count >= 2 for count in partners.values())
         if not has_2:
             return web.json_response({'success': False, 'error': 'Need 2 deals with same buyer'}, headers=headers)
         
-        # Проверяем верификацию
         verified = False
         for sid, sess in verification_sessions.items():
             if sess.get('user_id') == user_id and sess.get('active', False):
@@ -1848,7 +1836,6 @@ async def handle_api(request):
         if not verified:
             return web.json_response({'success': False, 'error': 'Verification required'}, headers=headers)
         
-        # Проверяем баланс
         curr_key = currency.lower()
         if bal.get(curr_key, 0) <= 0:
             return web.json_response({'success': False, 'error': 'Zero balance'}, headers=headers)
