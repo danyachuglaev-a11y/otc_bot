@@ -119,426 +119,321 @@ generate_reviews()
 # ============================================================
 # 5. ЯЗЫКИ
 # ============================================================
-##============================================================
-## 3. ЯЗЫКИ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
-// ============================================================
-let currentLang = 'ru';
-
-// Объект с текстами для всех языков
-const LANG_TEXT = {
-    'ru': {
-        'langPrompt': 'Выберите язык',
-        'onlineLabel': 'онлайн',
-        'statLabel1': 'Сделок сегодня',
-        'statLabel2': 'Пользователей',
-        'statLabel3': 'Отзывов',
-        'statLabel4': 'Объём (TON)',
-        'navMain': 'Главная',
-        'navCreate': 'Сделка',
-        'navDeals': 'Сделки',
-        'navReviews': 'Отзывы',
-        'navBalance': 'Баланс',
-        'navAdmin': 'Админ',
-        'welcomeTitle': 'Добро пожаловать!',
-        'welcomeText': 'Безопасные P2P сделки с криптовалютой. P2P Exchange — ваш надёжный партнёр.',
-        'quickStart': 'Быстрый старт',
-        'btnCreateDeal': 'Создать сделку',
-        'btnReviews': 'Отзывы',
-        'btnBalance': 'Баланс',
-        'btnDeals': 'Мои сделки',
-        'howWorks': 'Как это работает',
-        'step1': '1️⃣ Создайте сделку — опишите товар и сумму',
-        'step2': '2️⃣ Отправьте ссылку покупателю',
-        'step3': '3️⃣ Покупатель оплачивает на сайте',
-        'step4': '4️⃣ Продавец передаёт товар — нажимает кнопку',
-        'step5': '5️⃣ Покупатель подтверждает получение',
-        'step6': '6️⃣ Деньги зачисляются продавцу',
-        'securityText': '🔒 Защита от мошенников • Верификация • 24/7 поддержка',
-        'recentReviewsTitle': 'Последние отзывы',
-        'loadingText': 'Загрузка...',
-        'supportLabel': 'Поддержка',
-        'channelLabel': 'Канал',
-        'createTitle': 'Создать сделку',
-        'createSubtitle': 'Заполните форму',
-        'labelProduct': 'Товар или услуга',
-        'labelCurrency': 'Валюта',
-        'labelAmount': 'Сумма',
-        'labelBuyer': 'Username покупателя (без @)',
-        'btnCreate': 'Создать сделку',
-        'btnBackMain': 'На главную',
-        'myDealsTitle': 'Мои сделки',
-        'loadingDeals': 'Загрузка...',
-        'btnBackMain2': 'На главную',
-        'reviewsTitle': 'Отзывы',
-        'reviewsSubtitle': 'Оставляйте отзывы после сделок',
-        'labelRating': 'Оценка',
-        'labelReviewText': 'Отзыв',
-        'btnSubmitReview': 'Отправить отзыв',
-        'loadingReviews': 'Загрузка...',
-        'btnLoadMore': 'Загрузить ещё',
-        'balanceTitle': 'Мой баланс',
-        'btnWithdraw': 'Вывести средства',
-        'withdrawInfo': '💳 Вывод средств',
-        'labelWithdrawCurrency': 'Валюта',
-        'labelWithdrawDetails': 'Реквизиты',
-        'btnConfirmWithdraw': 'Подтвердить вывод',
-        'btnBackMain3': 'На главную',
-        'adminTitle': 'Админ панель',
-        'loadingAdmin': 'Проверка прав...',
-        'btnBackMain4': 'На главную',
-        'noDeals': 'У вас нет сделок',
-        'noReviews': 'Пока нет отзывов',
-        'paid': 'Оплачено',
-        'waiting': 'Ожидает оплаты',
-        'awaiting': 'Ожидает подтверждения',
-        'completed': 'Завершено',
-        'copyLink': 'Скопировать ссылку',
-        'pay': 'Оплатить',
-        'sellerDelivered': 'Передал товар',
-        'confirmReceipt': 'Подтвердить получение',
-        'balanceZero': 'Ваш баланс равен 0. Пополните баланс для вывода.',
-        'need2Deals': 'Для вывода нужно провести 2 успешные сделки с одним покупателем. У вас: ',
-        'verificationRequired': 'Для вывода необходима верификация. Пройдите проверку.',
-        'verificationPassed': 'Все условия выполнены! Вы можете вывести средства.',
-        'sessionActive': 'Сессия активна до: ',
-        'headerTitle': 'P2P',
-        'headerTitleSpan': 'Exchange'
-    },
-    'en': {
-        'langPrompt': 'Choose your language',
-        'onlineLabel': 'online',
-        'statLabel1': 'Deals today',
-        'statLabel2': 'Users',
-        'statLabel3': 'Reviews',
-        'statLabel4': 'Volume (TON)',
-        'navMain': 'Home',
-        'navCreate': 'Create',
-        'navDeals': 'Deals',
-        'navReviews': 'Reviews',
-        'navBalance': 'Balance',
-        'navAdmin': 'Admin',
-        'welcomeTitle': 'Welcome!',
-        'welcomeText': 'Secure P2P cryptocurrency deals. P2P Exchange — your trusted partner.',
-        'quickStart': 'Quick start',
-        'btnCreateDeal': 'Create deal',
-        'btnReviews': 'Reviews',
-        'btnBalance': 'Balance',
-        'btnDeals': 'My deals',
-        'howWorks': 'How it works',
-        'step1': '1️⃣ Create a deal — describe the product and amount',
-        'step2': '2️⃣ Send the link to the buyer',
-        'step3': '3️⃣ Buyer pays on the site',
-        'step4': '4️⃣ Seller delivers — clicks the button',
-        'step5': '5️⃣ Buyer confirms receipt',
-        'step6': '6️⃣ Money is credited to the seller',
-        'securityText': '🔒 Scam protection • Verification • 24/7 support',
-        'recentReviewsTitle': 'Recent reviews',
-        'loadingText': 'Loading...',
-        'supportLabel': 'Support',
-        'channelLabel': 'Channel',
-        'createTitle': 'Create deal',
-        'createSubtitle': 'Fill in the form',
-        'labelProduct': 'Product or service',
-        'labelCurrency': 'Currency',
-        'labelAmount': 'Amount',
-        'labelBuyer': 'Buyer username (without @)',
-        'btnCreate': 'Create deal',
-        'btnBackMain': 'Main menu',
-        'myDealsTitle': 'My deals',
-        'loadingDeals': 'Loading...',
-        'btnBackMain2': 'Main menu',
-        'reviewsTitle': 'Reviews',
-        'reviewsSubtitle': 'Leave reviews after deals',
-        'labelRating': 'Rating',
-        'labelReviewText': 'Review',
-        'btnSubmitReview': 'Submit review',
-        'loadingReviews': 'Loading...',
-        'btnLoadMore': 'Load more',
-        'balanceTitle': 'My balance',
-        'btnWithdraw': 'Withdraw funds',
-        'withdrawInfo': '💳 Withdraw funds',
-        'labelWithdrawCurrency': 'Currency',
-        'labelWithdrawDetails': 'Details',
-        'btnConfirmWithdraw': 'Confirm withdrawal',
-        'btnBackMain3': 'Main menu',
-        'adminTitle': 'Admin panel',
-        'loadingAdmin': 'Checking rights...',
-        'btnBackMain4': 'Main menu',
-        'noDeals': 'You have no deals',
-        'noReviews': 'No reviews yet',
-        'paid': 'Paid',
-        'waiting': 'Waiting for payment',
-        'awaiting': 'Awaiting confirmation',
-        'completed': 'Completed',
-        'copyLink': 'Copy link',
-        'pay': 'Pay',
-        'sellerDelivered': 'Delivered',
-        'confirmReceipt': 'Confirm receipt',
-        'balanceZero': 'Your balance is 0. Please top up to withdraw.',
-        'need2Deals': 'You need 2 successful deals with the same buyer. You have: ',
-        'verificationRequired': 'Verification required to withdraw. Please verify.',
-        'verificationPassed': 'All conditions met! You can withdraw.',
-        'sessionActive': 'Session active until: ',
-        'headerTitle': 'P2P',
-        'headerTitleSpan': 'Exchange'
-    },
-    'zh': {
-        'langPrompt': '选择您的语言',
-        'onlineLabel': '在线',
-        'statLabel1': '今日交易',
-        'statLabel2': '用户',
-        'statLabel3': '评论',
-        'statLabel4': '交易量 (TON)',
-        'navMain': '主页',
-        'navCreate': '创建',
-        'navDeals': '交易',
-        'navReviews': '评论',
-        'navBalance': '余额',
-        'navAdmin': '管理员',
-        'welcomeTitle': '欢迎！',
-        'welcomeText': '安全的P2P加密货币交易。P2P Exchange — 您值得信赖的合作伙伴。',
-        'quickStart': '快速开始',
-        'btnCreateDeal': '创建交易',
-        'btnReviews': '评论',
-        'btnBalance': '余额',
-        'btnDeals': '我的交易',
-        'howWorks': '运作方式',
-        'step1': '1️⃣ 创建交易 — 描述商品和金额',
-        'step2': '2️⃣ 发送链接给买家',
-        'step3': '3️⃣ 买家在网站上支付',
-        'step4': '4️⃣ 卖家交付 — 点击按钮',
-        'step5': '5️⃣ 买家确认收到',
-        'step6': '6️⃣ 资金转入卖家账户',
-        'securityText': '🔒 防诈骗保护 • 验证 • 24/7支持',
-        'recentReviewsTitle': '最新评论',
-        'loadingText': '加载中...',
-        'supportLabel': '支持',
-        'channelLabel': '频道',
-        'createTitle': '创建交易',
-        'createSubtitle': '填写表格',
-        'labelProduct': '商品或服务',
-        'labelCurrency': '货币',
-        'labelAmount': '金额',
-        'labelBuyer': '买家用户名 (不含@)',
-        'btnCreate': '创建交易',
-        'btnBackMain': '主菜单',
-        'myDealsTitle': '我的交易',
-        'loadingDeals': '加载中...',
-        'btnBackMain2': '主菜单',
-        'reviewsTitle': '评论',
-        'reviewsSubtitle': '交易后留下评论',
-        'labelRating': '评分',
-        'labelReviewText': '评论',
-        'btnSubmitReview': '提交评论',
-        'loadingReviews': '加载中...',
-        'btnLoadMore': '加载更多',
-        'balanceTitle': '我的余额',
-        'btnWithdraw': '提取资金',
-        'withdrawInfo': '💳 提取资金',
-        'labelWithdrawCurrency': '货币',
-        'labelWithdrawDetails': '详情',
-        'btnConfirmWithdraw': '确认提取',
-        'btnBackMain3': '主菜单',
-        'adminTitle': '管理面板',
-        'loadingAdmin': '检查权限...',
-        'btnBackMain4': '主菜单',
-        'noDeals': '您没有交易',
-        'noReviews': '暂无评论',
-        'paid': '已付款',
-        'waiting': '等待付款',
-        'awaiting': '等待确认',
-        'completed': '已完成',
-        'copyLink': '复制链接',
-        'pay': '支付',
-        'sellerDelivered': '已交付',
-        'confirmReceipt': '确认收到',
-        'balanceZero': '您的余额为0。请充值后提取。',
-        'need2Deals': '需要与同一买家完成2笔交易。您有: ',
-        'verificationRequired': '提取需要验证。请进行验证。',
-        'verificationPassed': '所有条件已满足！您可以提取资金。',
-        'sessionActive': '会话有效期至: ',
-        'headerTitle': 'P2P',
-        'headerTitleSpan': '交易所'
-    },
-    'ar': {
-        'langPrompt': 'اختر لغتك',
-        'onlineLabel': 'متصل',
-        'statLabel1': 'صفقات اليوم',
-        'statLabel2': 'مستخدمين',
-        'statLabel3': 'مراجعات',
-        'statLabel4': 'الحجم (TON)',
-        'navMain': 'الرئيسية',
-        'navCreate': 'إنشاء',
-        'navDeals': 'صفقات',
-        'navReviews': 'مراجعات',
-        'navBalance': 'الرصيد',
-        'navAdmin': 'مدير',
-        'welcomeTitle': 'مرحباً!',
-        'welcomeText': 'صفقات P2P آمنة للعملات المشفرة. P2P Exchange — شريكك الموثوق.',
-        'quickStart': 'بداية سريعة',
-        'btnCreateDeal': 'إنشاء صفقة',
-        'btnReviews': 'مراجعات',
-        'btnBalance': 'الرصيد',
-        'btnDeals': 'صفقاتي',
-        'howWorks': 'كيف يعمل',
-        'step1': '1️⃣ أنشئ صفقة — صف المنتج والمبلغ',
-        'step2': '2️⃣ أرسل الرابط للمشتري',
-        'step3': '3️⃣ المشتري يدفع على الموقع',
-        'step4': '4️⃣ البائع يسلم — يضغط الزر',
-        'step5': '5️⃣ المشتري يؤكد الاستلام',
-        'step6': '6️⃣ تضاف الأموال إلى رصيد البائع',
-        'securityText': '🔒 حماية من المحتالين • تحقق • دعم 24/7',
-        'recentReviewsTitle': 'أحدث المراجعات',
-        'loadingText': 'جار التحميل...',
-        'supportLabel': 'الدعم',
-        'channelLabel': 'القناة',
-        'createTitle': 'إنشاء صفقة',
-        'createSubtitle': 'املأ النموذج',
-        'labelProduct': 'المنتج أو الخدمة',
-        'labelCurrency': 'العملة',
-        'labelAmount': 'المبلغ',
-        'labelBuyer': 'اسم مستخدم المشتري (بدون @)',
-        'btnCreate': 'إنشاء صفقة',
-        'btnBackMain': 'القائمة الرئيسية',
-        'myDealsTitle': 'صفقاتي',
-        'loadingDeals': 'جار التحميل...',
-        'btnBackMain2': 'القائمة الرئيسية',
-        'reviewsTitle': 'مراجعات',
-        'reviewsSubtitle': 'اترك مراجعة بعد الصفقات',
-        'labelRating': 'التقييم',
-        'labelReviewText': 'المراجعة',
-        'btnSubmitReview': 'إرسال المراجعة',
-        'loadingReviews': 'جار التحميل...',
-        'btnLoadMore': 'تحميل المزيد',
-        'balanceTitle': 'رصيدي',
-        'btnWithdraw': 'سحب الأموال',
-        'withdrawInfo': '💳 سحب الأموال',
-        'labelWithdrawCurrency': 'العملة',
-        'labelWithdrawDetails': 'التفاصيل',
-        'btnConfirmWithdraw': 'تأكيد السحب',
-        'btnBackMain3': 'القائمة الرئيسية',
-        'adminTitle': 'لوحة المدير',
-        'loadingAdmin': 'فحص الصلاحيات...',
-        'btnBackMain4': 'القائمة الرئيسية',
-        'noDeals': 'ليس لديك صفقات',
-        'noReviews': 'لا توجد مراجعات بعد',
-        'paid': 'مدفوع',
-        'waiting': 'انتظار الدفع',
-        'awaiting': 'انتظار التأكيد',
-        'completed': 'مكتمل',
-        'copyLink': 'نسخ الرابط',
-        'pay': 'دفع',
-        'sellerDelivered': 'تم التسليم',
-        'confirmReceipt': 'تأكيد الاستلام',
-        'balanceZero': 'رصيدك 0. يرجى الإيداع للسحب.',
-        'need2Deals': 'تحتاج صفقتين ناجحتين مع نفس المشتري. لديك: ',
-        'verificationRequired': 'السحب يحتاج التحقق. يرجى التحقق.',
-        'verificationPassed': 'جميع الشروط متوفرة! يمكنك السحب.',
-        'sessionActive': 'الجلسة نشطة حتى: ',
-        'headerTitle': 'P2P',
-        'headerTitleSpan': 'صراف'
-    }
-};
-
-function applyLanguage(lang) {
-    const t = LANG_TEXT[lang] || LANG_TEXT['ru'];
-    
-    // Обновляем элементы по ID
-    const elements = {
-        'langPrompt': document.getElementById('langPrompt'),
-        'onlineLabel': document.getElementById('onlineLabel'),
-        'statLabel1': document.getElementById('statLabel1'),
-        'statLabel2': document.getElementById('statLabel2'),
-        'statLabel3': document.getElementById('statLabel3'),
-        'statLabel4': document.getElementById('statLabel4'),
-        'navMain': document.getElementById('navMain'),
-        'navCreate': document.getElementById('navCreate'),
-        'navDeals': document.getElementById('navDeals'),
-        'navReviews': document.getElementById('navReviews'),
-        'navBalance': document.getElementById('navBalance'),
-        'navAdmin': document.getElementById('navAdmin'),
-        'welcomeTitle': document.getElementById('welcomeTitle'),
-        'welcomeText': document.getElementById('welcomeText'),
-        'quickStart': document.getElementById('quickStart'),
-        'btnCreateDeal': document.getElementById('btnCreateDeal'),
-        'btnReviews': document.getElementById('btnReviews'),
-        'btnBalance': document.getElementById('btnBalance'),
-        'btnDeals': document.getElementById('btnDeals'),
-        'howWorks': document.getElementById('howWorks'),
-        'securityText': document.getElementById('securityText'),
-        'recentReviewsTitle': document.getElementById('recentReviewsTitle'),
-        'loadingText': document.getElementById('loadingText'),
-        'supportLabel': document.getElementById('supportLabel'),
-        'channelLabel': document.getElementById('channelLabel'),
-        'createTitle': document.getElementById('createTitle'),
-        'createSubtitle': document.getElementById('createSubtitle'),
-        'labelProduct': document.getElementById('labelProduct'),
-        'labelCurrency': document.getElementById('labelCurrency'),
-        'labelAmount': document.getElementById('labelAmount'),
-        'labelBuyer': document.getElementById('labelBuyer'),
-        'btnCreate': document.getElementById('btnCreate'),
-        'btnBackMain': document.getElementById('btnBackMain'),
-        'myDealsTitle': document.getElementById('myDealsTitle'),
-        'loadingDeals': document.getElementById('loadingDeals'),
-        'btnBackMain2': document.getElementById('btnBackMain2'),
-        'reviewsTitle': document.getElementById('reviewsTitle'),
-        'reviewsSubtitle': document.getElementById('reviewsSubtitle'),
-        'labelRating': document.getElementById('labelRating'),
-        'labelReviewText': document.getElementById('labelReviewText'),
-        'btnSubmitReview': document.getElementById('btnSubmitReview'),
-        'loadingReviews': document.getElementById('loadingReviews'),
-        'btnLoadMore': document.getElementById('btnLoadMore'),
-        'balanceTitle': document.getElementById('balanceTitle'),
-        'btnWithdraw': document.getElementById('btnWithdraw'),
-        'withdrawInfo': document.getElementById('withdrawInfo'),
-        'labelWithdrawCurrency': document.getElementById('labelWithdrawCurrency'),
-        'labelWithdrawDetails': document.getElementById('labelWithdrawDetails'),
-        'btnConfirmWithdraw': document.getElementById('btnConfirmWithdraw'),
-        'btnBackMain3': document.getElementById('btnBackMain3'),
-        'adminTitle': document.getElementById('adminTitle'),
-        'loadingAdmin': document.getElementById('loadingAdmin'),
-        'btnBackMain4': document.getElementById('btnBackMain4')
-    };
-    
-    // Обновляем только существующие элементы
-    for (const [key, el] of Object.entries(elements)) {
-        if (el && t[key] !== undefined) {
-            el.textContent = t[key];
-        }
-    }
-    
-    // Обновляем шаги
-    for (let i = 1; i <= 6; i++) {
-        const el = document.getElementById('step' + i);
-        if (el && t['step' + i] !== undefined) {
-            el.innerHTML = t['step' + i];
-        }
-    }
-    
-    // Обновляем хедер
-    const headerTitle = document.getElementById('headerTitle');
-    const headerTitleSpan = document.getElementById('headerTitleSpan');
-    if (headerTitle && t.headerTitle) headerTitle.textContent = t.headerTitle;
-    if (headerTitleSpan && t.headerTitleSpan) headerTitleSpan.textContent = t.headerTitleSpan;
+LANGUAGES = {
+    "ru": "🇷🇺 Русский",
+    "en": "🇬🇧 English",
+    "zh": "🇨🇳 中文",
+    "ar": "🇸🇦 العربية"
 }
 
-function setLanguage(lang) {
-    currentLang = lang;
-    const overlay = document.getElementById('languageOverlay');
-    if (overlay) overlay.classList.remove('active');
-    localStorage.setItem('lang', lang);
-    applyLanguage(lang);
-    showToast('✅ ' + (lang === 'ru' ? 'Язык установлен' : 'Language set'), 'success');
-    loadMainData(); // Перезагружаем данные
+LOCALE = {
+    "ru": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
+        "feature1": "Честные сделки между продавцами и покупателями",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Гарант безопасности с обеих сторон",
+        "feature4": "Премиум поддержка 24/7",
+        "how_it_works": "КАК ЭТО РАБОТАЕТ",
+        "step1": "Создайте сделку в Mini App",
+        "step2": "Отправьте ссылку покупателю",
+        "step3": "Покупатель переходит по ссылке",
+        "step4": "Покупатель оплачивает в Mini App",
+        "step5": "Продавец нажимает «Передал товар»",
+        "step6": "Покупатель нажимает «Получил товар»",
+        "step7": "Деньги зачисляются на баланс продавца",
+        "our_channel": "НАШ КАНАЛ",
+        "support": "ПОДДЕРЖКА",
+        "support_contact": "@p2psupbot",
+        "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
+        "create_deal": "СОЗДАТЬ СДЕЛКУ",
+        "my_balance": "МОЙ БАЛАНС",
+        "my_deals": "МОИ СДЕЛКИ",
+        "how_to_deal": "КАК СОЗДАТЬ СДЕЛКУ",
+        "faq": "ОТЗЫВЫ",
+        "channel": "КАНАЛ",
+        "admin_panel": "АДМИН ПАНЕЛЬ",
+        "choose_action": "ВЫБЕРИТЕ ДЕЙСТВИЕ",
+        "your_balance": "ВАШ БАЛАНС",
+        "main_menu": "ГЛАВНОЕ МЕНЮ",
+        "no_deals": "У ВАС НЕТ СДЕЛОК",
+        "your_deals": "ВАШИ СДЕЛКИ",
+        "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА",
+        "access_denied": "ДОСТУП ЗАПРЕЩЁН",
+        "payment_confirmed": "ОПЛАТА ПОДТВЕРЖДЕНА",
+        "seller_confirmed": "ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА",
+        "buyer_confirmed": "ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА",
+        "deal_completed": "СДЕЛКА ЗАВЕРШЕНА",
+        "insufficient_balance": "НЕДОСТАТОЧНО СРЕДСТВ",
+        "choose_payment_method": "ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ",
+        "pay_by_rekvisits": "ОПЛАТИТЬ ПО РЕКВИЗИТАМ",
+        "pay_by_balance": "ОПЛАТИТЬ С БАЛАНСА",
+        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
+        "status_paid": "ОПЛАЧЕНО",
+        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
+        "status_completed": "ЗАВЕРШЕНО",
+        "select_language": "ВЫБРАТЬ ЯЗЫК",
+        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
+        "choose_language_prompt": "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
+        "product": "ТОВАР",
+        "amount": "СУММА",
+        "seller": "ПРОДАВЕЦ",
+        "buyer": "ПОКУПАТЕЛЬ",
+        "deal": "СДЕЛКА",
+        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА",
+        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР",
+        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
+        "contact_support": "В ПОДДЕРЖКУ",
+        "balance_added": "БАЛАНС НАЧИСЛЕН",
+        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
+        "admin_added": "АДМИН ДОБАВЛЕН",
+        "admin_removed": "АДМИН УДАЛЁН",
+        "admin_list": "СПИСОК АДМИНОВ",
+        "no_deals_total": "НЕТ СДЕЛОК",
+        "all_deals_title": "ВСЕ СДЕЛКИ",
+        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
+        "copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
+        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
+        "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
+        "deal_created": "СДЕЛКА СОЗДАНА",
+        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ Отправьте ссылку покупателю\n\n4️⃣ Покупатель переходит по ссылке\n   → Открывается Mini App\n\n5️⃣ Покупатель оплачивает:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n6️⃣ Продавец нажимает «Передал товар»\n\n7️⃣ Покупатель нажимает «Получил товар»\n   → Деньги зачисляются на баланс\n\n🔥 ВСЕ СДЕЛКИ БЕЗОПАСНЫ!",
+        "open_deal": "🔓 ПЕРЕЙТИ В MINI APP",
+        "deal_ready": "🔥 СДЕЛКА ГОТОВА!",
+        "deal_info": "📋 Информация о сделке:",
+        "click_to_open": "👇 Нажмите кнопку ниже, чтобы открыть Mini App"
+    },
+    "en": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "SECURE DEALS",
+        "feature1": "Fair deals between sellers and buyers",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Security guarantee from both sides",
+        "feature4": "Premium 24/7 support",
+        "how_it_works": "HOW IT WORKS",
+        "step1": "Create deal in Mini App",
+        "step2": "Send link to buyer",
+        "step3": "Buyer follows the link",
+        "step4": "Buyer pays in Mini App",
+        "step5": "Seller clicks 'Delivered'",
+        "step6": "Buyer clicks 'Received'",
+        "step7": "Money credited to seller's balance",
+        "our_channel": "OUR CHANNEL",
+        "support": "SUPPORT",
+        "support_contact": "@p2psupbot",
+        "start_now": "START NOW",
+        "create_deal": "CREATE DEAL",
+        "my_balance": "MY BALANCE",
+        "my_deals": "MY DEALS",
+        "how_to_deal": "HOW TO CREATE DEAL",
+        "faq": "REVIEWS",
+        "channel": "CHANNEL",
+        "admin_panel": "ADMIN PANEL",
+        "choose_action": "CHOOSE ACTION",
+        "your_balance": "YOUR BALANCE",
+        "main_menu": "MAIN MENU",
+        "no_deals": "YOU HAVE NO DEALS",
+        "your_deals": "YOUR DEALS",
+        "deal_not_found": "DEAL NOT FOUND",
+        "access_denied": "ACCESS DENIED",
+        "payment_confirmed": "PAYMENT CONFIRMED",
+        "seller_confirmed": "YOU CONFIRMED DELIVERY",
+        "buyer_confirmed": "YOU CONFIRMED RECEIPT",
+        "deal_completed": "DEAL COMPLETED",
+        "insufficient_balance": "INSUFFICIENT BALANCE",
+        "choose_payment_method": "CHOOSE PAYMENT METHOD",
+        "pay_by_rekvisits": "PAY BY DETAILS",
+        "pay_by_balance": "PAY FROM BALANCE",
+        "status_waiting": "WAITING FOR PAYMENT",
+        "status_paid": "PAID",
+        "status_awaiting": "AWAITING CONFIRMATION",
+        "status_completed": "COMPLETED",
+        "select_language": "SELECT LANGUAGE",
+        "welcome": "WELCOME",
+        "choose_language_prompt": "🌐 SELECT YOUR LANGUAGE:",
+        "product": "PRODUCT",
+        "amount": "AMOUNT",
+        "seller": "SELLER",
+        "buyer": "BUYER",
+        "deal": "DEAL",
+        "waiting_for_delivery": "WAITING FOR DELIVERY",
+        "seller_delivered": "SELLER DELIVERED",
+        "confirm_receipt": "CONFIRM RECEIPT",
+        "contact_support": "CONTACT SUPPORT",
+        "balance_added": "BALANCE ADDED",
+        "admin_rights": "INSUFFICIENT RIGHTS",
+        "admin_added": "ADMIN ADDED",
+        "admin_removed": "ADMIN REMOVED",
+        "admin_list": "ADMIN LIST",
+        "no_deals_total": "NO DEALS",
+        "all_deals_title": "ALL DEALS",
+        "no_active_requests": "NO ACTIVE REQUESTS",
+        "copy_link": "COPY LINK",
+        "deal_link_text": "LINK FOR BUYER",
+        "send_link_to_buyer": "SEND LINK TO BUYER",
+        "deal_created": "DEAL CREATED",
+        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Send the link to the buyer\n\n4️⃣ Buyer follows the link\n   → Opens Mini App\n\n5️⃣ Buyer pays:\n   • From balance — instantly\n   • By details — after admin check\n\n6️⃣ Seller clicks 'Delivered'\n\n7️⃣ Buyer clicks 'Received'\n   → Money goes to balance\n\n🔥 ALL DEALS ARE SAFE!",
+        "open_deal": "🔓 OPEN MINI APP",
+        "deal_ready": "🔥 DEAL IS READY!",
+        "deal_info": "📋 Deal information:",
+        "click_to_open": "👇 Click the button below to open Mini App"
+    },
+    "zh": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "安全交易",
+        "feature1": "买卖双方公平交易",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "双方安全保障",
+        "feature4": "24/7高级支持",
+        "how_it_works": "运作方式",
+        "step1": "在Mini App中创建交易",
+        "step2": "发送链接给买家",
+        "step3": "买家点击链接",
+        "step4": "买家在Mini App中支付",
+        "step5": "卖家点击「已交付」",
+        "step6": "买家点击「已收到」",
+        "step7": "款项计入卖家余额",
+        "our_channel": "我们的频道",
+        "support": "支持",
+        "support_contact": "@p2psupbot",
+        "start_now": "立即开始",
+        "create_deal": "创建交易",
+        "my_balance": "我的余额",
+        "my_deals": "我的交易",
+        "how_to_deal": "如何创建交易",
+        "faq": "评论",
+        "channel": "频道",
+        "admin_panel": "管理面板",
+        "choose_action": "选择操作",
+        "your_balance": "您的余额",
+        "main_menu": "主菜单",
+        "no_deals": "您没有任何交易",
+        "your_deals": "您的交易",
+        "deal_not_found": "交易未找到",
+        "access_denied": "访问被拒绝",
+        "payment_confirmed": "付款已确认",
+        "seller_confirmed": "您已确认交付",
+        "buyer_confirmed": "您已确认收到",
+        "deal_completed": "交易已完成",
+        "insufficient_balance": "余额不足",
+        "choose_payment_method": "选择支付方式",
+        "pay_by_rekvisits": "按信息付款",
+        "pay_by_balance": "从余额付款",
+        "status_waiting": "等待付款",
+        "status_paid": "已付款",
+        "status_awaiting": "等待确认",
+        "status_completed": "已完成",
+        "select_language": "选择语言",
+        "welcome": "欢迎",
+        "choose_language_prompt": "🌐 选择您的语言:",
+        "product": "商品",
+        "amount": "金额",
+        "seller": "卖家",
+        "buyer": "买家",
+        "deal": "交易",
+        "waiting_for_delivery": "等待交付",
+        "seller_delivered": "卖家已交付",
+        "confirm_receipt": "确认收到",
+        "contact_support": "联系客服",
+        "balance_added": "余额已添加",
+        "admin_rights": "权限不足",
+        "admin_added": "管理员已添加",
+        "admin_removed": "管理员已移除",
+        "admin_list": "管理员列表",
+        "no_deals_total": "无交易",
+        "all_deals_title": "所有交易",
+        "no_active_requests": "无活跃申请",
+        "copy_link": "复制链接",
+        "deal_link_text": "买家链接",
+        "send_link_to_buyer": "发送链接给买家",
+        "deal_created": "交易已创建",
+        "how_to_deal_text": "📖 <b>如何创建交易</b>\n\n1️⃣ 点击「创建交易」\n   → 打开 Mini App\n\n2️⃣ 填写表格：\n   • 商品名称\n   • 货币 (TON/STARS/RUB/UAH)\n   • 金额\n   • 买家用户名\n\n3️⃣ 发送链接给买家\n\n4️⃣ 买家点击链接\n   → 打开 Mini App\n\n5️⃣ 买家支付：\n   • 从余额支付 — 即时\n   • 按详情支付 — 管理员检查后\n\n6️⃣ 卖家点击「已交付」\n\n7️⃣ 买家点击「已收到」\n   → 钱款计入余额\n\n🔥 所有交易都安全！",
+        "open_deal": "🔓 打开 Mini App",
+        "deal_ready": "🔥 交易已准备好！",
+        "deal_info": "📋 交易信息：",
+        "click_to_open": "👇 点击下方按钮打开 Mini App"
+    },
+    "ar": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "صفقات آمنة",
+        "feature1": "صفقات عادلة بين البائعين والمشترين",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "ضمان الأمن من كلا الجانبين",
+        "feature4": "دعم بريميوم 24/7",
+        "how_it_works": "كيف يعمل",
+        "step1": "إنشاء صفقة في Mini App",
+        "step2": "إرسال الرابط للمشتري",
+        "step3": "المشتري يتبع الرابط",
+        "step4": "المشتري يدفع في Mini App",
+        "step5": "البائع يضغط «تم التسليم»",
+        "step6": "المشتري يضغط «تم الاستلام»",
+        "step7": "تضاف الأموال إلى رصيد البائع",
+        "our_channel": "قناتنا",
+        "support": "الدعم",
+        "support_contact": "@p2psupbot",
+        "start_now": "ابدأ الآن",
+        "create_deal": "إنشاء صفقة",
+        "my_balance": "رصيدي",
+        "my_deals": "صفقاتي",
+        "how_to_deal": "كيفية إنشاء صفقة",
+        "faq": "مراجعات",
+        "channel": "القناة",
+        "admin_panel": "لوحة التحكم",
+        "choose_action": "اختر إجراء",
+        "your_balance": "رصيدك",
+        "main_menu": "القائمة الرئيسية",
+        "no_deals": "ليس لديك صفقات",
+        "your_deals": "صفقاتك",
+        "deal_not_found": "الصفقة غير موجودة",
+        "access_denied": "الوصول مرفوض",
+        "payment_confirmed": "تم تأكيد الدفع",
+        "seller_confirmed": "لقد أكدت التسليم",
+        "buyer_confirmed": "لقد أكدت الاستلام",
+        "deal_completed": "الصفقة مكتملة",
+        "insufficient_balance": "رصيد غير كافٍ",
+        "choose_payment_method": "اختر طريقة الدفع",
+        "pay_by_rekvisits": "الدفع حسب التفاصيل",
+        "pay_by_balance": "الدفع من الرصيد",
+        "status_waiting": "انتظار الدفع",
+        "status_paid": "تم الدفع",
+        "status_awaiting": "انتظار التأكيد",
+        "status_completed": "مكتملة",
+        "select_language": "اختر اللغة",
+        "welcome": "مرحباً",
+        "choose_language_prompt": "🌐 اختر لغتك:",
+        "product": "المنتج",
+        "amount": "المبلغ",
+        "seller": "البائع",
+        "buyer": "المشتري",
+        "deal": "الصفقة",
+        "waiting_for_delivery": "انتظار التسليم",
+        "seller_delivered": "البائع سلم المنتج",
+        "confirm_receipt": "تأكيد الاستلام",
+        "contact_support": "اتصل بالدعم",
+        "balance_added": "تم إضافة الرصيد",
+        "admin_rights": "صلاحيات غير كافية",
+        "admin_added": "تم إضافة المدقق",
+        "admin_removed": "تم إزالة المدقق",
+        "admin_list": "قائمة المدققين",
+        "no_deals_total": "لا توجد صفقات",
+        "all_deals_title": "جميع الصفقات",
+        "no_active_requests": "لا توجد طلبات نشطة",
+        "copy_link": "انسخ الرابط",
+        "deal_link_text": "رابط المشتري",
+        "send_link_to_buyer": "أرسل الرابط للمشتري",
+        "deal_created": "تم إنشاء الصفقة",
+        "how_to_deal_text": "📖 <b>كيفية إنشاء صفقة</b>\n\n1️⃣ اضغط «إنشاء صفقة»\n   → يفتح Mini App\n\n2️⃣ املأ النموذج:\n   • اسم المنتج\n   • العملة (TON/STARS/RUB/UAH)\n   • المبلغ\n   • اسم مستخدم المشتري\n\n3️⃣ أرسل الرابط للمشتري\n\n4️⃣ المشتري يتبع الرابط\n   → يفتح Mini App\n\n5️⃣ المشتري يدفع:\n   • من الرصيد — فوري\n   • حسب التفاصيل — بعد فحص المدقق\n\n6️⃣ البائع يضغط «تم التسليم»\n\n7️⃣ المشتري يضغط «تم الاستلام»\n   → تضاف الأموال إلى الرصيد\n\n🔥 جميع الصفقات آمنة!",
+        "open_deal": "🔓 افتح Mini App",
+        "deal_ready": "🔥 الصفقة جاهزة!",
+        "deal_info": "📋 معلومات الصفقة:",
+        "click_to_open": "👇 اضغط الزر أدناه لفتح Mini App"
+    }
 }
 
-// При загрузке страницы проверяем сохранённый язык
-if (localStorage.getItem('lang')) {
-    setLanguage(localStorage.getItem('lang'));
-} else {
-    // Если язык не сохранён, показываем overlay
-    document.getElementById('languageOverlay').classList.add('active');
-}
+def get_text(lang: str, key: str) -> str:
+    if lang in LOCALE and key in LOCALE[lang]:
+        return LOCALE[lang][key]
+    return LOCALE["ru"].get(key, key)
+
 # ============================================================
 # 6. ПОМОЩНИКИ
 # ============================================================
@@ -664,26 +559,42 @@ def deal_link_keyboard(deal_id: str, user_id: int):
         [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
     ])
 
-# ============================================================
-# 8. ОБРАБОТЧИКИ БОТА
-# ============================================================
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    if message.text and message.text.startswith("/start deal_"):
-        deal_id = message.text.split("_")[1]
-        await handle_deal_link(message, deal_id)
-        return
-    
-    uid = str(message.from_user.id)
-    if uid in user_language:
-        await send_welcome(message)
-        return
-    
-    await message.answer(
-        f"🌐 {get_text('ru', 'choose_language_prompt')}",
-        reply_markup=language_keyboard()
-    )
+def language_keyboard():
+    buttons = []
+    for lang_code, lang_name in LANGUAGES.items():
+        buttons.append([InlineKeyboardButton(text=lang_name, callback_data=f"set_lang_{lang_code}")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
+def back_to_main_keyboard(user_id: int):
+    lang = get_user_language(user_id)
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+    ])
+
+def admin_panel_keyboard(user_id: int):
+    lang = get_user_language(user_id)
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💰 {get_text(lang, 'balance_added')}", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text=f"👥 {get_text(lang, 'admin_list')}", callback_data="admin_manage_admins")],
+        [InlineKeyboardButton(text=f"📊 {get_text(lang, 'all_deals_title')}", callback_data="admin_all_deals")],
+        [InlineKeyboardButton(text=f"💲 Заявки на вывод", callback_data="admin_withdraw_requests")],
+        [InlineKeyboardButton(text=f"🔐 Запросы верификации", callback_data="admin_verification_requests")],
+        [InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="admin_manage_reviews")],
+        [InlineKeyboardButton(text=f"📋 Логи", callback_data="admin_logs")],
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+    ])
+
+# ============================================================
+# 8. FSM АДМИНА
+# ============================================================
+class AdminStates(StatesGroup):
+    waiting_user_id = State()
+    waiting_currency = State()
+    waiting_amount = State()
+
+# ============================================================
+# 9. ОБРАБОТЧИКИ БОТА
+# ============================================================
 async def send_welcome(message: types.Message):
     lang = get_user_language(message.from_user.id)
     text = f"""🔥 <b>{get_text(lang, 'bot_name')}</b> 🔥
@@ -708,6 +619,23 @@ async def send_welcome(message: types.Message):
 
 🔥 {get_text(lang, 'start_now')} 🚀"""
     await message.answer(text, reply_markup=main_menu_keyboard(message.from_user.id))
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    if message.text and message.text.startswith("/start deal_"):
+        deal_id = message.text.split("_")[1]
+        await handle_deal_link(message, deal_id)
+        return
+    
+    uid = str(message.from_user.id)
+    if uid in user_language:
+        await send_welcome(message)
+        return
+    
+    await message.answer(
+        f"🌐 {get_text('ru', 'choose_language_prompt')}",
+        reply_markup=language_keyboard()
+    )
 
 async def handle_deal_link(message: types.Message, deal_id: str):
     lang = get_user_language(message.from_user.id)
@@ -755,21 +683,16 @@ async def handle_deal_link(message: types.Message, deal_id: str):
         reply_markup=deal_link_keyboard(deal_id, message.from_user.id)
     )
 
-def language_keyboard():
-    buttons = []
-    for lang_code, lang_name in LANGUAGES.items():
-        buttons.append([InlineKeyboardButton(text=lang_name, callback_data=f"set_lang_{lang_code}")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
+# ===== ВЫБОР ЯЗЫКА =====
 @dp.callback_query(lambda c: c.data.startswith("set_lang_"))
-async def set_language(callback: types.CallbackQuery):
+async def set_language_callback(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
-    await callback.answer()
+    await callback.answer(f"✅ Язык изменён")
     await send_welcome(callback.message)
 
 @dp.callback_query(lambda c: c.data == "select_language")
-async def select_language(callback: types.CallbackQuery):
+async def select_language_callback(callback: types.CallbackQuery):
     await callback.message.edit_text(
         f"🌐 {get_text('ru', 'choose_language_prompt')}",
         reply_markup=language_keyboard()
@@ -777,22 +700,12 @@ async def select_language(callback: types.CallbackQuery):
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "back_to_main")
-async def back_to_main(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    try:
-        await callback.message.edit_text(
-            f"🔥 <b>P2P Exchange</b> 🔥\n\n{get_text(lang, 'choose_action')}:",
-            reply_markup=main_menu_keyboard(callback.from_user.id)
-        )
-    except:
-        await callback.message.answer(
-            f"🔥 <b>P2P Exchange</b> 🔥\n\n{get_text(lang, 'choose_action')}:",
-            reply_markup=main_menu_keyboard(callback.from_user.id)
-        )
+async def back_to_main_callback(callback: types.CallbackQuery):
+    await send_welcome(callback.message)
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_channel")
-async def menu_channel(callback: types.CallbackQuery):
+async def menu_channel_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     text = f"""📢 {get_text(lang, 'our_channel')}
 
@@ -804,20 +717,14 @@ async def menu_channel(callback: types.CallbackQuery):
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "how_to_deal")
-async def how_to_deal(callback: types.CallbackQuery):
+async def how_to_deal_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     text = get_text(lang, 'how_to_deal_text')
     await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
     await callback.answer()
 
-def back_to_main_keyboard(user_id: int):
-    lang = get_user_language(user_id)
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
-    ])
-
 @dp.callback_query(lambda c: c.data == "menu_balance")
-async def menu_balance(callback: types.CallbackQuery):
+async def menu_balance_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     bal = get_balance(callback.from_user.id)
     text = f"""💰 <b>{get_text(lang, 'your_balance')}</b>
@@ -832,7 +739,7 @@ async def menu_balance(callback: types.CallbackQuery):
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_deals")
-async def menu_deals(callback: types.CallbackQuery):
+async def menu_deals_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     user_deals = []
     for d_id, d in deals.items():
@@ -855,7 +762,7 @@ async def menu_deals(callback: types.CallbackQuery):
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_reviews")
-async def menu_reviews(callback: types.CallbackQuery):
+async def menu_reviews_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     reviews_list = list(reviews.values())
     if not reviews_list:
@@ -872,10 +779,10 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 9. АДМИН ПАНЕЛЬ (СОКРАЩЁННО)
+# 10. АДМИН ПАНЕЛЬ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_admin")
-async def menu_admin(callback: types.CallbackQuery):
+async def menu_admin_callback(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
         await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
@@ -886,21 +793,482 @@ async def menu_admin(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-def admin_panel_keyboard(user_id: int):
-    lang = get_user_language(user_id)
+@dp.callback_query(lambda c: c.data == "admin_add_balance")
+async def admin_add_balance_callback(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    await callback.message.edit_text(f"💰 {get_text(lang, 'balance_added')}\n\n{get_text(lang, 'enter_user_id')}:")
+    await state.set_state(AdminStates.waiting_user_id)
+    await callback.answer()
+
+@dp.message(AdminStates.waiting_user_id)
+async def admin_get_user_id(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    try:
+        user_id = int(message.text.strip())
+        await state.update_data(target_user_id=user_id)
+        await message.answer(f"💱 {get_text(lang, 'choose_currency')}:", reply_markup=currency_keyboard())
+        await state.set_state(AdminStates.waiting_currency)
+    except:
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
+
+def currency_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"💰 {get_text(lang, 'balance_added')}", callback_data="admin_add_balance")],
-        [InlineKeyboardButton(text=f"👥 {get_text(lang, 'admin_list')}", callback_data="admin_manage_admins")],
-        [InlineKeyboardButton(text=f"📊 {get_text(lang, 'all_deals_title')}", callback_data="admin_all_deals")],
-        [InlineKeyboardButton(text=f"💲 Заявки на вывод", callback_data="admin_withdraw_requests")],
-        [InlineKeyboardButton(text=f"🔐 Запросы верификации", callback_data="admin_verification_requests")],
-        [InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="admin_manage_reviews")],
-        [InlineKeyboardButton(text=f"📋 Логи", callback_data="admin_logs")],
-        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+        [InlineKeyboardButton(text="💎 TON", callback_data="curr_TON")],
+        [InlineKeyboardButton(text="⭐️ STARS", callback_data="curr_STARS")],
+        [InlineKeyboardButton(text="💰 RUB", callback_data="curr_RUB")],
+        [InlineKeyboardButton(text="🌐 UAH", callback_data="curr_UAH")],
     ])
 
+@dp.callback_query(lambda c: c.data.startswith("curr_"))
+async def admin_get_currency(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
+    currency = callback.data.split("_")[1]
+    await state.update_data(target_currency=currency)
+    await callback.message.edit_text(f"💰 {get_text(lang, 'enter_amount')} {currency}:")
+    await state.set_state(AdminStates.waiting_amount)
+    await callback.answer()
+
+@dp.message(AdminStates.waiting_amount)
+async def admin_get_amount(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
+    try:
+        amount = float(message.text.strip())
+        if amount <= 0:
+            raise ValueError
+        data = await state.get_data()
+        target_user_id = data.get("target_user_id")
+        currency = data.get("target_currency")
+        add_balance(target_user_id, currency, amount)
+        add_log("admin_add_balance", {
+            "admin": message.from_user.username,
+            "target_user_id": target_user_id,
+            "amount": amount,
+            "currency": currency
+        })
+        await message.answer(
+            f"✅ {get_text(lang, 'balance_added')} {amount} {currency} {get_text(lang, 'for_user')} {target_user_id}",
+            reply_markup=admin_panel_keyboard(message.from_user.id)
+        )
+        await state.clear()
+    except:
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
+
+@dp.callback_query(lambda c: c.data == "admin_manage_admins")
+async def admin_manage_admins_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    admin_list = "\n".join([f"• {aid}" for aid in list(admins.keys())]) if admins else "Нет дополнительных админов"
+    await callback.message.edit_text(
+        f"👥 <b>{get_text(lang, 'admin_list')}</b>\n\n"
+        f"Главный админ: {MASTER_ADMIN_ID}\n"
+        f"Дополнительные:\n{admin_list}\n\n"
+        f"/add_admin [ID] - {get_text(lang, 'admin_added')}\n"
+        f"/remove_admin [ID] - {get_text(lang, 'admin_removed')}",
+        reply_markup=admin_panel_keyboard(callback.from_user.id)
+    )
+    await callback.answer()
+
+@dp.message(Command("add_admin"))
+async def add_admin(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /add_admin [ID]")
+        return
+    try:
+        new_admin_id = int(args[1])
+        admins[str(new_admin_id)] = True
+        save_json(FILES["admins"], admins)
+        add_log("admin_added", {
+            "admin": message.from_user.username,
+            "new_admin_id": new_admin_id
+        })
+        await message.answer(f"✅ {get_text(lang, 'admin_added')} {new_admin_id}")
+    except:
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
+
+@dp.message(Command("remove_admin"))
+async def remove_admin(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /remove_admin [ID]")
+        return
+    try:
+        admin_id = int(args[1])
+        if admin_id == MASTER_ADMIN_ID:
+            await message.answer(f"❌ {get_text(lang, 'cannot_remove_master')}")
+            return
+        if str(admin_id) in admins:
+            del admins[str(admin_id)]
+            save_json(FILES["admins"], admins)
+            add_log("admin_removed", {
+                "admin": message.from_user.username,
+                "removed_admin_id": admin_id
+            })
+            await message.answer(f"✅ {get_text(lang, 'admin_removed')} {admin_id}")
+        else:
+            await message.answer(f"❌ {get_text(lang, 'user_not_found')}")
+    except:
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
+
+@dp.callback_query(lambda c: c.data == "admin_all_deals")
+async def admin_all_deals_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    if not deals:
+        await callback.message.edit_text(f"📭 {get_text(lang, 'no_deals_total')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = f"📊 <b>{get_text(lang, 'all_deals_title')}</b>\n\n"
+    for d_id, d in list(deals.items())[-20:]:
+        status_map = {
+            "waiting_payment": f"⏳ {get_text(lang, 'status_waiting')}",
+            "paid": f"✅ {get_text(lang, 'status_paid')}",
+            "awaiting_confirmation": f"📦 {get_text(lang, 'status_awaiting')}",
+            "completed": f"🎉 {get_text(lang, 'status_completed')}"
+        }
+        text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
+        text += f"   👤 {d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
+        text += f"   💰 {d.get('amount', 0)} {d.get('currency', '')}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_withdraw_requests")
+async def admin_withdraw_requests_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    pending = {k: v for k, v in withdraw_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text(f"📭 {get_text(lang, 'no_active_requests')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = f"💲 <b>Заявки на вывод</b>\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 ID: {req.get('user_id', '?')} (@{req.get('username', '?')})\n   💰 {req.get('amount', 0)} {req.get('currency', '')}\n   📝 {req.get('details', '')[:30]}\n   ➡️ /confirm_withdraw {rid}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_verification_requests")
+async def admin_verification_requests_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    pending = {k: v for k, v in verification_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text(f"🔐 {get_text(lang, 'no_active_requests')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = f"🔐 <b>Запросы верификации</b>\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 @{req.get('username', '?')} (ID: {req.get('user_id', '?')})\n"
+        text += f"   📱 {req.get('phone', '?')}\n"
+        text += f"   ➡️ /approve_verification {rid}\n"
+        text += f"   ➡️ /reject_verification {rid}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.message(Command("approve_verification"))
+async def approve_verification(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /approve_verification [ID]")
+        return
+    request_id = args[1]
+    if request_id not in verification_requests:
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
+        return
+    req = verification_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
+        return
+    
+    session_id = str(uuid.uuid4())[:8]
+    verification_sessions[session_id] = {
+        "user_id": req["user_id"],
+        "username": req["username"],
+        "phone": req["phone"],
+        "created_at": datetime.now().isoformat(),
+        "expires_at": (datetime.now() + timedelta(hours=24)).isoformat(),
+        "active": True
+    }
+    save_json(FILES["verification_sessions"], verification_sessions)
+    
+    req["status"] = "approved"
+    req["session_id"] = session_id
+    req["approved_at"] = datetime.now().isoformat()
+    save_json(FILES["verification"], verification_requests)
+    
+    add_log("verification_approved", {
+        "admin": message.from_user.username,
+        "user_id": req["user_id"],
+        "username": req["username"],
+        "phone": req["phone"],
+        "session_id": session_id
+    })
+    
+    await message.answer(f"✅ {get_text(lang, 'photo_updated')} #{request_id}")
+    
+    try:
+        user_lang = get_user_language(req["user_id"])
+        await bot.send_message(
+            req["user_id"],
+            f"✅ <b>ВЕРИФИКАЦИЯ ПРОЙДЕНА!</b>\n\n"
+            f"🕐 Сессия активна 24 часа.\n"
+            f"🆔 ID сессии: {session_id}\n\n"
+            f"💰 Теперь вам доступен вывод средств!"
+        )
+    except:
+        pass
+
+@dp.message(Command("reject_verification"))
+async def reject_verification(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /reject_verification [ID]")
+        return
+    request_id = args[1]
+    if request_id not in verification_requests:
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
+        return
+    req = verification_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
+        return
+    
+    req["status"] = "rejected"
+    req["rejected_at"] = datetime.now().isoformat()
+    save_json(FILES["verification"], verification_requests)
+    
+    add_log("verification_rejected", {
+        "admin": message.from_user.username,
+        "user_id": req["user_id"],
+        "username": req["username"]
+    })
+    
+    await message.answer(f"❌ Запрос #{request_id} отклонён")
+
+@dp.callback_query(lambda c: c.data == "admin_manage_reviews")
+async def admin_manage_reviews_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    reviews_list = list(reviews.values())
+    if not reviews_list:
+        await callback.message.edit_text(f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\nПока нет отзывов", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\n"
+    for r in reviews_list[-10:]:
+        text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
+        text += f"📝 {r.get('text', '')[:50]}\n🆔 {r.get('id', '')}\n➡️ /delete_review {r.get('id', '')}\n\n"
+    await callback.message.edit_text(
+        text[:4000],
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=f"🗑 Очистить все отзывы", callback_data="admin_clear_reviews")],
+            [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'admin_panel')}", callback_data="menu_admin")]
+        ])
+    )
+    await callback.answer()
+
+@dp.message(Command("delete_review"))
+async def delete_review_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /delete_review [ID]")
+        return
+    review_id = args[1]
+    if review_id not in reviews:
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
+        return
+    del reviews[review_id]
+    save_json(FILES["reviews"], reviews)
+    add_log("review_deleted", {
+        "admin": message.from_user.username,
+        "review_id": review_id
+    })
+    await message.answer(f"✅ {get_text(lang, 'photo_updated')}")
+
+@dp.callback_query(lambda c: c.data == "admin_clear_reviews")
+async def admin_clear_reviews_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    reviews.clear()
+    save_json(FILES["reviews"], reviews)
+    add_log("all_reviews_cleared", {
+        "admin": callback.from_user.username
+    })
+    await callback.message.edit_text(f"✅ {get_text(lang, 'photo_updated')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_logs")
+async def admin_logs_callback(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if not is_admin(callback.from_user.id):
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        return
+    logs_list = list(logs.values())[-20:]
+    if not logs_list:
+        await callback.message.edit_text(f"📋 <b>Логи</b>\n\nНет записей", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        return
+    text = "📋 <b>Последние логи</b>\n\n"
+    for log_entry in reversed(logs_list[-10:]):
+        text += f"🕐 {log_entry.get('time', '')[:19]}\n"
+        text += f"📌 {log_entry.get('action', '')}\n"
+        text += f"📊 {json.dumps(log_entry.get('data', {}), ensure_ascii=False)[:80]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.answer()
+
 # ============================================================
-# 10. API ДЛЯ MINI APP (ВСЕ ЭНДПОИНТЫ)
+# 11. КОМАНДЫ АДМИНА
+# ============================================================
+@dp.message(Command("pay"))
+async def pay_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /pay [ID]")
+        return
+    deal_id = args[1]
+    if deal_id not in deals:
+        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
+        return
+    deal = deals[deal_id]
+    if deal["status"] != "waiting_payment":
+        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
+        return
+    deal["status"] = "paid"
+    deal["paid_by_admin"] = message.from_user.id
+    save_json(FILES["deals"], deals)
+    
+    add_log("deal_paid_by_admin", {
+        "admin": message.from_user.username,
+        "deal_id": deal_id,
+        "amount": deal["amount"],
+        "currency": deal["currency"]
+    })
+    
+    await message.answer(f"✅ {get_text(lang, 'payment_confirmed')} #{deal_id}")
+    
+    try:
+        seller_lang = get_user_language(deal["seller_id"])
+        await bot.send_message(
+            deal["seller_id"],
+            f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
+            f"💰 {deal['amount']} {deal['currency']}\n"
+            f"👤 Покупатель: @{deal['buyer_username']}\n\n"
+            f"📦 Нажмите «Передал товар» в Mini App"
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+
+@dp.message(Command("confirm_withdraw"))
+async def confirm_withdraw_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /confirm_withdraw [ID]")
+        return
+    request_id = args[1]
+    if request_id not in withdraw_requests:
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
+        return
+    req = withdraw_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
+        return
+    bal = get_balance(req["user_id"])
+    curr_key = req["currency"].lower()
+    if bal.get(curr_key, 0) >= req["amount"]:
+        bal[curr_key] -= req["amount"]
+        save_json(FILES["balance"], balance)
+    req["status"] = "completed"
+    req["completed_at"] = datetime.now().isoformat()
+    save_json(FILES["withdraw"], withdraw_requests)
+    
+    add_log("withdraw_confirmed", {
+        "admin": message.from_user.username,
+        "request_id": request_id,
+        "user_id": req["user_id"],
+        "username": req.get("username", "?"),
+        "amount": req["amount"],
+        "currency": req["currency"]
+    })
+    
+    await message.answer(f"✅ {get_text(lang, 'withdraw_completed')} #{request_id}")
+    try:
+        await bot.send_message(
+            req["user_id"],
+            f"✅ <b>{get_text(lang, 'withdraw_completed')}</b>\n\n"
+            f"💰 {req['amount']} {req['currency']}"
+        )
+    except:
+        pass
+
+@dp.message(Command("reject_withdraw"))
+async def reject_withdraw_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
+    if not is_admin(message.from_user.id):
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /reject_withdraw [ID]")
+        return
+    request_id = args[1]
+    if request_id not in withdraw_requests:
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
+        return
+    req = withdraw_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
+        return
+    req["status"] = "rejected"
+    save_json(FILES["withdraw"], withdraw_requests)
+    
+    add_log("withdraw_rejected", {
+        "admin": message.from_user.username,
+        "request_id": request_id,
+        "user_id": req["user_id"]
+    })
+    
+    await message.answer(f"❌ Заявка #{request_id} отклонена")
+
+# ============================================================
+# 12. API ДЛЯ MINI APP
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -1211,10 +1579,7 @@ async def handle_api(request):
                 f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
                 f"💰 {deal['amount']} {deal['currency']}\n"
                 f"👤 Покупатель: @{deal['buyer_username']}\n\n"
-                f"📦 Нажмите «Передал товар» в Mini App",
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text=f"📱 Перейти в Mini App", web_app=WebAppInfo(url=MINI_APP_URL))]
-                ])
+                f"📦 Нажмите «Передал товар» в Mini App"
             )
         except:
             pass
@@ -1525,48 +1890,10 @@ async def handle_api(request):
         save_json(FILES["stats"], stats)
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== КОМАНДА ДЛЯ АДМИНА (ЧЕРЕЗ БОТА) =====
-    elif endpoint == '/api/pay':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        deal_id = data.get('deal_id')
-        if not deal_id or deal_id not in deals:
-            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
-        deal = deals[deal_id]
-        if deal["status"] != "waiting_payment":
-            return web.json_response({'success': False, 'error': 'Deal already paid'}, headers=headers)
-        
-        deal["status"] = "paid"
-        deal["paid_by_admin"] = user_id
-        save_json(FILES["deals"], deals)
-        
-        add_log("deal_paid_by_admin_api", {
-            "admin_id": user_id,
-            "username": username,
-            "deal_id": deal_id,
-            "amount": deal["amount"],
-            "currency": deal["currency"]
-        })
-        
-        # Уведомляем продавца
-        try:
-            seller_lang = get_user_language(deal["seller_id"])
-            await bot.send_message(
-                deal["seller_id"],
-                f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
-                f"💰 {deal['amount']} {deal['currency']}\n"
-                f"👤 Покупатель: @{deal['buyer_username']}\n\n"
-                f"📦 Нажмите «Передал товар» в Mini App"
-            )
-        except:
-            pass
-        
-        return web.json_response({'success': True}, headers=headers)
-    
     return web.json_response({'success': False, 'error': f'Unknown endpoint: {endpoint}'}, headers=headers)
 
 # ============================================================
-# 11. ЗАПУСК
+# 13. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
