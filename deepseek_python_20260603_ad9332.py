@@ -21,9 +21,9 @@ BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
 MASTER_ADMIN_ID = 8855434638
 SUPPORT_LINK = "@p2psupbot"
 BOT_USERNAME = "tonkeeperp2p_bot"
-BOT_NAME = " Tonkeeper | P2P"
+BOT_NAME = "Tonkeeper P2P"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
-MINI_APP_URL = "https://saitminiapp.onrender.com"  # Ваш сайт на Render
+MINI_APP_URL = "https://saitminiapp.onrender.com"
 
 # ============================================================
 # 2. ИНИЦИАЛИЗАЦИЯ
@@ -32,7 +32,7 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 # ============================================================
-# 3. ФАЙЛЫ ДЛЯ ХРАНЕНИЯ
+# 3. ФАЙЛЫ
 # ============================================================
 FILES = {
     "deals": "deals.json",
@@ -223,7 +223,7 @@ def set_user_language(user_id: int, lang: str):
     save_json(FILES["user_language"], user_language)
 
 # ============================================================
-# 7. КЛАВИАТУРЫ (МИНИМАЛЬНЫЕ ДЛЯ БОТА)
+# 7. КЛАВИАТУРЫ
 # ============================================================
 def main_menu_keyboard(user_id: int):
     buttons = [
@@ -238,9 +238,7 @@ def main_menu_keyboard(user_id: int):
 def language_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="set_lang_ru")],
-        [InlineKeyboardButton(text="🇬🇧 English", callback_data="set_lang_en")],
-        [InlineKeyboardButton(text="🇨🇳 中文", callback_data="set_lang_zh")],
-        [InlineKeyboardButton(text="🇸🇦 العربية", callback_data="set_lang_ar")]
+        [InlineKeyboardButton(text="🇬🇧 English", callback_data="set_lang_en")]
     ])
 
 # ============================================================
@@ -261,28 +259,27 @@ async def cmd_start(message: types.Message):
         )
         return
     
-    await message.answer(
-        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
-        "Безопасные P2P сделки с криптовалютой.\n\n"
-        "📌 Все сделки проводятся в <b>Mini App</b>\n"
-        "📌 Бот только для уведомлений и поддержки\n\n"
-        f"📢 Канал: {CHANNEL_LINK}\n"
-        f"🆘 Поддержка: {SUPPORT_LINK}\n\n"
-        "👇 Выберите действие:",
-        reply_markup=main_menu_keyboard(message.from_user.id)
-    )
+    lang = get_user_language(message.from_user.id)
+    
+    if lang == "ru":
+        welcome = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nБезопасные P2P сделки с криптовалютой.\n\n📌 Все сделки проводятся в <b>Mini App</b>\n📌 Бот только для уведомлений и поддержки\n\n👇 Выберите действие:"
+    else:
+        welcome = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nSecure P2P crypto deals.\n\n📌 All deals are in <b>Mini App</b>\n📌 Bot for notifications and support\n\n👇 Choose action:"
+    
+    await message.answer(welcome, reply_markup=main_menu_keyboard(message.from_user.id))
 
 @dp.callback_query(lambda c: c.data.startswith("set_lang_"))
 async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
-    await callback.answer("✅ Язык установлен")
-    await callback.message.edit_text(
-        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
-        "Безопасные P2P сделки с криптовалютой.\n\n"
-        "👇 Выберите действие:",
-        reply_markup=main_menu_keyboard(callback.from_user.id)
-    )
+    await callback.answer("✅ Language set / Язык установлен")
+    
+    if lang == "ru":
+        welcome = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nБезопасные P2P сделки с криптовалютой.\n\n👇 Выберите действие:"
+    else:
+        welcome = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nSecure P2P crypto deals.\n\n👇 Choose action:"
+    
+    await callback.message.edit_text(welcome, reply_markup=main_menu_keyboard(callback.from_user.id))
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
@@ -294,70 +291,65 @@ async def select_language(callback: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "menu_channel")
 async def menu_channel(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    
+    if lang == "ru":
+        text = f"📢 <b>Наш канал</b>\n\n{CHANNEL_LINK}\n\nВ канале:\n• Новости и обновления\n• Полезные гайды\n• Розыгрыши и бонусы\n• Актуальные курсы валют"
+    else:
+        text = f"📢 <b>Our channel</b>\n\n{CHANNEL_LINK}\n\nIn the channel:\n• News and updates\n• Useful guides\n• Giveaways and bonuses\n• Current exchange rates"
+    
     await callback.message.edit_text(
-        f"📢 <b>Наш канал</b>\n\n"
-        f"{CHANNEL_LINK}\n\n"
-        "В канале:\n"
-        "• Новости и обновления\n"
-        "• Полезные гайды\n"
-        "• Розыгрыши и бонусы\n"
-        "• Актуальные курсы валют",
+        text,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+            [InlineKeyboardButton(text="◀️ На главную / Back", callback_data="back_to_main")]
         ])
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_support")
 async def menu_support(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    
+    if lang == "ru":
+        text = f"🆘 <b>Поддержка</b>\n\n{SUPPORT_LINK}\n\n📢 Наш канал: {CHANNEL_LINK}"
+    else:
+        text = f"🆘 <b>Support</b>\n\n{SUPPORT_LINK}\n\n📢 Our channel: {CHANNEL_LINK}"
+    
     await callback.message.edit_text(
-        f"🆘 <b>Поддержка</b>\n\n"
-        f"{SUPPORT_LINK}\n\n"
-        "📢 Наш канал: " + CHANNEL_LINK,
+        text,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+            [InlineKeyboardButton(text="◀️ На главную / Back", callback_data="back_to_main")]
         ])
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "how_to_deal")
 async def how_to_deal(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    
+    if lang == "ru":
+        text = "📖 <b>Как создать сделку</b>\n\n1️⃣ Нажмите <b>«Создать сделку»</b> в Mini App\n\n2️⃣ Заполните форму:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ Отправьте ссылку покупателю\n\n4️⃣ Покупатель оплачивает на сайте\n\n5️⃣ Продавец нажимает «Передал товар»\n\n6️⃣ Покупатель нажимает «Подтвердить получение»\n\n7️⃣ Сделка завершена ✅\n\n🔥 <b>ВАЖНО:</b>\n• Продавец НЕ МОЖЕТ подтвердить получение\n• Только покупатель завершает сделку\n• Деньги на балансе продавца"
+    else:
+        text = "📖 <b>How to create a deal</b>\n\n1️⃣ Click <b>«Create deal»</b> in Mini App\n\n2️⃣ Fill in the form:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Send the link to the buyer\n\n4️⃣ Buyer pays on the website\n\n5️⃣ Seller clicks «Delivered»\n\n6️⃣ Buyer clicks «Confirm receipt»\n\n7️⃣ Deal completed ✅\n\n🔥 <b>IMPORTANT:</b>\n• Seller CANNOT confirm receipt\n• Only buyer completes the deal\n• Money goes to seller's balance"
+    
     await callback.message.edit_text(
-        f"📖 <b>Как создать сделку</b>\n\n"
-        "1️⃣ Нажмите <b>«Создать сделку»</b>\n"
-        "   в Mini App\n\n"
-        "2️⃣ Заполните форму:\n"
-        "   • Название товара\n"
-        "   • Валюту (TON/STARS/RUB/UAH)\n"
-        "   • Сумму\n"
-        "   • Username покупателя\n\n"
-        "3️⃣ Отправьте ссылку покупателю\n\n"
-        "4️⃣ Покупатель переходит по ссылке\n"
-        "   и оплачивает на сайте\n\n"
-        "5️⃣ После оплаты продавец нажимает\n"
-        "   <b>«Передал товар»</b>\n\n"
-        "6️⃣ Покупатель нажимает\n"
-        "   <b>«Подтвердить получение»</b>\n\n"
-        "7️⃣ Сделка завершена ✅\n"
-        "   Деньги зачислены на баланс\n\n"
-        "🔥 <b>ВАЖНО:</b>\n"
-        "• Продавец НЕ МОЖЕТ подтвердить получение\n"
-        "• Только покупатель завершает сделку\n"
-        "• Все деньги на балансе продавца",
+        text,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+            [InlineKeyboardButton(text="◀️ На главную / Back", callback_data="back_to_main")]
         ])
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "back_to_main")
 async def back_to_main(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n"
-        "Безопасные P2P сделки с криптовалютой.\n\n"
-        "👇 Выберите действие:",
-        reply_markup=main_menu_keyboard(callback.from_user.id)
-    )
+    lang = get_user_language(callback.from_user.id)
+    
+    if lang == "ru":
+        text = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nБезопасные P2P сделки с криптовалютой.\n\n👇 Выберите действие:"
+    else:
+        text = "🔥 <b>Tonkeeper P2P</b> 🔥\n\nSecure P2P crypto deals.\n\n👇 Choose action:"
+    
+    await callback.message.edit_text(text, reply_markup=main_menu_keyboard(callback.from_user.id))
     await callback.answer()
 
 # ============================================================
@@ -365,17 +357,17 @@ async def back_to_main(callback: types.CallbackQuery):
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     if deal_id not in deals:
-        await message.answer("❌ Сделка не найдена")
+        await message.answer("❌ Сделка не найдена / Deal not found")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment" and deal["status"] != "paid":
-        await message.answer("❌ Сделка уже завершена")
+        await message.answer("❌ Сделка уже завершена / Deal already completed")
         return
 
     if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         await message.answer(
-            f"❌ Доступ запрещён!\n\nЭта сделка для @{deal['buyer_username']}"
+            f"❌ Доступ запрещён!\n\nЭта сделка для @{deal['buyer_username']}\n\nAccess denied! This deal is for @{deal['buyer_username']}"
         )
         return
 
@@ -409,6 +401,29 @@ async def handle_api(request):
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username'
     }
+    
+    # ===== ОБРАБОТКА ПУСТОГО ЗАПРОСА (КОРЕНЬ) =====
+    if request.path == '/' or request.path == '':
+        return web.json_response({
+            'success': True,
+            'bot': BOT_NAME,
+            'version': '1.0.0',
+            'status': 'running',
+            'endpoints': [
+                '/api/balance', '/api/deals', '/api/create_deal', 
+                '/api/stats', '/api/reviews', '/api/online',
+                '/api/is_admin', '/api/ping'
+            ]
+        }, headers=headers)
+    
+    # ===== PING (ДЛЯ UPTIMEROBOT) =====
+    if request.path == '/ping':
+        return web.json_response({
+            'status': 'ok',
+            'time': datetime.now().isoformat(),
+            'uptime': 'running'
+        }, headers=headers)
+    
     if request.method == 'OPTIONS':
         return web.Response(headers=headers)
     
@@ -419,14 +434,6 @@ async def handle_api(request):
     
     user_id = data.get('user_id')
     endpoint = request.path
-    
-    # ===== PING (ДЛЯ UPTIMEROBOT) =====
-    if endpoint == '/ping':
-        return web.json_response({
-            'status': 'ok',
-            'time': datetime.now().isoformat(),
-            'uptime': 'running'
-        }, headers=headers)
     
     # ===== БАЛАНС =====
     if endpoint == '/api/balance':
@@ -473,7 +480,6 @@ async def handle_api(request):
         if not all([user_id, rating, text]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Проверка: есть ли завершённые сделки у пользователя
         user_deals = [d for d in deals.values() if d.get('seller_id') == user_id and d.get('status') == 'completed']
         if len(user_deals) < 1:
             return web.json_response({'success': False, 'error': 'Need at least 1 completed deal'}, headers=headers)
@@ -527,7 +533,7 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
         return web.json_response({'success': True, 'verified': is_verified(user_id)}, headers=headers)
     
-    # ===== ВЕРИФИКАЦИЯ (ТОЛЬКО НА САЙТЕ) =====
+    # ===== ВЕРИФИКАЦИЯ =====
     elif endpoint == '/api/verify':
         phone = data.get('phone')
         full_name = data.get('full_name', '')
@@ -617,7 +623,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ОПЛАТА ПО РЕКВИЗИТАМ =====
+    # ===== РЕКВИЗИТЫ =====
     elif endpoint == '/api/get_rekvisits':
         deal_id = data.get('deal_id')
         if deal_id not in deals:
@@ -690,11 +696,9 @@ async def handle_api(request):
         if not all([user_id, currency, details]):
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Проверка 2 сделок
         if not has_2_deals_with_same_buyer(user_id):
             return web.json_response({'success': False, 'error': 'Need 2 deals with same buyer'}, headers=headers)
         
-        # Проверка верификации
         if not is_verified(user_id):
             return web.json_response({'success': False, 'error': 'Verification required'}, headers=headers)
         
@@ -801,7 +805,6 @@ async def handle_api(request):
         if not key or value is None:
             return web.json_response({'success': False, 'error': 'Missing key or value'}, headers=headers)
         
-        # При накрутке не даём упасть ниже минимума
         if key == 'deals_today':
             value = max(MIN_DEALS, value)
         elif key == 'users':
