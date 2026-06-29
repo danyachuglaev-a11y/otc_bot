@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 from aiohttp import web
-
+#
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
