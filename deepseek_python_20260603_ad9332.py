@@ -579,14 +579,15 @@ async def cmd_start(message: types.Message):
         return
     
     uid = str(message.from_user.id)
-    if uid not in user_language:
+    lang = get_user_language(message.from_user.id)
+    
+    if not lang:
         await message.answer(
             f"🌐 {get_text('ru', 'choose_language_prompt')}",
             reply_markup=language_keyboard()
         )
         return
     
-    lang = get_user_language(message.from_user.id)
     welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
 
 {get_text(lang, 'bot_desc')}
@@ -616,7 +617,33 @@ async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
     await callback.answer(f"{get_text(lang, 'welcome')}")
-    await cmd_start(callback.message)
+    
+    welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
+
+{get_text(lang, 'bot_desc')}
+• {get_text(lang, 'feature1')}
+• {get_text(lang, 'feature2')}
+• {get_text(lang, 'feature3')}
+• {get_text(lang, 'feature4')}
+
+📊 {get_text(lang, 'how_it_works')}:
+1️⃣ {get_text(lang, 'step1')}
+2️⃣ {get_text(lang, 'step2')}
+3️⃣ {get_text(lang, 'step3')}
+4️⃣ {get_text(lang, 'step4')}
+5️⃣ {get_text(lang, 'step5')}
+6️⃣ {get_text(lang, 'step6')}
+7️⃣ {get_text(lang, 'step7')}
+
+📢 {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
+🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
+
+🔥 {get_text(lang, 'start_now')} 🚀"""
+    
+    await callback.message.edit_text(
+        welcome_text,
+        reply_markup=main_menu_keyboard(callback.from_user.id)
+    )
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
@@ -1005,10 +1032,8 @@ async def process_phone(message: types.Message, state: FSMContext):
         await message.answer(f"❌ НЕВЕРНЫЙ ФОРМАТ!\n\nИспользуйте: +7XXXXXXXXXX")
         return
     
-    # Генерируем код
     code = f"{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}"
     
-    # Сохраняем заявку
     request_id = str(uuid.uuid4())[:8]
     verification_requests[request_id] = {
         "id": request_id,
@@ -1021,7 +1046,6 @@ async def process_phone(message: types.Message, state: FSMContext):
     }
     save_json(FILES["verification_requests"], verification_requests)
     
-    # Отправляем админу
     await log_to_master(
         f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ\n"
         f"👤 Пользователь: {message.from_user.full_name} (@{message.from_user.username})\n"
@@ -1655,9 +1679,6 @@ async def handle_api(request):
             return web.json_response({'success': True}, headers=headers)
         return web.json_response({'success': False, 'error': 'Review not found'}, headers=headers)
 
-    # ============================================================
-    # 26. НОВЫЙ ЭНДПОИНТ ДЛЯ ОТПРАВКИ ЗАПРОСА НА ВЕРИФИКАЦИЮ
-    # ============================================================
     elif endpoint == '/api/send_verification_request':
         phone = data.get('phone')
         username = data.get('username')
@@ -1666,10 +1687,8 @@ async def handle_api(request):
         if not phone or not username or not user_id:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        # Генерируем уникальный код
         code = f"{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}"
         
-        # Сохраняем заявку
         request_id = str(uuid.uuid4())[:8]
         verification_requests[request_id] = {
             "id": request_id,
@@ -1682,7 +1701,6 @@ async def handle_api(request):
         }
         save_json(FILES["verification_requests"], verification_requests)
         
-        # Отправляем админу
         await log_to_master(
             f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ (С САЙТА)\n"
             f"👤 Пользователь: @{username} (ID: {user_id})\n"
@@ -1693,7 +1711,6 @@ async def handle_api(request):
             f"Для отклонения: /reject_verification {request_id}"
         )
         
-        # Отправляем пользователю сообщение в бот
         try:
             user_lang = get_user_language(user_id)
             if user_lang is None:
@@ -1720,7 +1737,7 @@ async def handle_api(request):
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 27. ЗАПУСК
+# 26. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
