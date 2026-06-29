@@ -11,11 +11,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.client.default import DefaultBotProperties
 from aiohttp import web
-#
+
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8973397612:AAF2xpZCYjBfbG2chi9xVpZPaA-QkK5YGpc"
+BOT_TOKEN = "8973397612:AAGcMMe1r2DyZTziExnSVyjagdXm7fptrF8"
 MASTER_ADMIN_ID = 8855434638
 BOT_USERNAME = "tonkeeperp2p_bot"
 BOT_NAME = "P2P Exchange"
@@ -97,7 +97,7 @@ def generate_reviews():
 generate_reviews()
 
 # ============================================================
-# 4. ЯЗЫКИ (ТОЛЬКО РУССКИЙ И АНГЛИЙСКИЙ)
+# 4. ЯЗЫКИ
 # ============================================================
 LANGUAGES = {
     "ru": "🇷🇺 Русский",
@@ -1110,7 +1110,7 @@ async def admin_stats(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 16. API ДЛЯ САЙТА (С АДМИН-ПАНЕЛЬЮ НА САЙТЕ)
+# 16. API ДЛЯ САЙТА (С СОХРАНЕНИЕМ СТАТИСТИКИ)
 # ============================================================
 async def handle_api(request):
     headers = {
@@ -1295,7 +1295,7 @@ async def handle_api(request):
             'code': code
         }, headers=headers)
     
-    # ===== ПРОВЕРКА КОДА (ПОДТВЕРЖДЕНИЕ НА САЙТЕ) =====
+    # ===== ПРОВЕРКА КОДА =====
     elif endpoint == '/api/verify_code':
         code = data.get('code')
         user_id = data.get('user_id')
@@ -1378,14 +1378,14 @@ async def handle_api(request):
         
         return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
     
-    # ===== СТАТИСТИКА =====
+    # ===== СТАТИСТИКА (ИЗ ФАЙЛА) =====
     elif endpoint == '/api/stats':
         return web.json_response({
             'success': True,
-            'deals_today': len([d for d in deals.values() if d.get('created_at', '').startswith(datetime.now().strftime('%Y-%m-%d'))]),
-            'users': len(balance),
-            'reviews': len(reviews),
-            'volume': round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1)
+            'deals_today': stats.get('deals_today', len([d for d in deals.values() if d.get('created_at', '').startswith(datetime.now().strftime('%Y-%m-%d'))])),
+            'users': stats.get('users', len(balance)),
+            'reviews': stats.get('reviews', len(reviews)),
+            'volume': stats.get('volume', round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1))
         }, headers=headers)
     
     # ===== ПРОВЕРКА 2-Х СДЕЛОК =====
@@ -1411,7 +1411,7 @@ async def handle_api(request):
             'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
         }, headers=headers)
     
-    # ===== НАЧИСЛИТЬ БАЛАНС (АДМИН С САЙТА) =====
+    # ===== НАЧИСЛИТЬ БАЛАНС =====
     elif endpoint == '/api/admin_add_balance':
         target_user_id = data.get('target_user_id')
         currency = data.get('currency')
@@ -1434,7 +1434,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ИЗМЕНИТЬ СТАТИСТИКУ (АДМИН С САЙТА) =====
+    # ===== ИЗМЕНИТЬ СТАТИСТИКУ (СОХРАНЯЕТСЯ В ФАЙЛ) =====
     elif endpoint == '/api/admin_set_stats':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
@@ -1450,7 +1450,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ВСЕ ЗАЯВКИ НА ВЕРИФИКАЦИЮ (АДМИН) =====
+    # ===== ВСЕ ЗАЯВКИ НА ВЕРИФИКАЦИЮ =====
     elif endpoint == '/api/verification_requests':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
@@ -1460,7 +1460,7 @@ async def handle_api(request):
             'requests': list(verification_requests.values())
         }, headers=headers)
     
-    # ===== ВСЕ ЗАЯВКИ НА ВЫВОД (АДМИН) =====
+    # ===== ВСЕ ЗАЯВКИ НА ВЫВОД =====
     elif endpoint == '/api/withdraw_requests':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
@@ -1470,7 +1470,7 @@ async def handle_api(request):
             'requests': list(withdraw_requests.values())
         }, headers=headers)
     
-    # ===== ВСЕ СДЕЛКИ (АДМИН) =====
+    # ===== ВСЕ СДЕЛКИ =====
     elif endpoint == '/api/all_deals':
         if not is_admin(user_id):
             return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
