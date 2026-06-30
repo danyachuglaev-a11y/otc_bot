@@ -15,13 +15,13 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8973397612:AAF2xpZCYjBfbG2chi9xVpZPaA-QkK5YGpc"
+BOT_TOKEN = "8821579284:AAEP2cbAQP-8l-779Eq5NmLOALSRzNX1iso"
 MASTER_ADMIN_ID = 8855434638
-BOT_USERNAME = "tonkeeperp2p_bot"
+BOT_USERNAME = "p2ptonexchange_bot"
 BOT_NAME = "P2P Exchange"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@p2psupbot"
+SUPPORT_LINK = "@p2ptonsupportbot"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
