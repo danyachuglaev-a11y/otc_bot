@@ -15,13 +15,13 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8821579284:AAEP2cbAQP-8l-779Eq5NmLOALSRzNX1iso"
-MASTER_ADMIN_ID = 8855434638
-BOT_USERNAME = "p2ptonexchange_bot"
+BOT_TOKEN = "8897194644:AAF5YR4geO61FAhwwuYIGCiQZoL7PWPk1WU"
+MASTER_ADMIN_ID = 8986358602
+BOT_USERNAME = "p2ptonexchangebot"
 BOT_NAME = "P2P Exchange"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@p2ptonsupportbot"
+SUPPORT_LINK = "@supxchange_bot"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -121,7 +121,7 @@ LOCALE = {
         "step6": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
-        "support_contact": "@p2ptonsupportbot",
+        "support_contact": "@supxchange_bot",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -188,7 +188,7 @@ LOCALE = {
         "step6": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
-        "support_contact": "@p2ptonsupportbot",
+        "support_contact": "@supxchange_bot",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
@@ -1319,7 +1319,6 @@ async def handle_api(request):
         deal["paid_by_admin"] = user_id
         save_json(FILES["deals"], deals)
         
-        # ЛОГ
         await log_to_master(
             f"💳 ОПЛАТА С БАЛАНСА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
@@ -1385,7 +1384,6 @@ async def handle_api(request):
         deal["status"] = "awaiting_confirmation"
         save_json(FILES["deals"], deals)
         
-        # ЛОГ
         await log_to_master(
             f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР\n\n"
             f"🆔 Сделка: #{deal_id}\n"
@@ -1439,7 +1437,6 @@ async def handle_api(request):
         deal["completed_at"] = datetime.now().isoformat()
         save_json(FILES["deals"], deals)
         
-        # ЛОГ
         await log_to_master(
             f"🎉 СДЕЛКА ЗАВЕРШЕНА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
@@ -1565,9 +1562,9 @@ async def main():
     print(f"👑 Мастер-админ: {MASTER_ADMIN_ID}")
     print(f"🤖 Бот: @{BOT_USERNAME}")
     print(f"📱 Сайт: {MINI_APP_URL}")
+    print(f"🆘 Поддержка: {SUPPORT_LINK}")
     print("=" * 50)
     
-    # Запускаем фоновую автонакрутку
     asyncio.create_task(auto_increment_stats())
     
     await start_web_server()
