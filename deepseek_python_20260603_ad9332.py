@@ -15,7 +15,7 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8897194644:AAF5YR4geO61FAhwwuYIGCiQZoL7PWPk1WU"
+BOT_TOKEN = "8897194644:AAGIBa5Fyla4UYQgWsRwfwbdXl3zQZOIL4M"
 MASTER_ADMIN_ID = 8986358602
 BOT_USERNAME = "p2ptonexchangebot"
 BOT_NAME = "P2P Exchange"
