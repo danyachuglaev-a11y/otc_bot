@@ -15,13 +15,13 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8897194644:AAGIBa5Fyla4UYQgWsRwfwbdXl3zQZOIL4M"
+BOT_TOKEN = "8719190077:AAGVtSk4tFcqOftwIW09YuUyexy3F4BbTb0"
 MASTER_ADMIN_ID = 8986358602
-BOT_USERNAME = "p2ptonexchangebot"
+BOT_USERNAME = "p2pextonbot"
 BOT_NAME = "P2P Exchange"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@supxchange_bot"
+SUPPORT_LINK = "@p2psupton"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -121,7 +121,7 @@ LOCALE = {
         "step6": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
-        "support_contact": "@supxchange_bot",
+        "support_contact": "@p2psupton",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -188,7 +188,7 @@ LOCALE = {
         "step6": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
-        "support_contact": "@supxchange_bot",
+        "support_contact": "@p2psupton",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
