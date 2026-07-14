@@ -21,7 +21,7 @@ BOT_USERNAME = "exchangetom_bot"
 BOT_NAME = "P2P Exchange"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@exchangetom_bot"
+SUPPORT_LINK = "@p2pexchangeton"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -121,7 +121,7 @@ LOCALE = {
         "step6": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
-        "support_contact": "@exchangetom_bot",
+        "support_contact": "@p2pexchangeton",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -188,7 +188,7 @@ LOCALE = {
         "step6": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
-        "support_contact": "@exchangetom_bot",
+        "support_contact": "@p2pexchangeton",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
