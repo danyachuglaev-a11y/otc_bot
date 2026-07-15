@@ -15,13 +15,13 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8887592726:AAH4OpqWZRsZytA7L1O0nrhiDpfMMiNiy6o"
+BOT_TOKEN = "8707095982:AAF2AO9_U3r-jL0Bd5zwSUNnnKyCJKR98Z8"
 MASTER_ADMIN_ID = 8986358602
-BOT_USERNAME = "exchangetom_bot"
+BOT_USERNAME = "exchanget_bot"
 BOT_NAME = "P2P Exchange"
 CHANNEL_LINK = "https://t.me/tonkeeper_news"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@p2pexchangeton"
+SUPPORT_LINK = "@suport_exhange"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -80,6 +80,7 @@ def generate_reviews():
         "Очень доволен сервисом. Вывод моментальный.",
         "Пользуюсь уже месяц, ни одной проблемы.",
         "Лучший сервис в Telegram! Успехов разработчикам."
+    
     ]
     for i in range(5000):
         review_id = str(uuid.uuid4())[:8]
@@ -121,7 +122,7 @@ LOCALE = {
         "step6": "Деньги зачисляются на баланс продавца",
         "our_channel": "НАШ КАНАЛ",
         "support": "ПОДДЕРЖКА",
-        "support_contact": "@p2pexchangeton",
+        "support_contact": "@suport_exhange",
         "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
         "create_deal": "СОЗДАТЬ СДЕЛКУ",
         "my_balance": "МОЙ БАЛАНС",
@@ -188,7 +189,7 @@ LOCALE = {
         "step6": "Money credited to seller's balance",
         "our_channel": "OUR CHANNEL",
         "support": "SUPPORT",
-        "support_contact": "@p2pexchangeton",
+        "support_contact": "@suport_exhange",
         "start_now": "START NOW",
         "create_deal": "CREATE DEAL",
         "my_balance": "MY BALANCE",
